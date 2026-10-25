@@ -174,8 +174,13 @@ async function doBid(nId,aId,mId){
 
 /* ---------- แอดมิน ---------- */
 async function renderAdmin(){
-  if(!S.user){$('app').innerHTML=bar()+`<div class="wrap"><div class="box" style="text-align:center"><h2>เข้าสู่ระบบผู้ดูแล</h2><p style="color:var(--mut);margin:10px 0 18px">ใช้บัญชี Google ที่อยู่ในตาราง ac_admins</p><button class="btn y" id="gl">เข้าสู่ระบบด้วย Google</button></div></div>`;paintSnd();
-    $('gl').onclick=()=>db.auth.signInWithOAuth({provider:'google',options:{redirectTo:BASE+'#/admin',queryParams:{prompt:'select_account'}}});return}
+  if(!S.user){$('app').innerHTML=bar()+`<div class="wrap"><div class="box" style="max-width:420px;margin:auto"><h2>เข้าสู่ระบบผู้ดูแล</h2><div style="display:grid;gap:12px;margin-top:14px"><label>อีเมล<input id="le" type="email" autocomplete="username"></label><label>รหัสผ่าน<input id="lp" type="password" inputmode="numeric" autocomplete="current-password"></label><button class="btn y" id="gl">เข้าสู่ระบบ</button><div class="msg e" id="lm"></div></div></div></div>`;paintSnd();
+    const go=async()=>{const em=$('le').value.trim(),pw=$('lp').value,m=$('lm');m.textContent='';
+      if(!em||!pw){m.textContent='กรุณากรอกอีเมลและรหัสผ่าน';return}
+      $('gl').disabled=true;const {error}=await db.auth.signInWithPassword({email:em,password:pw});$('gl').disabled=false;
+      if(error){m.textContent=/invalid login/i.test(error.message)?'อีเมลหรือรหัสผ่านไม่ถูกต้อง':/not confirmed/i.test(error.message)?'อีเมลนี้ยังไม่ได้ยืนยัน':'เข้าสู่ระบบไม่สำเร็จ: '+error.message;return}
+      await loadAuth();render()};
+    $('gl').onclick=go;$('lp').onkeydown=ev=>{if(ev.key==='Enter')go()};return}
   if(!S.admin){$('app').innerHTML=bar()+`<div class="wrap"><div class="box">บัญชี ${e(S.user.email)} ไม่ได้อยู่ในรายชื่อผู้ดูแล<p style="margin-top:14px"><button class="btn g" onclick="out()">ออกจากระบบ</button></p></div></div>`;paintSnd();return}
   const L=S.list;
   $('app').innerHTML=bar()+`<div class="wrap"><div class="box"><h2>สร้างรายการประมูลใหม่</h2><div class="fm" style="margin-top:14px">
