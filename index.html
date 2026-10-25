@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ระบบประมูลสด</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Inter:wght@700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{--bg:#0b1020;--card:#151c33;--line:#26304f;--ink:#f3f5ff;--mut:#9aa6c9;--gold:#ffc83d;--red:#ff4d5e;--green:#2ee59d;--blue:#4d8dff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans Thai',sans-serif;background:radial-gradient(1200px 600px at 50% -10%,#1b2750,var(--bg));color:var(--ink);min-height:100vh}
+a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer;border:0;color:inherit}
+input,textarea,select{font:inherit;width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#0e1429;color:var(--ink)}
+label{display:grid;gap:6px;font-size:13px;color:var(--mut)}
+.btn{padding:11px 20px;border-radius:999px;background:var(--blue);font-weight:600}
+.btn.g{background:var(--card);border:1px solid var(--line)}.btn.r{background:var(--red)}.btn.y{background:var(--gold);color:#222}.btn.s{padding:7px 14px;font-size:13px}
+.btn:disabled{opacity:.5}
+.top{display:flex;justify-content:space-between;align-items:center;padding:14px 24px;gap:10px;flex-wrap:wrap}
+.top b{font-size:20px}.top .r{display:flex;gap:8px;flex-wrap:wrap}
+.stage{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:22px;padding:10px 24px 24px;align-items:stretch}
+.box{background:var(--card);border:1px solid var(--line);border-radius:28px;padding:24px}
+.left img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:18px;background:#0e1429;margin-bottom:14px}
+.left h1{font-size:clamp(22px,2.4vw,34px)}.left p{color:var(--mut);margin-top:8px;white-space:pre-line}
+.mid{text-align:center;display:flex;flex-direction:column;justify-content:center;gap:6px}
+.lbl{color:var(--mut);letter-spacing:.2em;font-size:14px;margin-top:10px}
+.pr{font-family:Inter,sans-serif;font-weight:800;font-size:clamp(56px,9vw,150px);line-height:1.05;color:var(--gold);transition:.25s}
+.pr.pop{transform:scale(1.08);color:#fff}
+.thw{color:var(--mut);font-size:clamp(14px,1.4vw,20px)}
+.bd{font-size:clamp(18px,2vw,28px);font-weight:600}
+.cd{font-family:Inter,sans-serif;font-weight:800;font-size:clamp(48px,7vw,110px);line-height:1.1;font-variant-numeric:tabular-nums}
+.cd.warn{color:var(--red);animation:bl 1s infinite}.cd.end{color:var(--mut);font-size:clamp(34px,5vw,72px)}
+@keyframes bl{50%{opacity:.45}}
+.right{display:flex;flex-direction:column;gap:14px;align-items:center}
+#qr{background:#fff;padding:12px;border-radius:16px;display:inline-block}
+.hist{width:100%;display:grid;gap:8px}
+.hr{display:flex;justify-content:space-between;gap:8px;padding:10px 14px;background:#0e1429;border-radius:14px;font-size:15px}
+.hr:first-child{background:#3a2f0d;border:1px solid var(--gold)}
+.hr b{color:var(--gold)}
+.ctl{margin:0 24px 24px;display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end}
+.wrap{max-width:900px;margin:0 auto;padding:20px}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tag{font-size:12px;padding:3px 10px;border-radius:99px;background:var(--line)}.tag.on{background:var(--green);color:#052}
+.fm{display:grid;grid-template-columns:1fr 1fr;gap:12px}.fm .f{grid-column:1/-1}
+.msg{margin-top:10px;font-size:14px;min-height:20px}.msg.e{color:var(--red)}.msg.o{color:var(--green)}
+.bidp{max-width:520px;margin:0 auto;padding:18px;display:grid;gap:14px;text-align:center}
+.empty{text-align:center;color:var(--mut);padding:80px 20px;font-size:20px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#000c;padding:12px 22px;border-radius:99px;display:none;z-index:9}
+@media(max-width:1000px){.stage{grid-template-columns:1fr}.ctl{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="app"></div><div class="toast" id="toast"></div>
+<script>
+const SUPABASE_URL='https://aefzegkgfwszuiznihsk.supabase.co';
+const SUPABASE_KEY='sb_publishable_Z1zogpI9qqUlegxG816ncQ_eHeaiFvr';
+const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const BASE=location.origin+location.pathname;
+const $=id=>document.getElementById(id);
+const e=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const baht=n=>Number(n||0).toLocaleString('th-TH');
+const safeImg=u=>/^https?:\/\//i.test(String(u||''))?u:'';
+function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display='none',3000)}
+
+/* ---------- อ่านเลขเป็นคำไทย ---------- */
+const D=['ศูนย์','หนึ่ง','สอง','สาม','สี่','ห้า','หก','เจ็ด','แปด','เก้า'],U=['','สิบ','ร้อย','พัน','หมื่น','แสน'];
+function th6(n,after){const s=String(n);let o='';for(let i=0;i<s.length;i++){const d=+s[i],p=s.length-1-i;if(!d)continue;
+  if(p===0&&d===1&&(s.length>1||after))o+='เอ็ด';else if(p===1&&d===1)o+='สิบ';else if(p===1&&d===2)o+='ยี่สิบ';else o+=D[d]+U[p]}return o}
+function thInt(n){n=Math.floor(Number(n)||0);if(n===0)return D[0];if(n>=1e6)return thInt(Math.floor(n/1e6))+'ล้าน'+(n%1e6?th6(n%1e6,true):'');return th6(n)}
+const thBaht=n=>thInt(n)+'บาท';
+
+/* ---------- เสียงอ่าน ---------- */
+let SND=false;try{SND=localStorage.getItem('au_snd')==='1'}catch(_){}
+function speak(t){if(!SND||!('speechSynthesis' in window))return;
+  const u=new SpeechSynthesisUtterance(t);u.lang='th-TH';u.rate=.95;
+  const v=speechSynthesis.getVoices().find(v=>/th/i.test(v.lang));if(v)u.voice=v;speechSynthesis.speak(u)}
+function toggleSnd(){SND=!SND;try{localStorage.setItem('au_snd',SND?'1':'0')}catch(_){}
+  if(SND){speechSynthesis.cancel();speak('เปิดเสียงอ่านราคาแล้ว')}paintSnd()}
+const paintSnd=()=>{const b=$('snd');if(b)b.textContent=SND?'🔊 เสียง: เปิด':'🔇 เสียง: ปิด (กดเพื่อเปิด)'};
+
+/* ---------- state ---------- */
+const S={list:[],cur:null,bids:[],off:0,admin:false,user:null,key:'',lastBid:undefined,spoken:{}};
+const route=()=>location.hash.replace(/^#/,'')||'/';
+const now=()=>Date.now()+S.off;
+const isOpen=a=>a&&a.status==='open'&&now()<new Date(a.ends_at).getTime();
+
+async function sync(){try{const t0=Date.now(),r=await db.rpc('ac_now');if(!r.error)S.off=new Date(r.data).getTime()-(t0+Date.now())/2}catch(_){}}
+async function loadAuth(){const {data}=await db.auth.getSession();S.user=data.session?.user||null;S.admin=false;
+  if(S.user){const r=await db.from('ac_admins').select('email');S.admin=!r.error&&r.data.length>0}}
+function pick(){const r=route();let id=(r.match(/^\/(?:a|bid)\/(\d+)/)||[])[1];
+  return S.list.find(a=>String(a.id)===id)||(r==='/'||r.startsWith('/a/')||r.startsWith('/bid/')?(S.list.find(a=>a.is_live)||S.list.find(isOpen)||S.list[0]):null)||null}
+async function load(){
+  const a=await db.from('ac_auctions').select('*').order('created_at',{ascending:false});
+  if(a.error){S.err=a.error.message;return}S.err=null;S.list=a.data;S.cur=pick();
+  S.bids=[];if(S.cur){const b=await db.from('ac_bids').select('*').eq('auction_id',S.cur.id).order('amount',{ascending:false}).limit(12);S.bids=b.data||[]}
+}
+
+/* ---------- วาดหน้า ---------- */
+function bar(){return `<div class="top"><b>🔨 ประมูลสด</b><div class="r"><button class="btn g s" id="snd" onclick="toggleSnd()"></button><a class="btn g s" href="#/">หน้าจอประมูล</a><a class="btn g s" href="#/admin">${S.admin?'จัดการ':'ผู้ดูแล'}</a></div></div>`}
+function render(){
+  const r=route(),a=S.cur,key=r+'|'+(a?a.id:'');
+  if(S.err){$('app').innerHTML=bar()+`<div class="empty">โหลดข้อมูลไม่ได้: ${e(S.err)}<br><small>รันไฟล์ auction_setup.sql ใน Supabase ก่อน</small></div>`;paintSnd();return}
+  if(r==='/admin'){if(S.key!==key||true){S.key=key;return renderAdmin()}}
+  if(!a){$('app').innerHTML=bar()+`<div class="empty">ยังไม่มีรายการประมูล${S.admin?'':' — ผู้ดูแลเข้าสู่ระบบเพื่อสร้างรายการ'}</div>`;paintSnd();S.key=key;return}
+  if(S.key!==key){S.key=key;S.lastBid=undefined;
+    if(r.startsWith('/bid/'))buildBid();else buildStage()}
+  update();
+}
+function buildStage(){
+  const url=`${BASE}#/bid/${S.cur.id}`;
+  $('app').innerHTML=bar()+`<div class="stage"><div class="box left"><img id="img" alt=""><h1 id="tt"></h1><p id="ds"></p></div>
+   <div class="box mid"><div class="lbl">ราคาปัจจุบัน (บาท)</div><div class="pr" id="pr"></div><div class="thw" id="thw"></div><div class="bd" id="bd"></div>
+   <div class="lbl">เวลาที่เหลือ</div><div class="cd" id="cd"></div></div>
+   <div class="box right"><div id="qr"></div><small style="color:var(--mut)">สแกน QR เพื่อเข้าร่วมประมูลด้วยมือถือ</small><div class="hist" id="hist"></div></div></div>
+   ${S.admin?`<div class="box ctl"><label>ชื่อผู้ประมูล<input id="cn" placeholder="เช่น เลขที่ป้าย / ชื่อ"></label><label>ราคาที่เสนอ (บาท)<input id="ca" type="number" inputmode="numeric"></label><button class="btn y" id="cb">บันทึกราคา</button><div class="msg" id="cm" style="grid-column:1/-1"></div></div>`:''}`;
+  paintSnd();
+  try{new QRCode($('qr'),{text:url,width:170,height:170})}catch(_){}
+  if(S.admin){$('cb').onclick=()=>doBid('cn','ca','cm');$('ca').onkeydown=ev=>{if(ev.key==='Enter')doBid('cn','ca','cm')}}
+}
+function buildBid(){
+  $('app').innerHTML=bar()+`<div class="bidp"><div class="box"><h1 id="tt" style="font-size:24px"></h1><div class="lbl">ราคาปัจจุบัน</div><div class="pr" id="pr" style="font-size:60px"></div><div class="thw" id="thw"></div><div class="bd" id="bd"></div><div class="cd" id="cd" style="font-size:54px"></div></div>
+   <div class="box" style="display:grid;gap:12px;text-align:left"><label>ชื่อผู้ประมูล<input id="bn" maxlength="60"></label><label>ราคาที่เสนอ (บาท)<input id="ba" type="number" inputmode="numeric"></label><button class="btn y" id="bb">ยืนยันราคา</button><div class="msg" id="bm"></div></div><div class="hist" id="hist"></div></div>`;
+  paintSnd();try{$('bn').value=localStorage.getItem('au_name')||''}catch(_){}
+  $('bb').onclick=()=>doBid('bn','ba','bm');
+}
+const minBid=a=>S.bids.length?Number(a.current_price)+Number(a.min_step):Number(a.start_price);
+function update(){
+  const a=S.cur;if(!a||!$('pr'))return;
+  const top=S.bids[0],price=top?a.current_price:a.start_price;
+  if($('img')){const i=safeImg(a.image_url);$('img').src=i;$('img').style.display=i?'':'none';$('ds').textContent=a.description||''}
+  $('tt').textContent=a.title;
+  const pe=$('pr'),old=pe.textContent,nw=baht(price);pe.textContent=nw;
+  if(old&&old!==nw){pe.classList.add('pop');setTimeout(()=>pe.classList.remove('pop'),500)}
+  $('thw').textContent=thBaht(price);
+  $('bd').textContent=top?'ผู้เสนอราคาสูงสุด: '+a.current_bidder:'ราคาเริ่มต้น — ยังไม่มีผู้เสนอ';
+  $('hist').innerHTML=S.bids.map(b=>`<div class="hr"><span>${e(b.bidder_name)}</span><b>${baht(b.amount)}</b></div>`).join('');
+  const m=minBid(a),inp=$('ca')||$('ba');if(inp&&!inp.value&&document.activeElement!==inp)inp.placeholder='ขั้นต่ำ '+baht(m);
+  if(S.lastBid!==undefined&&top&&top.id!==S.lastBid)speak(`ราคาปัจจุบัน ${thBaht(top.amount)} โดย ${top.bidder_name}`);
+  S.lastBid=top?top.id:null;
+}
+function tick(){
+  const a=S.cur,c=$('cd');if(!a||!c)return;
+  const ms=new Date(a.ends_at).getTime()-now(),rem=Math.ceil(ms/1000),open=a.status==='open'&&ms>0,sp=S.spoken,k=a.id+':';
+  if(!open){
+    c.className='cd end';const top=S.bids[0];
+    c.textContent=a.status==='closed'||ms<=0?'ปิดประมูลแล้ว':'';
+    if($('bd')&&top)$('bd').textContent='🏆 ผู้ชนะ: '+a.current_bidder;
+    if(sp[k+'end']===undefined){sp[k+'end']=ms>-3000; /* ไม่พูดซ้ำถ้าเปิดหน้ามาตอนปิดไปนานแล้ว */
+      if(sp[k+'end']&&top)speak(`ปิดประมูล ผู้ชนะคือ ${a.current_bidder} ราคา ${thBaht(top.amount)}`);else if(sp[k+'end'])speak('ปิดประมูล ไม่มีผู้เสนอราคา')}
+    return}
+  sp[k+'end']=undefined;
+  const h=Math.floor(rem/3600),mi=Math.floor(rem%3600/60),s=rem%60,p=n=>String(n).padStart(2,'0');
+  c.textContent=(h?h+':':'')+p(mi)+':'+p(s);c.className='cd'+(rem<=10?' warn':'');
+  if([10,5,4,3,2,1].includes(rem)&&!sp[k+rem]){sp[k+rem]=1;speak(rem===10?'เหลือเวลา สิบวินาที':thInt(rem))}
+  if(rem>10){for(const x of [10,5,4,3,2,1])delete sp[k+x]}
+}
+setInterval(tick,200);
+
+/* ---------- ใส่ราคา ---------- */
+async function doBid(nId,aId,mId){
+  const a=S.cur,name=$(nId).value.trim(),amt=Number($(aId).value),m=$(mId),b=event&&event.target;
+  const say=(t,c)=>{m.className='msg '+c;m.textContent=t};
+  if(!name)return say('กรุณากรอกชื่อ','e');if(!(amt>0))return say('กรุณากรอกราคา','e');
+  if(b)b.disabled=true;
+  const r=await db.rpc('ac_place_bid',{p_auction:a.id,p_name:name,p_amount:amt});
+  if(b)b.disabled=false;
+  if(r.error)return say('ส่งไม่สำเร็จ: '+r.error.message,'e');
+  if(r.data!=='ok')return say(r.data,'e');
+  try{localStorage.setItem('au_name',name)}catch(_){}
+  say('บันทึกราคา '+baht(amt)+' บาท สำเร็จ','o');$(aId).value='';if(nId==='cn')$(nId).value='';
+  await load();update();
+}
+
+/* ---------- แอดมิน ---------- */
+async function renderAdmin(){
+  if(!S.user){$('app').innerHTML=bar()+`<div class="wrap"><div class="box" style="text-align:center"><h2>เข้าสู่ระบบผู้ดูแล</h2><p style="color:var(--mut);margin:10px 0 18px">ใช้บัญชี Google ที่อยู่ในตาราง ac_admins</p><button class="btn y" id="gl">เข้าสู่ระบบด้วย Google</button></div></div>`;paintSnd();
+    $('gl').onclick=()=>db.auth.signInWithOAuth({provider:'google',options:{redirectTo:BASE+'#/admin',queryParams:{prompt:'select_account'}}});return}
+  if(!S.admin){$('app').innerHTML=bar()+`<div class="wrap"><div class="box">บัญชี ${e(S.user.email)} ไม่ได้อยู่ในรายชื่อผู้ดูแล<p style="margin-top:14px"><button class="btn g" onclick="out()">ออกจากระบบ</button></p></div></div>`;paintSnd();return}
+  const L=S.list;
+  $('app').innerHTML=bar()+`<div class="wrap"><div class="box"><h2>สร้างรายการประมูลใหม่</h2><div class="fm" style="margin-top:14px">
+   <label class="f">ชื่อสินค้า<input id="f_t"></label><label class="f">รายละเอียด<textarea id="f_d" rows="2"></textarea></label><label class="f">ลิงก์รูป<input id="f_i" placeholder="https://..."></label>
+   <label>ราคาเริ่มต้น (บาท)<input id="f_s" type="number" value="100"></label><label>ขั้นต่ำการเพิ่มราคา<input id="f_m" type="number" value="10"></label>
+   <label>ระยะเวลา (นาที)<input id="f_n" type="number" value="10"></label><label>ต่อเวลาอัตโนมัติ (วินาที, 0 = ปิด)<input id="f_x" type="number" value="0"></label>
+   </div><p style="margin-top:14px"><button class="btn y" id="f_go">เริ่มประมูล</button> <button class="btn g" onclick="out()">ออกจากระบบ</button></p><div class="msg" id="f_m2"></div></div>
+   <div class="box" style="margin-top:18px"><h2>รายการทั้งหมด</h2>${L.map(a=>{const op=isOpen(a);return `<div class="row"><div><b>${e(a.title)}</b> <span class="tag ${op?'on':''}">${op?'กำลังประมูล':'ปิดแล้ว'}</span> ${a.is_live?'<span class="tag on">หน้าจอหลัก</span>':''}<br><small style="color:var(--mut)">ราคา ${baht(a.current_price||a.start_price)} · ${e(a.current_bidder||'ไม่มีผู้เสนอ')} · ปิด ${e(new Date(a.ends_at).toLocaleString('th-TH'))}</small></div>
+     <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn s g" data-x="live" data-id="${a.id}">ตั้งเป็นหน้าจอหลัก</button><a class="btn s g" href="#/a/${a.id}">เปิดดู</a><button class="btn s g" data-x="plus" data-id="${a.id}">+1 นาที</button><button class="btn s r" data-x="close" data-id="${a.id}">ปิดประมูล</button><button class="btn s r" data-x="del" data-id="${a.id}">ลบ</button></div></div>`}).join('')||'<p style="color:var(--mut);margin-top:10px">ยังไม่มีรายการ</p>'}</div></div>`;
+  paintSnd();
+  $('f_go').onclick=async()=>{const v=id=>$(id).value,t=v('f_t').trim(),sp=Number(v('f_s'));
+    if(!t)return $('f_m2').textContent='กรุณากรอกชื่อสินค้า';
+    const row={title:t,description:v('f_d'),image_url:v('f_i'),start_price:sp,current_price:sp,min_step:Number(v('f_m'))||1,extend_sec:Number(v('f_x'))||0,ends_at:new Date(now()+(Number(v('f_n'))||10)*60000).toISOString(),status:'open',is_live:true};
+    await db.from('ac_auctions').update({is_live:false}).eq('is_live',true);
+    const r=await db.from('ac_auctions').insert(row);if(r.error)return $('f_m2').textContent='ไม่สำเร็จ: '+r.error.message;
+    toast('สร้างแล้ว');await load();renderAdmin()};
+  document.querySelectorAll('[data-x]').forEach(b=>b.onclick=async()=>{const id=b.dataset.id,a=L.find(x=>String(x.id)===id),x=b.dataset.x;let r;
+    if(x==='live'){await db.from('ac_auctions').update({is_live:false}).eq('is_live',true);r=await db.from('ac_auctions').update({is_live:true}).eq('id',id)}
+    else if(x==='plus')r=await db.from('ac_auctions').update({ends_at:new Date(Math.max(now(),new Date(a.ends_at).getTime())+60000).toISOString()}).eq('id',id);
+    else if(x==='close')r=await db.from('ac_auctions').update({status:'closed'}).eq('id',id);
+    else if(x==='del'){if(!confirm('ลบรายการนี้และประวัติราคาทั้งหมด?'))return;r=await db.from('ac_auctions').delete().eq('id',id)}
+    if(r&&r.error)return toast('ไม่สำเร็จ: '+r.error.message);await load();renderAdmin()});
+}
+async function out(){await db.auth.signOut();S.user=null;S.admin=false;location.hash='#/';render()}
+
+/* ---------- boot ---------- */
+addEventListener('hashchange',async()=>{await load();render()});
+if('speechSynthesis' in window)speechSynthesis.onvoiceschanged=()=>{};
+(async()=>{await sync();await loadAuth();await load();render();
+  db.auth.onAuthStateChange((ev)=>{if(ev==='SIGNED_IN')setTimeout(async()=>{await loadAuth();render()},0)});
+  const kick=async()=>{await load();render()};
+  try{db.channel('au').on('postgres_changes',{event:'*',schema:'public',table:'ac_bids'},kick).on('postgres_changes',{event:'*',schema:'public',table:'ac_auctions'},kick).subscribe()}catch(_){}
+  setInterval(()=>{if(route()!=='/admin')kick()},3000);setInterval(sync,60000);
+})();
+</script>
+</body>
+</html>
