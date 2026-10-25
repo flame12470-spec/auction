@@ -47,6 +47,17 @@ label{display:grid;gap:6px;font-size:13px;color:var(--mut)}
 .bidp{max-width:520px;margin:0 auto;padding:18px;display:grid;gap:14px;text-align:center}
 .empty{text-align:center;color:var(--mut);padding:80px 20px;font-size:20px}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#000c;padding:12px 22px;border-radius:99px;display:none;z-index:9}
+.kpbox{margin:0 auto 24px;max-width:520px;width:calc(100% - 48px)}
+.kp{display:grid;gap:12px;text-align:center}
+.kpd{font-family:Inter,sans-serif;font-weight:800;font-size:clamp(40px,7vw,64px);color:var(--gold);background:#0e1429;border-radius:18px;padding:10px;font-variant-numeric:tabular-nums}
+.kpn{color:var(--mut);font-size:13px;min-height:18px}
+.qa{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.qa .btn{padding:12px 4px;background:#1f2c55;border:1px solid var(--line);font-size:15px}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.key{padding:18px 0;border-radius:18px;background:var(--card);border:1px solid var(--line);font-size:26px;font-weight:700}
+.key:active{background:var(--blue)}
+.kpr{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#kok{padding:16px;font-size:18px}
 @media(max-width:1000px){.stage{grid-template-columns:1fr}.ctl{grid-template-columns:1fr}}
 </style>
 </head>
@@ -103,7 +114,7 @@ function render(){
   if(S.err){$('app').innerHTML=bar()+`<div class="empty">โหลดข้อมูลไม่ได้: ${e(S.err)}<br><small>รันไฟล์ auction_setup.sql ใน Supabase ก่อน</small></div>`;paintSnd();return}
   if(r==='/admin'){if(S.key!==key||true){S.key=key;return renderAdmin()}}
   if(!a){$('app').innerHTML=bar()+`<div class="empty">ยังไม่มีรายการประมูล${S.admin?'':' — ผู้ดูแลเข้าสู่ระบบเพื่อสร้างรายการ'}</div>`;paintSnd();S.key=key;return}
-  if(S.key!==key){S.key=key;S.lastBid=undefined;
+  if(S.key!==key){S.key=key;S.lastBid=undefined;S.kp='';
     if(r.startsWith('/bid/'))buildBid();else buildStage()}
   update();
 }
@@ -113,16 +124,15 @@ function buildStage(){
    <div class="box mid"><div class="lbl">ราคาปัจจุบัน (บาท)</div><div class="pr" id="pr"></div><div class="thw" id="thw"></div><div class="bd" id="bd"></div>
    <div class="lbl">เวลาที่เหลือ</div><div class="cd" id="cd"></div></div>
    <div class="box right"><div id="qr"></div><small style="color:var(--mut)">สแกน QR เพื่อเข้าร่วมประมูลด้วยมือถือ</small><div class="hist" id="hist"></div></div></div>
-   ${S.admin?`<div class="box ctl"><label>ชื่อผู้ประมูล<input id="cn" placeholder="เช่น เลขที่ป้าย / ชื่อ"></label><label>ราคาที่เสนอ (บาท)<input id="ca" type="number" inputmode="numeric"></label><button class="btn y" id="cb">บันทึกราคา</button><div class="msg" id="cm" style="grid-column:1/-1"></div></div>`:''}`;
+   ${S.admin?`<div class="box kpbox">${kpHtml()}</div>`:''}`;
   paintSnd();
   try{new QRCode($('qr'),{text:url,width:170,height:170})}catch(_){}
-  if(S.admin){$('cb').onclick=()=>doBid('cn','ca','cm');$('ca').onkeydown=ev=>{if(ev.key==='Enter')doBid('cn','ca','cm')}}
+  if(S.admin)bindKp('ผู้ประมูลในห้อง');
 }
 function buildBid(){
   $('app').innerHTML=bar()+`<div class="bidp"><div class="box"><h1 id="tt" style="font-size:24px"></h1><div class="lbl">ราคาปัจจุบัน</div><div class="pr" id="pr" style="font-size:60px"></div><div class="thw" id="thw"></div><div class="bd" id="bd"></div><div class="cd" id="cd" style="font-size:54px"></div></div>
-   <div class="box" style="display:grid;gap:12px;text-align:left"><label>ชื่อผู้ประมูล<input id="bn" maxlength="60"></label><label>ราคาที่เสนอ (บาท)<input id="ba" type="number" inputmode="numeric"></label><button class="btn y" id="bb">ยืนยันราคา</button><div class="msg" id="bm"></div></div><div class="hist" id="hist"></div></div>`;
-  paintSnd();try{$('bn').value=localStorage.getItem('au_name')||''}catch(_){}
-  $('bb').onclick=()=>doBid('bn','ba','bm');
+   <div class="box">${kpHtml()}</div><div class="hist" id="hist"></div></div>`;
+  paintSnd();bindKp(myName());
 }
 const minBid=a=>S.bids.length?Number(a.current_price)+Number(a.min_step):Number(a.start_price);
 function update(){
@@ -135,7 +145,7 @@ function update(){
   $('thw').textContent=thBaht(price);
   $('bd').textContent=top?'ผู้เสนอราคาสูงสุด: '+a.current_bidder:'ราคาเริ่มต้น — ยังไม่มีผู้เสนอ';
   $('hist').innerHTML=S.bids.map(b=>`<div class="hr"><span>${e(b.bidder_name)}</span><b>${baht(b.amount)}</b></div>`).join('');
-  const m=minBid(a),inp=$('ca')||$('ba');if(inp&&!inp.value&&document.activeElement!==inp)inp.placeholder='ขั้นต่ำ '+baht(m);
+  paintKp();
   if(S.lastBid!==undefined&&top&&top.id!==S.lastBid)speak(`ราคาปัจจุบัน ${thBaht(top.amount)} โดย ${top.bidder_name}`);
   S.lastBid=top?top.id:null;
 }
@@ -158,17 +168,33 @@ function tick(){
 setInterval(tick,200);
 
 /* ---------- ใส่ราคา ---------- */
-async function doBid(nId,aId,mId){
-  const a=S.cur,name=$(nId).value.trim(),amt=Number($(aId).value),m=$(mId),b=event&&event.target;
+function myName(){try{let n=localStorage.getItem('au_id');if(!n){n='ผู้ประมูลหมายเลข '+Math.floor(100+Math.random()*900);localStorage.setItem('au_id',n)}return n}catch(_){return 'ผู้ประมูล'}}
+function kpHtml(){return `<div class="kp"><div class="kpn" id="kpn"></div><div class="kpd" id="kpd">0</div><div class="thw" id="kpt"></div>
+ <div class="qa" id="qa"></div>
+ <div class="keys">${['1','2','3','4','5','6','7','8','9','00','0','⌫'].map(k=>`<button type="button" class="key" data-k="${k}">${k}</button>`).join('')}</div>
+ <div class="kpr"><button type="button" class="btn g s" id="kmin">ใช้ราคาขั้นต่ำ</button><button type="button" class="btn g s" id="kclr">ล้าง</button></div>
+ <button type="button" class="btn y" id="kok">ยืนยันราคา</button><div class="msg" id="km"></div></div>`}
+function paintKp(){const a=S.cur;if(!a||!$('kpd'))return;S.kp=String(S.kp||'');
+  const n=Number(S.kp)||0,step=Number(a.min_step)||1,adds=[...new Set([step,100,500,1000].filter(x=>x>0))].sort((x,y)=>x-y).slice(0,4);
+  $('kpd').textContent=baht(n);$('kpt').textContent=n?thBaht(n):'';
+  $('kpn').textContent='ขั้นต่ำ '+baht(minBid(a))+' บาท';
+  $('qa').innerHTML=adds.map(x=>`<button type="button" class="btn" data-add="${x}">+${baht(x)}</button>`).join('')}
+function bindKp(name){
+  const set=v=>{S.kp=String(v).replace(/^0+/,'').slice(0,9);paintKp()};
+  document.querySelectorAll('.key').forEach(b=>b.onclick=()=>{const k=b.dataset.k;set(k==='⌫'?String(S.kp||'').slice(0,-1):(S.kp||'')+k)});
+  $('qa').onclick=ev=>{const b=ev.target.closest('[data-add]');if(!b||!S.cur)return;
+    const base=Number(S.kp)||(S.bids.length?Number(S.cur.current_price):Number(S.cur.start_price)-Number(S.cur.min_step)*0);set(base+Number(b.dataset.add))};
+  $('kmin').onclick=()=>S.cur&&set(minBid(S.cur));$('kclr').onclick=()=>set('');
+  $('kok').onclick=()=>submitBid(name);paintKp();
+}
+async function submitBid(name){
+  const a=S.cur,amt=Number(S.kp),m=$('km'),b=$('kok');
   const say=(t,c)=>{m.className='msg '+c;m.textContent=t};
-  if(!name)return say('กรุณากรอกชื่อ','e');if(!(amt>0))return say('กรุณากรอกราคา','e');
-  if(b)b.disabled=true;
-  const r=await db.rpc('ac_place_bid',{p_auction:a.id,p_name:name,p_amount:amt});
-  if(b)b.disabled=false;
+  if(!(amt>0))return say('กดตัวเลขราคาก่อน','e');
+  b.disabled=true;const r=await db.rpc('ac_place_bid',{p_auction:a.id,p_name:name,p_amount:amt});b.disabled=false;
   if(r.error)return say('ส่งไม่สำเร็จ: '+r.error.message,'e');
   if(r.data!=='ok')return say(r.data,'e');
-  try{localStorage.setItem('au_name',name)}catch(_){}
-  say('บันทึกราคา '+baht(amt)+' บาท สำเร็จ','o');$(aId).value='';if(nId==='cn')$(nId).value='';
+  say('บันทึกราคา '+baht(amt)+' บาท สำเร็จ','o');S.kp='';
   await load();update();
 }
 
