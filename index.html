@@ -47,6 +47,12 @@ label{display:grid;gap:6px;font-size:13px;color:var(--mut)}
 .bidp{max-width:520px;margin:0 auto;padding:18px;display:grid;gap:14px;text-align:center}
 .empty{text-align:center;color:var(--mut);padding:80px 20px;font-size:20px}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#000c;padding:12px 22px;border-radius:99px;display:none;z-index:9}
+.mus{position:fixed;right:16px;bottom:16px;width:min(360px,92vw);max-height:80vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px;display:grid;gap:10px;z-index:20;box-shadow:0 20px 50px #000a}
+.mus[hidden]{display:none}.mh{display:flex;justify-content:space-between;align-items:center}
+.ml{display:grid;gap:6px;max-height:200px;overflow:auto}
+.mi{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 12px;border-radius:12px;background:#0e1429;font-size:14px;cursor:pointer}
+.mi.on{border:1px solid var(--gold);color:var(--gold)}.mi span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mc{display:grid;grid-template-columns:1fr 2fr 1fr;gap:8px}
 .kpbox{margin:0 auto 24px;max-width:520px;width:calc(100% - 48px)}
 .kp{display:grid;gap:12px;text-align:center}
 .kpd{font-family:Inter,sans-serif;font-weight:800;font-size:clamp(40px,7vw,64px);color:var(--gold);background:#0e1429;border-radius:18px;padding:10px;font-variant-numeric:tabular-nums}
@@ -85,7 +91,9 @@ const thBaht=n=>thInt(n)+'บาท';
 let SND=false;try{SND=localStorage.getItem('au_snd')==='1'}catch(_){}
 function speak(t){if(!SND||!('speechSynthesis' in window))return;
   const u=new SpeechSynthesisUtterance(t);u.lang='th-TH';u.rate=.95;
-  const v=speechSynthesis.getVoices().find(v=>/th/i.test(v.lang));if(v)u.voice=v;speechSynthesis.speak(u)}
+  const v=speechSynthesis.getVoices().find(v=>/th/i.test(v.lang));if(v)u.voice=v;
+  duck(true);let d=false;const end=()=>{if(!d){d=true;duck(false)}};u.onend=end;u.onerror=end;setTimeout(end,15000);
+  speechSynthesis.speak(u)}
 function toggleSnd(){SND=!SND;try{localStorage.setItem('au_snd',SND?'1':'0')}catch(_){}
   if(SND){speechSynthesis.cancel();speak('เปิดเสียงอ่านราคาแล้ว')}paintSnd()}
 const paintSnd=()=>{const b=$('snd');if(b)b.textContent=SND?'🔊 เสียง: เปิด':'🔇 เสียง: ปิด (กดเพื่อเปิด)'};
@@ -108,7 +116,7 @@ async function load(){
 }
 
 /* ---------- วาดหน้า ---------- */
-function bar(){return `<div class="top"><b>🔨 ประมูลสด</b><div class="r"><button class="btn g s" id="snd" onclick="toggleSnd()"></button><a class="btn g s" href="#/">หน้าจอประมูล</a><a class="btn g s" href="#/admin">${S.admin?'จัดการ':'ผู้ดูแล'}</a></div></div>`}
+function bar(){return `<div class="top"><b>🔨 ประมูลสด</b><div class="r"><button class="btn g s" id="snd" onclick="toggleSnd()"></button><button class="btn g s" onclick="toggleMus()">🎵 เพลง</button><a class="btn g s" href="#/">หน้าจอประมูล</a><a class="btn g s" href="#/admin">${S.admin?'จัดการ':'ผู้ดูแล'}</a></div></div>`}
 function render(){
   const r=route(),a=S.cur,key=r+'|'+(a?a.id:'');
   if(S.err){$('app').innerHTML=bar()+`<div class="empty">โหลดข้อมูลไม่ได้: ${e(S.err)}<br><small>รันไฟล์ auction_setup.sql ใน Supabase ก่อน</small></div>`;paintSnd();return}
@@ -152,6 +160,8 @@ function update(){
 function tick(){
   const a=S.cur,c=$('cd');if(!a||!c)return;
   const ms=new Date(a.ends_at).getTime()-now(),rem=Math.ceil(ms/1000),open=a.status==='open'&&ms>0,sp=S.spoken,k=a.id+':';
+  if(a.mode==='rolling'&&a.status==='open'&&!S.bids.length){c.className='cd end';c.textContent='รอผู้เสนอราคาคนแรก';return}
+  if(S.le!==a.ends_at){S.le=a.ends_at;for(const x of [10,5,4,3,2,1])delete sp[k+x]}
   if(!open){
     c.className='cd end';const top=S.bids[0];
     c.textContent=a.status==='closed'||ms<=0?'ปิดประมูลแล้ว':'';
@@ -212,14 +222,15 @@ async function renderAdmin(){
   $('app').innerHTML=bar()+`<div class="wrap"><div class="box"><h2>สร้างรายการประมูลใหม่</h2><div class="fm" style="margin-top:14px">
    <label class="f">ชื่อสินค้า<input id="f_t"></label><label class="f">รายละเอียด<textarea id="f_d" rows="2"></textarea></label><label class="f">ลิงก์รูป<input id="f_i" placeholder="https://..."></label>
    <label>ราคาเริ่มต้น (บาท)<input id="f_s" type="number" value="100"></label><label>ขั้นต่ำการเพิ่มราคา<input id="f_m" type="number" value="10"></label>
-   <label>ระยะเวลา (นาที)<input id="f_n" type="number" value="10"></label><label>ต่อเวลาอัตโนมัติ (วินาที, 0 = ปิด)<input id="f_x" type="number" value="0"></label>
+   <label class="f">รูปแบบเวลา<select id="f_o"><option value="rolling">ไม่กำหนดเวลา — ทุกครั้งที่มีคนเสนอราคา นับถอยหลังใหม่ ปิดเมื่อไม่มีใครเสนอเพิ่ม</option><option value="timed">กำหนดเวลาปิดแน่นอน (ต่อเวลาเมื่อมีคนเสนอช่วงท้าย)</option></select></label><label id="f_nw">ระยะเวลาประมูล (นาที)<input id="f_n" type="number" value="10"></label><label id="f_xw">เวลานับถอยหลังต่อการเสนอ 1 ครั้ง (วินาที)<input id="f_x" type="number" value="15"></label>
    </div><p style="margin-top:14px"><button class="btn y" id="f_go">เริ่มประมูล</button> <button class="btn g" onclick="out()">ออกจากระบบ</button></p><div class="msg" id="f_m2"></div></div>
-   <div class="box" style="margin-top:18px"><h2>รายการทั้งหมด</h2>${L.map(a=>{const op=isOpen(a);return `<div class="row"><div><b>${e(a.title)}</b> <span class="tag ${op?'on':''}">${op?'กำลังประมูล':'ปิดแล้ว'}</span> ${a.is_live?'<span class="tag on">หน้าจอหลัก</span>':''}<br><small style="color:var(--mut)">ราคา ${baht(a.current_price||a.start_price)} · ${e(a.current_bidder||'ไม่มีผู้เสนอ')} · ปิด ${e(new Date(a.ends_at).toLocaleString('th-TH'))}</small></div>
+   <div class="box" style="margin-top:18px"><h2>รายการทั้งหมด</h2>${L.map(a=>{const op=isOpen(a);return `<div class="row"><div><b>${e(a.title)}</b> <span class="tag ${op?'on':''}">${op?'กำลังประมูล':'ปิดแล้ว'}</span> ${a.is_live?'<span class="tag on">หน้าจอหลัก</span>':''}<br><small style="color:var(--mut)">ราคา ${baht(a.current_price||a.start_price)} · ${e(a.current_bidder||'ไม่มีผู้เสนอ')} · ${a.mode==='rolling'?(a.status!=='open'||!isOpen(a)?'ปิดแล้ว':'ไม่กำหนดเวลา (รีเซ็ต '+a.extend_sec+' วินาทีต่อการเสนอ)'):'ปิด '+e(new Date(a.ends_at).toLocaleString('th-TH'))}</small></div>
      <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn s g" data-x="live" data-id="${a.id}">ตั้งเป็นหน้าจอหลัก</button><a class="btn s g" href="#/a/${a.id}">เปิดดู</a><button class="btn s g" data-x="plus" data-id="${a.id}">+1 นาที</button><button class="btn s r" data-x="close" data-id="${a.id}">ปิดประมูล</button><button class="btn s r" data-x="del" data-id="${a.id}">ลบ</button></div></div>`}).join('')||'<p style="color:var(--mut);margin-top:10px">ยังไม่มีรายการ</p>'}</div></div>`;
   paintSnd();
+  const fo=()=>{$('f_nw').style.display=$('f_o').value==='rolling'?'none':''};$('f_o').onchange=fo;fo();
   $('f_go').onclick=async()=>{const v=id=>$(id).value,t=v('f_t').trim(),sp=Number(v('f_s'));
     if(!t)return $('f_m2').textContent='กรุณากรอกชื่อสินค้า';
-    const row={title:t,description:v('f_d'),image_url:v('f_i'),start_price:sp,current_price:sp,min_step:Number(v('f_m'))||1,extend_sec:Number(v('f_x'))||0,ends_at:new Date(now()+(Number(v('f_n'))||10)*60000).toISOString(),status:'open',is_live:true};
+    const row={title:t,description:v('f_d'),image_url:v('f_i'),start_price:sp,current_price:sp,min_step:Number(v('f_m'))||1,mode:v('f_o'),extend_sec:Math.max(1,Number(v('f_x'))||15),ends_at:new Date(v('f_o')==='rolling'?now()+3650*864e5:now()+(Number(v('f_n'))||10)*60000).toISOString(),status:'open',is_live:true};
     await db.from('ac_auctions').update({is_live:false}).eq('is_live',true);
     const r=await db.from('ac_auctions').insert(row);if(r.error)return $('f_m2').textContent='ไม่สำเร็จ: '+r.error.message;
     toast('สร้างแล้ว');await load();renderAdmin()};
@@ -231,6 +242,71 @@ async function renderAdmin(){
     if(r&&r.error)return toast('ไม่สำเร็จ: '+r.error.message);await load();renderAdmin()});
 }
 async function out(){await db.auth.signOut();S.user=null;S.admin=false;location.hash='#/';render()}
+
+/* ---------- เพลงประกอบ ---------- */
+const M={a:new Audio(),list:[],i:-1,vol:.6,duck:true,spk:0};
+try{const v=parseFloat(localStorage.getItem('au_vol'));if(v>=0&&v<=1)M.vol=v;M.duck=localStorage.getItem('au_duck')!=='0'}catch(_){}
+function mApply(){const v=Math.max(0,Math.min(1,M.vol*(M.duck&&M.spk>0?.2:1)));M.a.volume=v;try{M.yt&&M.yt.setVolume&&M.yt.setVolume(Math.round(v*100))}catch(_){}}
+function duck(on){M.spk=Math.max(0,M.spk+(on?1:-1));mApply()}
+function mPlay(i){if(!M.list.length)return;M.i=(i+M.list.length)%M.list.length;const it=M.list[M.i];
+  if(it.yt){M.a.pause();return ytPlay(it)}
+  ytStop();M.a.src=it.src;mApply();
+  M.a.play().catch(()=>toast('เล่นเพลงไม่ได้ — ตรวจสอบไฟล์หรือลิงก์'));mPaint()}
+const mNext=()=>mPlay(M.i+1),mPrev=()=>mPlay(M.i-1);
+const mIsPlaying=()=>{const it=M.list[M.i];return it&&it.yt?M.ytOn:!M.a.paused};
+function mToggle(){if(M.i<0)return mPlay(0);const it=M.list[M.i];
+  if(it&&it.yt){if(!M.yt||!M.yt.playVideo)return;M.ytOn?M.yt.pauseVideo():M.yt.playVideo();return}
+  M.a.paused?M.a.play().catch(()=>{}):M.a.pause()}
+M.yt=null;M.ytOn=false;
+function ytLoadApi(){if(window.YT&&YT.Player)return Promise.resolve();
+  return new Promise((ok,no)=>{const prev=window.onYouTubeIframeAPIReady;window.onYouTubeIframeAPIReady=()=>{prev&&prev();ok()};
+    const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';s.onerror=()=>no();document.head.appendChild(s)})}
+async function ytEnsure(){if(M.yt)return;await ytLoadApi();
+  await new Promise(res=>{M.yt=new YT.Player('ytp',{width:'100%',height:'180',playerVars:{playsinline:1,rel:0},events:{onReady:()=>{mApply();res()},
+    onStateChange:ev=>{M.ytOn=ev.data===1;if(ev.data===0){const it=M.list[M.i];if(!(it&&it.yt==='list'))mNext()}mPaint()},
+    onError:()=>{toast('เล่นวิดีโอนี้ไม่ได้ (เจ้าของปิดการฝัง) — ข้ามไปรายการถัดไป');M.ytOn=false;if(M.list.length>1)mNext();else mPaint()}}})})}
+async function ytPlay(it){mPaint();try{await ytEnsure()}catch(_){toast('โหลดตัวเล่น YouTube ไม่ได้ (ตรวจอินเทอร์เน็ต)');return}
+  mApply();if(it.yt==='list')M.yt.loadPlaylist({list:it.id,listType:'playlist'});else M.yt.loadVideoById(it.id);mPaint()}
+function ytStop(){try{M.yt&&M.yt.stopVideo&&M.yt.stopVideo()}catch(_){}M.ytOn=false}
+function ytParse(u){try{const x=new URL(u),h=x.hostname.replace(/^www\.|^m\./,'');let id='';
+  if(h==='youtu.be')id=x.pathname.slice(1).split('/')[0];
+  else if(/youtube\.com$|youtube-nocookie\.com$/.test(h))id=x.searchParams.get('v')||((x.pathname.match(/^\/(?:shorts|embed|live|v)\/([\w-]{6,})/)||[])[1]||'');
+  else return null;
+  if(/^[\w-]{11}$/.test(id))return {yt:'video',id};
+  const l=x.searchParams.get('list');return l?{yt:'list',id:l}:null}catch(_){return null}}
+M.a.onended=mNext;M.a.onplay=M.a.onpause=()=>mPaint();
+function mPaint(){const l=$('ml');if(!l)return;
+  l.innerHTML=M.list.map((x,n)=>`<div class="mi ${n===M.i?'on':''}" data-p="${n}"><span>${n===M.i&&mIsPlaying()?'▶ ':''}${e(x.name)}</span><button class="btn g s" data-r="${n}">✕</button></div>`).join('')||'<small style="color:var(--mut)">ยังไม่มีเพลงในรายการ</small>';
+  $('mt').textContent=mIsPlaying()?'⏸ หยุด':'▶ เล่น';
+  const w=$('ytw'),it=M.list[M.i];if(w)w.style.display=it&&it.yt?'block':'none'}
+function toggleMus(){const d=$('mus');d.hidden=!d.hidden;mPaint()}
+function mInit(){const d=document.createElement('div');d.id='mus';d.className='mus';d.hidden=true;
+  d.innerHTML=`<div class="mh"><b>🎵 เพลงประกอบการประมูล</b><button class="btn g s" onclick="toggleMus()">✕</button></div>
+  <label class="btn g s" style="cursor:pointer;text-align:center">เลือกไฟล์เพลงจากเครื่อง (เลือกได้หลายไฟล์)<input id="mf" type="file" accept="audio/*" multiple hidden></label>
+  <div style="display:flex;gap:6px"><input id="mu" placeholder="วางลิงก์ YouTube หรือไฟล์ .mp3"><button class="btn g s" id="mua">เพิ่ม</button></div>
+  <div id="ml" class="ml"></div>
+  <div id="ytw" style="display:none;border-radius:12px;overflow:hidden"><div id="ytp"></div></div>
+  <div class="mc"><button class="btn g s" id="mp">⏮</button><button class="btn y s" id="mt">▶ เล่น</button><button class="btn g s" id="mn">⏭</button></div>
+  <label>ความดังเพลง<input id="mv" type="range" min="0" max="1" step="0.05"></label>
+  <label style="display:flex;gap:8px;flex-direction:row;align-items:center"><input type="checkbox" id="md" style="width:auto"> ลดเสียงเพลงตอนอ่านราคา/นับถอยหลัง</label>
+  <small style="color:var(--mut)">เพลงจากเครื่องจะหายเมื่อรีเฟรชหน้า ต้องเลือกใหม่</small>`;
+  document.body.appendChild(d);
+  const add=(name,src)=>{M.list.push({name,src});if(M.i<0)mPlay(0);else mPaint()};
+  $('mf').onchange=ev=>{[...ev.target.files].forEach(f=>add(f.name,URL.createObjectURL(f)));ev.target.value=''};
+  $('mua').onclick=async()=>{const u=$('mu').value.trim();if(!/^https?:\/\//i.test(u))return toast('ลิงก์ต้องขึ้นต้นด้วย http:// หรือ https://');
+    const y=ytParse(u);
+    if(y){$('mu').value='';let nm='YouTube: '+y.id;
+      try{const r=await fetch('https://www.youtube.com/oembed?format=json&url='+encodeURIComponent(u));if(r.ok)nm='▶ '+((await r.json()).title||nm)}catch(_){}
+      M.list.push({name:nm,...y});if(M.i<0)mPlay(0);else mPaint();return}
+    add(decodeURIComponent(u.split('/').pop().split('?')[0])||u,u);$('mu').value=''};
+  $('ml').onclick=ev=>{const r=ev.target.closest('[data-r]');
+    if(r){const n=+r.dataset.r;M.list.splice(n,1);if(n===M.i){M.a.pause();ytStop();M.i=-1;if(M.list.length)mPlay(Math.min(n,M.list.length-1));else M.a.removeAttribute('src')}else if(n<M.i)M.i--;mPaint();return}
+    const p=ev.target.closest('[data-p]');if(p)mPlay(+p.dataset.p)};
+  $('mt').onclick=mToggle;$('mp').onclick=mPrev;$('mn').onclick=mNext;
+  $('mv').value=M.vol;$('mv').oninput=()=>{M.vol=+$('mv').value;try{localStorage.setItem('au_vol',M.vol)}catch(_){}mApply()};
+  $('md').checked=M.duck;$('md').onchange=()=>{M.duck=$('md').checked;try{localStorage.setItem('au_duck',M.duck?'1':'0')}catch(_){}mApply()};
+  mApply();mPaint()}
+mInit();
 
 /* ---------- boot ---------- */
 addEventListener('hashchange',async()=>{await load();render()});
