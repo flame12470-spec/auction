@@ -295,7 +295,7 @@ const S={app:'คุยกัน',chats:'แชต',calls:'ประวัติ
  yourNo:'เบอร์สั้นของคุณ',agent:'ฉันเป็นเจ้าหน้าที่ (รับสายที่โอนมาจากระบบอัตโนมัติ)',
  online:'ออนไลน์',offline:'ออฟไลน์',type:'พิมพ์ข้อความ…',recording:'กำลังอัดเสียง…',
  photo:'รูปภาพ',voice:'ข้อความเสียง',calling:'กำลังโทร…',connecting:'กำลังเชื่อมต่อ…',incoming:'สายเรียกเข้า',
- toAgent:'กำลังโอนสายหาเจ้าหน้าที่…',ivrOn:'ระบบตอบรับอัตโนมัติ',vmRec:'กำลังอัดข้อความ — พูดจบแล้วกด #',
+ toAgent:'กำลังโอนสายไปยังเจ้าหน้าที่… 🎵',ivrOn:'ระบบตอบรับอัตโนมัติ',vmRec:'กำลังอัดข้อความ — พูดจบแล้วกด #',
  noMic:'กรุณาอนุญาตการใช้ไมโครโฟน',noAns:'ไม่มีผู้รับสาย',rejected:'ปฏิเสธสาย',busy:'สายไม่ว่าง',ended:'วางสายแล้ว',failed:'การเชื่อมต่อขาด',
  inCall:'คุณกำลังอยู่ในสาย',dial:'กดเบอร์โทร',operator:'ระบบตอบรับอัตโนมัติ',operatorSub:'IVR · โทรเบอร์ 100',
  inbox:'กล่องข้อความเจ้าหน้าที่',noChats:'ยังไม่มีแชต เริ่มจากแท็บ “สมาชิก”',noCalls:'ยังไม่มีประวัติการโทร',noPeople:'ยังไม่มีสมาชิกคนอื่น ลองเปิดอีกแท็บแล้วเข้าสู่ระบบด้วยอีกชื่อ',
@@ -345,7 +345,18 @@ function tone(fs,d,v){try{const c=ac(),g=c.createGain();g.gain.value=v||.15;g.co
 const DT={1:[697,1209],2:[697,1336],3:[697,1477],4:[770,1209],5:[770,1336],6:[770,1477],7:[852,1209],8:[852,1336],9:[852,1477],'*':[941,1209],0:[941,1336],'#':[941,1477]};
 let ringT=null;
 function ring(kind){stopRing();const inn=kind==='in';const go=()=>{if(inn){tone([440,480],.4);setTimeout(()=>tone([440,480],.4),600)}else tone([425],1)};go();ringT=setInterval(go,inn?3000:4000);if(inn&&navigator.vibrate)navigator.vibrate([400,200,400,1500,400,200,400])}
-function stopRing(){clearInterval(ringT);ringT=null;if(navigator.vibrate)navigator.vibrate(0)}
+let HOLD=null;
+function holdSynth(){const N=[523,659,784,659,587,698,880,698,523,659,784,1047,880,784,659,587];let i=0;const step=()=>{tone([N[i%N.length]],.38,.05);i++};step();return setInterval(step,420)}
+/* เพลงรอสายระหว่างโอนสายหาเจ้าหน้าที่: ใช้ไฟล์ที่แอดมินอัปโหลด ถ้าไม่มีใช้ทำนองมาตรฐาน */
+function holdStart(){
+ stopRing();const u=IVRC.hold&&IVRC.hold.url;HOLD={};
+ if(u){try{const a=TTSA||(TTSA=new Audio()),H=HOLD;a.onended=null;a.loop=true;a.src=u;H.a=a;
+   const fb=()=>{if(HOLD===H&&!H.t){a.onerror=null;try{a.pause()}catch(e){}H.t=holdSynth()}};
+   a.onerror=fb;a.play().catch(fb);return}catch(e){}}
+ HOLD.t=holdSynth();
+}
+function holdStop(){if(!HOLD)return;const H=HOLD;HOLD=null;clearInterval(H.t);if(H.a){try{H.a.pause();H.a.loop=false;H.a.onerror=null}catch(e){}}}
+function stopRing(){clearInterval(ringT);ringT=null;holdStop();if(navigator.vibrate)navigator.vibrate(0)}
 function notifyB(t,b){try{if(document.hidden&&window.Notification&&Notification.permission==='granted')new Notification(t,{body:b})}catch(e){}}
 
 /* ============ Transport: ในเครื่อง (BroadcastChannel) / Supabase ============ */
@@ -545,7 +556,7 @@ function render(){
  if(VIEW==='feed'){const tot=Object.keys(MSGS).filter(c=>c!=='feed').reduce((a,c)=>a+unread(c),0);
   tb=tb.replace(/<\/div><\/div>$/,'</div><button class="icon-btn callbtn cbtn" data-act="tab" data-v="chats" aria-label="แชต"><svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round">'+NAVIC.chats+'</svg>'+(tot?'<span class="cbadge">'+tot+'</span>':'')+'</button></div>')}
  page().innerHTML=tb+V;
- $('#nav').classList.remove('hide');drawNav();tickClock();window.scrollTo(0,y);
+ $('#nav').classList.remove('hide');drawNav();tickClock();window.scrollTo(0,y);if(VIEW==='admin')holdInfo();
 }
 function vChats(){
  const ids=Object.keys(MSGS).filter(c=>c!=='feed'&&MSGS[c].length&&(c!=='inbox'||ME.agent)).sort((a,b)=>MSGS[b][MSGS[b].length-1].ts-MSGS[a][MSGS[a].length-1].ts);
@@ -623,11 +634,37 @@ function vAdmin(){
  return '<div class="card"><b>➕ เพิ่มผู้ใช้ใหม่</b><div class="fld"><label for="an">ชื่อผู้ใช้</label><input type="text" id="an" maxlength="40" autocomplete="off" placeholder="เช่น สมชาย ใจดี"></div>'+
   '<label class="chk" style="margin-top:8px"><input type="checkbox" id="aag"><span>ให้เป็นแอดมินด้วย</span></label>'+
   '<button class="cta inline" data-act="adminAdd">เพิ่มผู้ใช้ (ระบบสร้างหมายเลขให้อัตโนมัติ)</button></div>'+
+  '<div class="card"><b>🎵 เพลงรอสาย</b><div class="sub" style="margin:4px 0 10px">เล่นระหว่าง "กำลังโอนสายไปยังเจ้าหน้าที่" · <span id="holdinfo">กำลังโหลด…</span></div><div class="erow"><label class="btn p" for="hf" style="cursor:pointer">⬆ อัปโหลดเพลง</label><input type="file" id="hf" accept="audio/*" hidden><button class="btn" data-act="holdPrev">▶ ฟัง</button><button class="btn" data-act="holdDel">✕ ใช้เพลงมาตรฐาน</button></div></div>'+
   '<button class="cta ghost" data-act="ivrEd">🎛 '+S.ivrSet+'</button>'+
   '<div class="section-title"><h3>ผู้ใช้ทั้งหมด ('+us.length+')</h3></div><div class="list">'+us.map(u=>
    '<div class="item">'+av(u,'',ONL[u.id])+'<div class="nm"><b>'+esc(u.name)+(u.agent?'<span class="tag">แอดมิน</span>':'')+'</b><small>หมายเลข <bdi>'+esc(u.ext)+'</bdi> · '+(ONL[u.id]?S.online:S.offline)+'</small></div>'+
    (u.id!==ME.id?'<div class="acts"><button class="mini" data-act="adminTg" data-id="'+esc(u.id)+'">'+(u.agent?'ถอดแอดมิน':'ตั้งเป็นแอดมิน')+'</button><button class="mini r" data-act="adminDel" data-id="'+esc(u.id)+'">🗑 '+S.del+'</button></div>':'<span class="sub">คุณ</span>')+'</div>').join('')+'</div>';
 }
+async function holdInfo(){
+ const el=$('#holdinfo');if(!el)return;
+ try{const v=await T.kvGet('ivr');if(v)IVRC=v}catch(e){}
+ const h=IVRC.hold,e2=$('#holdinfo');if(e2)e2.textContent=h&&h.url?(h.name||'เพลงที่อัปโหลด'):'ใช้เพลงมาตรฐานของระบบ';
+}
+async function holdSave(h){
+ const cur=(await T.kvGet('ivr'))||defIVR();
+ if(h)cur.hold=h;else delete cur.hold;
+ await T.kvSet('ivr',cur);IVRC=cur;holdInfo();
+}
+async function holdPick(f){
+ if(!f||!ME.agent)return;
+ if(f.size>10*1024*1024)return toast('ไฟล์ใหญ่เกิน 10 MB');
+ if(!/^audio\//.test(f.type)&&!/\.(mp3|m4a|wav|ogg|aac|webm)$/i.test(f.name))return toast('เลือกไฟล์เสียงเท่านั้น');
+ toast('กำลังอัปโหลดเพลง…');
+ try{const ext=(f.name.split('.').pop()||'mp3').toLowerCase();const url=await T.upload(f,ext);await holdSave({url,name:f.name});toast(S.saved)}catch(e){toast(e.message||S.err)}
+}
+let PREV=null;
+function holdPrev(){
+ if(PREV){clearInterval(PREV.t);try{PREV.a&&PREV.a.pause()}catch(e){}PREV=null;return}
+ const u=IVRC.hold&&IVRC.hold.url;ac();
+ if(u){const a=new Audio(u);PREV={a};a.onended=()=>{PREV=null};a.play().catch(()=>toast(S.err))}
+ else{const t=holdSynth();PREV={t};setTimeout(()=>{if(PREV&&PREV.t===t){clearInterval(t);PREV=null}},7000)}
+}
+async function holdDel(){if(!ME.agent)return;try{await holdSave(null);toast('ใช้เพลงมาตรฐานแล้ว')}catch(e){toast(e.message||S.err)}}
 async function adminAdd(){
  if(!ME.agent)return;
  const i=$('#an'),n=((i&&i.value)||'').trim().replace(/\s+/g,' ');
@@ -958,7 +995,7 @@ async function ivrAgent(){
  const ag=Object.values(ONL).filter(x=>x.agent&&x.id!==ME.id);
  if(!ag.length){await say('noagent');if(CALL===C&&I.tok===k)ivrVM();return}
  await say('agent');if(CALL!==C||I.tok!==k)return;
- C.state='agentring';C.invited=ag.map(x=>x.id);C.ivrMode=1;callUI();ring('out');
+ C.state='agentring';C.invited=ag.map(x=>x.id);C.ivrMode=1;callUI();holdStart();
  ag.forEach(x=>sig(x.id,'invite',C.id,{name:ME.name,ext:ME.ext,grp:1}));
  C.to=setTimeout(()=>{if(CALL===C&&C.state==='agentring'){C.invited.forEach(i=>sig(i,'cancel',C.id));ivrNoAgent()}},30000);
 }
@@ -1020,7 +1057,7 @@ const A={
  zoom(t){const m=(MSGS[OPEN||'feed']||[]).find(x=>x.id===t.dataset.i);if(!m)return;const d=document.createElement('div');d.className='lb';d.innerHTML='<img src="'+esc(m.url)+'">';d.onclick=()=>d.remove();document.body.appendChild(d)},
  answer,decline,hang,mute,dg(t){dig(t.dataset.d)},
  dialer,dk(t){if(DIAL.length<8){DIAL+=t.dataset.d;$('#dn').textContent=DIAL;tone(DT[t.dataset.d],.1,.08)}},dbs(){DIAL=DIAL.slice(0,-1);$('#dn').innerHTML=DIAL||'&nbsp;'},dgo:dialGo,
- closeSheet,postT:postText,like:likePost,postdel:delPost,adminAdd,adminDel,adminTg,msgmenu,unsend,setup:setupAdmin,
+ closeSheet,holdPrev,holdDel,postT:postText,like:likePost,postdel:delPost,adminAdd,adminDel,adminTg,msgmenu,unsend,setup:setupAdmin,
  async logout(){if(CALL)hang();MS.removeItem('uy_me');location.reload()},
  ivrEd(){ED=JSON.parse(JSON.stringify(IVRC));T.kvGet('ivr').then(v=>{if(v){ED=JSON.parse(JSON.stringify(v));IVRC=v;edDraw()}}).catch(()=>{});edDraw()},
  edrec(t){edRec(t.dataset.k)},
@@ -1038,6 +1075,7 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('change',async e=>{
  const t=e.target;
+ if(t.id==='hf'){const f=t.files[0];t.value='';holdPick(f)}
  if(t.id==='ff'){const f=t.files[0];t.value='';postImage(f)}
  if(t.id==='pf'){const f=t.files[0];t.value='';pickImage(f)}
  if(t.dataset&&t.dataset.act==='agentTg'){ME.agent=t.checked;MS.setItem('uy_me',JSON.stringify(pub(ME)));try{await T.upsertUser(pub(ME));T.track(pub(ME))}catch(x){toast(x.message)}if(ME.agent)refresh();render()}
