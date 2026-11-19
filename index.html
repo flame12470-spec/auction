@@ -534,11 +534,11 @@ function render(){
 }
 function vChats(){
  const ids=Object.keys(MSGS).filter(c=>c!=='feed'&&MSGS[c].length&&(c!=='inbox'||ME.agent)).sort((a,b)=>MSGS[b][MSGS[b].length-1].ts-MSGS[a][MSGS[a].length-1].ts);
- const dial='<div class="list"><button class="item" data-act="dialer"><div class="rb call">📞</div><div class="nm"><b>โทรด้วยหมายเลข</b><small>แป้นโทร · โทรระบบตอบรับอัตโนมัติ 100</small></div></button></div>';
+ const dial='';
  if(!ids.length)return dial+'<div class="card empty">'+S.noChats+'</div>';
  return dial+'<div class="list">'+ids.map(c=>{
   const l=MSGS[c][MSGS[c].length-1],inbox=c==='inbox',pid=inbox?null:c.split('|').find(x=>x!==ME.id),u=inbox?{id:'inbox',name:S.inbox}:(getUser(pid)||{id:pid,name:'?'}),n=unread(c);
-  return '<div class="item" role="button" tabindex="0" data-act="open" data-c="'+esc(c)+'">'+av(u,'',pid&&ONL[pid])+'<div class="nm"><b>'+esc(u.name)+'</b><small>'+(l.sender===ME.id&&l.body!==UNS?'✓ ':'')+esc(prev(l))+'</small></div><div class="end"><span>'+hhmm(l.ts)+'</span>'+(n?'<span class="badge">'+n+'</span>':'')+'</div>'+(pid&&ONL[pid]?'<button class="rb call" data-act="callu" data-id="'+esc(pid)+'" aria-label="โทร">📞</button>':'')+'</div>'}).join('')+'</div>';
+  return '<div class="item" role="button" tabindex="0" data-act="open" data-c="'+esc(c)+'">'+av(u,'',pid&&ONL[pid])+'<div class="nm"><b>'+esc(u.name)+'</b><small>'+(l.sender===ME.id&&l.body!==UNS?'✓ ':'')+esc(prev(l))+'</small></div><div class="end"><span>'+hhmm(l.ts)+'</span>'+(n?'<span class="badge">'+n+'</span>':'')+'</div>'+'</div>'}).join('')+'</div>';
 }
 function feedData(){
  const likes={},posts=[];
@@ -588,14 +588,15 @@ function vPeople(){
  const us=Object.values(allUsers()).filter(u=>u.id!==ME.id&&u.name).sort((a,b)=>(!!ONL[b.id])-(!!ONL[a.id])||String(a.name).localeCompare(b.name));
  return '<input class="search" id="ps" placeholder="'+S.search+'" autocomplete="off">'+(us.length?'<div class="list" id="pl">'+us.map(u=>
   '<div class="item" data-nm="'+esc((u.name||'').toLowerCase()+' '+u.ext)+'">'+av(u,'',ONL[u.id])+'<div class="nm"><b>'+esc(u.name)+(u.agent?'<span class="tag">แอดมิน</span>':'')+'</b><small>หมายเลข <bdi>'+esc(u.ext)+'</bdi> · '+(ONL[u.id]?S.online:S.offline)+'</small></div>'+
-  '<button class="rb" data-act="chat" data-id="'+esc(u.id)+'">💬</button>'+(ONL[u.id]?'<button class="rb call" data-act="callu" data-id="'+esc(u.id)+'">📞</button>':'')+'</div>').join('')+'</div>':'<div class="card empty">'+S.noPeople+'</div>');
+  '<button class="rb" data-act="chat" data-id="'+esc(u.id)+'">💬</button>'+'</div>').join('')+'</div>':'<div class="card empty">'+S.noPeople+'</div>');
 }
 const CL=()=>LS('uy_calls_'+ME.id,[]);
 function vCalls(){
  const l=CL();
- return l.length?'<div class="list">'+l.map(c=>{
+ const dial='<div class="list"><button class="item" data-act="dialer"><div class="rb call">📞</div><div class="nm"><b>แป้นโทร</b><small>โทรด้วยหมายเลข · ระบบตอบรับอัตโนมัติ 100</small></div></button></div>';
+ return dial+(l.length?'<div class="list">'+l.map(c=>{
   const miss=c.res==='missed',cl=miss?'miss':(c.dir==='in'?'in':'out'),ar=c.dir==='in'?'↙':'↗';
-  return '<div class="item">'+av({id:c.pid,name:c.name})+'<div class="nm"><b>'+esc(c.name)+'</b><small class="'+cl+'">'+ar+' '+(miss?S.missed:c.res==='rej'?S.rejectedLog:c.dur?mmss(c.dur):S.noAns)+' · '+hhmm(c.ts)+'</small></div>'+(c.pid==='ivr'?'<button class="rb call" data-act="ivr">📞</button>':'<button class="rb call" data-act="callx" data-id="'+esc(c.pid)+'">📞</button>')+'</div>'}).join('')+'</div>':'<div class="card empty">'+S.noCalls+'</div>';
+  return '<div class="item">'+av({id:c.pid,name:c.name})+'<div class="nm"><b>'+esc(c.name)+'</b><small class="'+cl+'">'+ar+' '+(miss?S.missed:c.res==='rej'?S.rejectedLog:c.dur?mmss(c.dur):S.noAns)+' · '+hhmm(c.ts)+'</small></div>'+(c.pid==='ivr'?'<button class="rb call" data-act="ivr">📞</button>':'<button class="rb call" data-act="callx" data-id="'+esc(c.pid)+'">📞</button>')+'</div>'}).join('')+'</div>':'<div class="card empty">'+S.noCalls+'</div>');
 }
 function vSet(){
  return '<div class="card" style="display:flex;gap:14px;align-items:center">'+av(ME)+'<div style="flex:1;min-width:0"><b>'+esc(ME.name)+(ME.agent?'<span class="tag">แอดมิน</span>':'')+'</b><div class="sub">'+S.yourNo+': <b style="color:var(--green-dark);font-size:18px"><bdi>'+esc(ME.ext)+'</bdi></b></div></div></div>'+
