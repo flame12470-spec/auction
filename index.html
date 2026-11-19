@@ -376,7 +376,17 @@ function CloudT(){
   async unsendMsg(id){const r=ck(await sb.from('uy_msgs').update({kind:'text',body:UNS,url:''}).eq('id',id).select());if(!r||!r.length)throw Error('ยกเลิกข้อความไม่ได้ — ต้องเปิดสิทธิ์ update ของตาราง uy_msgs ใน Supabase')},
   async delUser(id){const r=ck(await sb.from('uy_users').delete().eq('id',id).select());if(!r||!r.length)throw Error('ลบผู้ใช้ไม่ได้ — ต้องเปิดสิทธิ์ delete ของตาราง uy_users ใน Supabase')},
   async recent(id){const r=ck(await sb.from('uy_msgs').select('*').or('chat.like.*'+id+'*,chat.eq.inbox,chat.eq.feed').order('ts',{ascending:false}).limit(700));return r.reverse()},
-  async upload(blob,ext){const p=me.id+'/'+rid()+'.'+ext;const r=await sb.storage.from('uy-media').upload(p,blob,{contentType:blob.type});if(r.error)throw r.error;return sb.storage.from('uy-media').getPublicUrl(p).data.publicUrl},
+  async upload(blob,ext){
+   if(!me||!me.id)throw Error('ยังไม่ได้เข้าสู่ระบบ กรุณาออกจากระบบแล้วเข้าใหม่');
+   const types={mp3:'audio/mpeg',m4a:'audio/mp4',wav:'audio/wav',ogg:'audio/ogg',aac:'audio/aac',webm:'audio/webm',jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png'};
+   const p=me.id+'/'+rid()+'.'+ext;
+   const contentType=blob.type||types[ext]||'application/octet-stream';
+   const r=await sb.storage.from('uy-media').upload(p,blob,{contentType,upsert:true});
+   if(r.error)throw Error('Supabase Storage: '+(r.error.message||r.error.error||'อัปโหลดไฟล์ไม่ได้')+(r.error.statusCode?' (HTTP '+r.error.statusCode+')':''));
+   const pub=sb.storage.from('uy-media').getPublicUrl(p);
+   if(!pub||!pub.data||!pub.data.publicUrl)throw Error('อัปโหลดแล้วแต่สร้างลิงก์ไฟล์ไม่สำเร็จ');
+   return pub.data.publicUrl
+  },
   async kvGet(k){const r=await sb.from('uy_kv').select('v').eq('k',k).maybeSingle();return r.data?r.data.v:null},
   async kvSet(k,v){ck(await sb.from('uy_kv').upsert({k,v}))}
  }
@@ -1038,17 +1048,24 @@ function edDraw(){
   '<button class="cta inline ghost" data-act="edadd">'+S.addNode+'</button><button class="cta inline" data-act="edsave">'+S.save+'</button>');
 }
 async function edFilePick(k,f){
- if(!f||!ME.agent||!ED||!ED.nodes[k])return;
+ if(!f)return;
+ if(!ME||!ME.agent){toast('ไม่มีสิทธิ์อัปโหลดไฟล์เสียง กรุณาเข้าสู่ระบบด้วยบัญชีแอดมิน');return}
+ if(!ED||!ED.nodes||!ED.nodes[k]){toast('ไม่พบรายการ IVR ที่ต้องการเพิ่มเสียง กรุณาปิดแล้วเปิดเมนู IVR ใหม่');return}
  edSync();
  if(f.size>10*1024*1024){toast('ไฟล์เสียงต้องมีขนาดไม่เกิน 10 MB');return}
- if(!/^audio\\//i.test(f.type)&&!/\\.(mp3|m4a|wav|ogg|aac|webm)$/i.test(f.name)){toast('กรุณาเลือกไฟล์เสียง MP3, M4A, WAV, OGG หรือ AAC');return}
+ const ext=(f.name.split('.').pop()||'').toLowerCase();
+ const allowed=['mp3','m4a','wav','ogg','aac','webm'];
+ if(!allowed.includes(ext)&&!String(f.type||'').toLowerCase().startsWith('audio/')){toast('ไฟล์นี้ไม่ใช่ไฟล์เสียงที่รองรับ กรุณาเลือก MP3, M4A, WAV, OGG, AAC หรือ WEBM');return}
  toast('กำลังอัปโหลดไฟล์เสียง…');
  try{
-  const ext=(f.name.split('.').pop()||'mp3').toLowerCase();
-  ED.nodes[k].audio=await T.upload(f,ext);
+  const url=await T.upload(f,allowed.includes(ext)?ext:'mp3');
+  ED.nodes[k].audio=url;
   edDraw();
-  toast('เพิ่มไฟล์เสียงแล้ว กด “บันทึก” เพื่อยืนยัน');
- }catch(e){toast(e.message||S.err)}
+  toast('อัปโหลดสำเร็จแล้ว กด “บันทึก” เพื่อบันทึกการตั้งค่า IVR');
+ }catch(e){
+  console.error('IVR audio upload failed:',e);
+  toast('อัปโหลดไม่สำเร็จ: '+(e&&e.message?e.message:'ตรวจสอบ Storage และสิทธิ์ Supabase'));
+ }
 }
 async function edRec(k){
  edSync();
