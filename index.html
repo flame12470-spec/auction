@@ -333,7 +333,8 @@ const av=(u,s,on)=>'<div class="av '+(s||'')+'" style="background:'+col(u.id)+'"
 const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2800)};
 const cid=(a,b)=>[a,b].sort().join('|');
 const MIC={audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}};
-const getMic=()=>navigator.mediaDevices.getUserMedia(MIC);
+const getMic=()=>{if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return Promise.reject(Object.assign(Error('insecure'),{name:'InsecureContext'}));return navigator.mediaDevices.getUserMedia(MIC)};
+const micMsg=e=>({InsecureContext:'ต้องเปิดเว็บผ่านลิงก์ https เพื่อใช้ไมโครโฟน',NotAllowedError:'ไมโครโฟนถูกบล็อก — อนุญาตไมโครโฟนให้เว็บนี้ในตั้งค่าเบราว์เซอร์ แล้วลองใหม่',NotFoundError:'ไม่พบไมโครโฟนในเครื่องนี้',NotReadableError:'ไมโครโฟนกำลังถูกใช้โดยแอปอื่น'}[e&&e.name]||S.noMic);
 const MS=localStorage;
 const page=()=>$('#page');
 
@@ -737,14 +738,13 @@ function dialGo(){
 const sig=(to,type,callId,x)=>T.emit('sig',Object.assign({to,from:ME.id,type,callId},x||{}));
 async function startCall(u){
  if(CALL)return toast(S.inCall);
- if(!ONL[u.id])return toast(S.offline);
  ac();CALL={id:rid(),dir:'out',pend:[],state:'calling',peer:u};
  callUI();                               // แสดงหน้าจอโทรทันที ก่อนขอไมค์
  await beginOut(u);
 }
 async function beginOut(u){
  const C=CALL;
- try{C.stream=C.stream||await getMic()}catch(e){return cleanup(S.noMic)}
+ try{C.stream=C.stream||await getMic()}catch(e){return cleanup(micMsg(e))}
  if(CALL!==C)return;
  C.peer=u;C.state='calling';C.invited=[u.id];C.pend=[];C.ivr=null;C.sub='';
  const inv=()=>sig(u.id,'invite',C.id,{name:ME.name,ext:ME.ext});
@@ -817,7 +817,7 @@ async function onSig(p){
 }
 async function answer(){
  const C=CALL;if(!C||C.state!=='ringing')return;stopRing();ac();
- let st;try{st=await getMic()}catch(e){sig(C.peer.id,'reject',C.id);return cleanup(S.noMic)}
+ let st;try{st=await getMic()}catch(e){sig(C.peer.id,'reject',C.id);return cleanup(micMsg(e))}
  if(CALL!==C){st.getTracks().forEach(t=>t.stop());return}
  C.stream=st;C.state='connecting';callUI();await mkPC();sig(C.peer.id,'accept',C.id);
  C.ra=setInterval(()=>{if(CALL===C&&C.state==='connecting'&&!C.gotOffer)sig(C.peer.id,'accept',C.id);else clearInterval(C.ra)},2000);
@@ -1014,7 +1014,7 @@ const A={
  chat(t){openChat(cid(ME.id,t.dataset.id))},
  back(){recEnd(false);OPEN=null;render()},
  callu(t){const u=getUser(t.dataset.id);if(u)startCall(u)},
- callx(t){const u=getUser(t.dataset.id);if(u)startCall(u);else toast(S.offline)},
+ callx(t){const u=getUser(t.dataset.id);if(u)startCall(u);else toast('ไม่พบผู้ใช้นี้')},
  ivr(){closeSheet();startIVR()},
  sendT:sendText,recStart,recCancel(){recEnd(false)},recSend(){recEnd(true)},
  zoom(t){const m=(MSGS[OPEN||'feed']||[]).find(x=>x.id===t.dataset.i);if(!m)return;const d=document.createElement('div');d.className='lb';d.innerHTML='<img src="'+esc(m.url)+'">';d.onclick=()=>d.remove();document.body.appendChild(d)},
