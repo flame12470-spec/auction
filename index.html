@@ -1034,8 +1034,21 @@ function edSync(){
 }
 function edDraw(){
  sheet('<h3>'+S.ivrSet+'</h3>'+Object.keys(ED.nodes).map(k=>{const n=ED.nodes[k];
-  return '<div class="ecard" data-k="'+k+'"><b>'+esc(NL[k]||S.extra)+'</b><textarea class="et">'+esc(n.text)+'</textarea><div class="erow"><button data-act="edrec" data-k="'+k+'">'+(ER&&ER.k===k?'⏹':'🎙')+' '+S.rec+'</button>'+(n.audio?'<button data-act="edplay" data-k="'+k+'">▶</button><button class="mini r" data-act="edclr" data-k="'+k+'">✕</button>':'')+(NL[k]?'':'<button class="mini r" data-act="eddel" data-k="'+k+'">'+S.del+'</button>')+'</div>'+(n.opts?optsHtml(k,n):'')+'</div>'}).join('')+
+  return '<div class="ecard" data-k="'+k+'"><b>'+esc(NL[k]||S.extra)+'</b><textarea class="et">'+esc(n.text)+'</textarea><div class="erow"><button data-act="edrec" data-k="'+k+'">'+(ER&&ER.k===k?'⏹':'🎙')+' '+S.rec+'</button><label class="btn p" for="ivrf_'+k+'">⬆ เลือกไฟล์เสียง</label><input type="file" id="ivrf_'+k+'" data-ivr-file="'+k+'" accept="audio/*,.mp3,.m4a,.wav,.ogg,.aac,.webm" hidden>'+(n.audio?'<button data-act="edplay" data-k="'+k+'">▶ ฟังเสียง</button><button class="mini r" data-act="edclr" data-k="'+k+'">✕ ลบเสียง</button>':'')+(NL[k]?'':'<button class="mini r" data-act="eddel" data-k="'+k+'">'+S.del+'</button>')+'</div>'+(n.audio?'<div class="sub" style="margin-top:6px;color:var(--green-dark)">✓ มีไฟล์เสียงแล้ว</div>':'<div class="sub" style="margin-top:6px">ยังไม่มีไฟล์เสียง · เลือกไฟล์เพื่อใช้แทนเสียงอ่านข้อความ</div>')+(n.opts?optsHtml(k,n):'')+'</div>'}).join('')+
   '<button class="cta inline ghost" data-act="edadd">'+S.addNode+'</button><button class="cta inline" data-act="edsave">'+S.save+'</button>');
+}
+async function edFilePick(k,f){
+ if(!f||!ME.agent||!ED||!ED.nodes[k])return;
+ edSync();
+ if(f.size>10*1024*1024){toast('ไฟล์เสียงต้องมีขนาดไม่เกิน 10 MB');return}
+ if(!/^audio\\//i.test(f.type)&&!/\\.(mp3|m4a|wav|ogg|aac|webm)$/i.test(f.name)){toast('กรุณาเลือกไฟล์เสียง MP3, M4A, WAV, OGG หรือ AAC');return}
+ toast('กำลังอัปโหลดไฟล์เสียง…');
+ try{
+  const ext=(f.name.split('.').pop()||'mp3').toLowerCase();
+  ED.nodes[k].audio=await T.upload(f,ext);
+  edDraw();
+  toast('เพิ่มไฟล์เสียงแล้ว กด “บันทึก” เพื่อยืนยัน');
+ }catch(e){toast(e.message||S.err)}
 }
 async function edRec(k){
  edSync();
@@ -1076,6 +1089,7 @@ document.addEventListener('click',e=>{
 document.addEventListener('change',async e=>{
  const t=e.target;
  if(t.id==='hf'){const f=t.files[0];t.value='';holdPick(f)}
+ if(t.dataset&&t.dataset.ivrFile){const k=t.dataset.ivrFile,f=t.files[0];t.value='';edFilePick(k,f)}
  if(t.id==='ff'){const f=t.files[0];t.value='';postImage(f)}
  if(t.id==='pf'){const f=t.files[0];t.value='';pickImage(f)}
  if(t.dataset&&t.dataset.act==='agentTg'){ME.agent=t.checked;MS.setItem('uy_me',JSON.stringify(pub(ME)));try{await T.upsertUser(pub(ME));T.track(pub(ME))}catch(x){toast(x.message)}if(ME.agent)refresh();render()}
