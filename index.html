@@ -204,6 +204,54 @@ bdi{unicode-bidi:isolate}
 @keyframes bnc{50%{transform:scale(1.12)}}
 .kp button{border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .kp.lt button{border-color:#e3ecc8;backdrop-filter:none}
+
+/* ===== responsive: มือถือ / ไอแพด / คอมพิวเตอร์ ===== */
+#app,#nav,.chatpage{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+#nav{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+@media(hover:hover){.item:hover,.tab:hover{background:rgba(182,245,26,.12)}.cta:hover,.btn:hover,.cb:hover,.icon-btn:hover{filter:brightness(1.05)}.item,.tab,.cta,.cb,.icon-btn{cursor:pointer}}
+@media(min-width:768px){
+  body{background:linear-gradient(135deg,#e6f3c8,#d3ecf2 60%,#e4dcf7);font-size:17px}
+  #app,#nav,.chatpage{max-width:860px}
+  #app{box-shadow:0 0 60px rgba(0,0,0,.12)}
+  #nav{border-radius:22px 22px 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.06)}
+  .topbar h1,.topbar .tt h1{font-size:28px}
+  .card,.list{margin-left:24px;margin-right:24px}
+  .search{margin-left:24px;width:calc(100% - 48px)}
+  .cta{width:calc(100% - 48px);margin-left:24px;margin-right:24px}
+  .cta.inline{width:100%;margin-left:0;margin-right:0}
+  .b{max-width:65%;font-size:16px}
+  #msgs{padding:16px 24px}
+  #comp{padding-left:20px;padding-right:20px}
+  .av{width:50px;height:50px}.av.s{width:44px;height:44px}
+  .auth-card{max-width:480px;padding:36px 32px}
+  .oi{max-width:460px}
+  .kp{grid-template-columns:repeat(3,80px);gap:14px}.kp button{height:62px}
+  /* ฟอร์ม/แป้นโทรเป็นหน้าต่างกลางจอ แทนแผ่นเลื่อนจากล่าง */
+  #sheet{bottom:auto;top:50%;max-width:520px;border-radius:28px;transform:translate(-50%,-44%);opacity:0;pointer-events:none;transition:transform .25s,opacity .25s;max-height:86vh;padding-bottom:24px}
+  #sheet.on{transform:translate(-50%,-50%);opacity:1;pointer-events:auto}
+  #toast{bottom:40px}
+}
+@media(min-width:1100px){
+  #app,#nav,.chatpage{max-width:980px}
+  .b{max-width:60%}
+}
+/* มือถือแนวนอน / จอเตี้ย */
+@media(max-height:560px){
+  .ov{padding-top:calc(16px + var(--sat));padding-bottom:calc(12px + var(--sab))}
+  .cav{width:72px;height:72px;font-size:30px;margin-bottom:6px}
+  .ov h2{font-size:20px}.extd{font-size:22px;min-height:30px}
+  .kp{grid-template-columns:repeat(6,52px);gap:8px;margin-top:8px}.kp button{height:44px;font-size:20px}
+  .cb{width:58px;height:58px}.cctl{padding-top:10px;gap:20px}
+  #sheet{max-height:94vh}
+  .dn{font-size:26px;min-height:36px}
+}
+@media(max-width:360px){.topbar h1{font-size:21px}.kp{grid-template-columns:repeat(3,64px)}}
+
+.fin{flex:1;min-width:0;padding:12px 18px;border-radius:99px;border:2px solid var(--line);background:#fff;outline:none}.fin:focus{border-color:var(--green)}
+.post .pbody{margin-top:10px;word-break:break-word}
+.post .pimg{margin-top:10px;width:100%;max-height:420px;object-fit:cover;border-radius:16px;cursor:zoom-in}
+.tab{font-size:12px}
+label.btn{cursor:pointer;display:inline-block}
 </style>
 </head>
 <body>
@@ -217,8 +265,8 @@ bdi{unicode-bidi:isolate}
 (()=>{
 'use strict';
 /* ============ ตั้งค่าฐานข้อมูล (Supabase โปรเจกต์เดียวกับเว็บห้อง) ============ */
-const CFG=Object.assign({SB_URL:'https://iejmwihipfvtkbvjtude.supabase.co',SB_KEY:'sb_publishable_PybXrP5brR32CHIw3nm8Lg_-SruBwlg',local:false},(()=>{try{return JSON.parse(localStorage.uy_cfg||'{}')}catch(e){return{}}})());
-const CLOUD=!!(CFG.SB_URL&&CFG.SB_KEY&&!CFG.local&&window.supabase);
+const CFG=Object.assign({SB_URL:'https://iejmwihipfvtkbvjtude.supabase.co',SB_KEY:'sb_publishable_PybXrP5brR32CHIw3nm8Lg_-SruBwlg'},{});
+const CLOUD=!!(CFG.SB_URL&&CFG.SB_KEY&&window.supabase);
 const OPERATOR_EXT='100';
 const UNS='__unsent__';
 const DONE=new Set();
@@ -230,7 +278,7 @@ const PHI='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15 15
 
 /* ============ ข้อความภาษาไทย ============ */
 const S={app:'คุยกัน',chats:'แชต',calls:'ประวัติ',people:'สมาชิก',set:'ตั้งค่า',dialTab:'โทร',
- name:'ชื่อของคุณ',login:'เข้าสู่ระบบ',loginTitle:'เข้าสู่ระบบ',admin:'แอดมิน',num:'หมายเลขของคุณ',enterNo:'กรอกหมายเลขของคุณก่อน',noNo:'ไม่พบหมายเลขนี้ในระบบ กรุณาติดต่อแอดมินเพื่อขอหมายเลข',unsent:'ข้อความนี้ถูกยกเลิกแล้ว',typing:'กำลังพิมพ์ตอบกลับ…',
+ name:'ชื่อของคุณ',login:'เข้าสู่ระบบ',loginTitle:'เข้าสู่ระบบ',admin:'แอดมิน',feed:'ฟีด',num:'หมายเลขของคุณ',enterNo:'กรอกหมายเลขของคุณก่อน',noNo:'ไม่พบหมายเลขนี้ในระบบ กรุณาติดต่อแอดมินเพื่อขอหมายเลข',unsent:'ข้อความนี้ถูกยกเลิกแล้ว',typing:'กำลังพิมพ์ตอบกลับ…',
  loginLead:'ใส่หมายเลขที่แอดมินมอบให้ แล้วกดเข้าสู่ระบบ',
  enterName:'กรอกชื่อของคุณก่อน',loginHint:'ยังไม่มีหมายเลข? ให้แอดมินเพิ่มชื่อของคุณเข้าระบบ ระบบจะสร้างหมายเลขให้อัตโนมัติ',
  yourNo:'เบอร์สั้นของคุณ',agent:'ฉันเป็นเจ้าหน้าที่ (รับสายที่โอนมาจากระบบอัตโนมัติ)',
@@ -242,9 +290,9 @@ const S={app:'คุยกัน',chats:'แชต',calls:'ประวัติ
  inbox:'กล่องข้อความเจ้าหน้าที่',noChats:'ยังไม่มีแชต เริ่มจากแท็บ “สมาชิก”',noCalls:'ยังไม่มีประวัติการโทร',noPeople:'ยังไม่มีสมาชิกคนอื่น ลองเปิดอีกแท็บแล้วเข้าสู่ระบบด้วยอีกชื่อ',
  ivrSet:'ตั้งค่าระบบตอบรับอัตโนมัติ (IVR)',save:'บันทึก',rec:'อัดเสียง',del:'ลบ',extra:'ข้อมูลเพิ่มเติม',addNode:'+ เพิ่มข้อความข้อมูล',addOpt:'+ เพิ่มปุ่มกด',
  logout:'ออกจากระบบ',search:'ค้นหา…',saved:'บันทึกแล้ว',missed:'ไม่ได้รับสาย',rejectedLog:'ปฏิเสธสาย',
- netTitle:'ฐานข้อมูล',netOn:'ออนไลน์ (Supabase) — ใช้ข้ามเครื่องได้',netOff:'โหมดทดลองในเครื่อง — ใช้ได้เฉพาะในเบราว์เซอร์นี้',
+ netTitle:'ฐานข้อมูล',netOn:'ออนไลน์ (Supabase) — ใช้ข้ามเครื่องได้',
  err:'ผิดพลาด',needTbl:'ฐานข้อมูลยังไม่มีตาราง — เปิด Supabase › SQL Editor แล้วรันไฟล์ schema.sql จากนั้นกดเข้าสู่ระบบใหม่',
- useLocal:'ใช้โหมดทดลองในเครื่องก่อน',useCloud:'กลับไปใช้ฐานข้อมูลออนไลน์',
+ 
  optAgent:'โอนหาเจ้าหน้าที่',optExt:'ต่อเบอร์สั้น',optVm:'ฝากข้อความเสียง',optHang:'วางสาย',optRep:'ฟังซ้ำ'};
 const NL={root:'คำทักทายและเมนูหลัก',info:'ข้อมูลทั่วไป',hours:'เวลาทำการ',agent:'กำลังโอนสายเจ้าหน้าที่',noagent:'ไม่มีเจ้าหน้าที่',extp:'ขอเบอร์สั้น',vmp:'ฝากข้อความเสียง',thx:'ขอบคุณ/ลาก่อน',bad:'เบอร์ไม่ถูกต้อง'};
 const defIVR=()=>({nodes:{
@@ -275,7 +323,7 @@ const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('on');clearT
 const cid=(a,b)=>[a,b].sort().join('|');
 const MIC={audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}};
 const getMic=()=>navigator.mediaDevices.getUserMedia(MIC);
-const MS=CLOUD?localStorage:sessionStorage;
+const MS=localStorage;
 const page=()=>$('#page');
 
 /* ============ เสียงเรียกเข้า / DTMF ============ */
@@ -289,24 +337,6 @@ function stopRing(){clearInterval(ringT);ringT=null;if(navigator.vibrate)navigat
 function notifyB(t,b){try{if(document.hidden&&window.Notification&&Notification.permission==='granted')new Notification(t,{body:b})}catch(e){}}
 
 /* ============ Transport: ในเครื่อง (BroadcastChannel) / Supabase ============ */
-function LocalT(){
- const bc=new BroadcastChannel('uy-app'),h={},pres={};let me=null,pcb=()=>{};
- const calc=()=>{const o={},n=Date.now();for(const k in pres)if(n-pres[k].ts<9000)o[k]=pres[k];pcb(o)};
- bc.onmessage=e=>{const d=e.data||{},p=d.p;if(d.ev==='_hi'){pres[p.id]=Object.assign({},p,{ts:Date.now()});calc()}else if(d.ev==='_bye'){delete pres[p.id];calc()}else(h[d.ev]||[]).forEach(f=>f(p))};
- return{
-  async init(m){me=m;const hi=()=>bc.postMessage({ev:'_hi',p:me});hi();setInterval(hi,3000);setInterval(calc,3000);addEventListener('beforeunload',()=>bc.postMessage({ev:'_bye',p:{id:me.id}}))},
-  track(m){me=m;bc.postMessage({ev:'_hi',p:me})},
-  emit(ev,p){bc.postMessage({ev,p})},on(ev,f){(h[ev]=h[ev]||[]).push(f)},onPresence(f){pcb=f},
-  async upsertUser(u){const a=LS('uy_users',{});for(const k in a)if(k!==u.id&&a[k].ext===u.ext)throw Error('dup');a[u.id]=u;SV('uy_users',a)},
-  async users(){return Object.values(LS('uy_users',{}))},
-  async saveMsg(m){const a=LS('uy_msgs',[]);a.push(m);if(!SV('uy_msgs',a)){a.splice(0,Math.ceil(a.length/3));SV('uy_msgs',a)}},
-  async unsendMsg(id){const a=LS('uy_msgs',[]);a.forEach(m=>{if(m.id===id){m.kind='text';m.body=UNS;m.url=''}});SV('uy_msgs',a)},
-  async delUser(id){const a=LS('uy_users',{});delete a[id];SV('uy_users',a)},
-  async recent(id){return LS('uy_msgs',[]).filter(m=>m.chat==='inbox'||m.chat.split('|').includes(id))},
-  upload(blob){return new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.readAsDataURL(blob)})},
-  async kvGet(k){return LS('uy_kv_'+k,null)},async kvSet(k,v){SV('uy_kv_'+k,v)}
- }
-}
 function CloudT(){
  const sb=supabase.createClient(CFG.SB_URL,CFG.SB_KEY,{realtime:{params:{eventsPerSecond:40}}}),h={};let ch,pcb=()=>{},me;
  const ck=r=>{if(r.error){const m=r.error.message||'';throw Error(r.error.code==='23505'?'dup':(r.error.code==='PGRST205'||r.error.code==='42P01'||/relation|does not exist|schema cache|Could not find the table/i.test(m)?'tbl':m))}return r.data};
@@ -322,7 +352,7 @@ function CloudT(){
   async saveMsg(m){ck(await sb.from('uy_msgs').insert(m))},
   async unsendMsg(id){const r=ck(await sb.from('uy_msgs').update({kind:'text',body:UNS,url:''}).eq('id',id).select());if(!r||!r.length)throw Error('ยกเลิกข้อความไม่ได้ — ต้องเปิดสิทธิ์ update ของตาราง uy_msgs ใน Supabase')},
   async delUser(id){const r=ck(await sb.from('uy_users').delete().eq('id',id).select());if(!r||!r.length)throw Error('ลบผู้ใช้ไม่ได้ — ต้องเปิดสิทธิ์ delete ของตาราง uy_users ใน Supabase')},
-  async recent(id){const r=ck(await sb.from('uy_msgs').select('*').or('chat.like.*'+id+'*,chat.eq.inbox').order('ts',{ascending:false}).limit(400));return r.reverse()},
+  async recent(id){const r=ck(await sb.from('uy_msgs').select('*').or('chat.like.*'+id+'*,chat.eq.inbox,chat.eq.feed').order('ts',{ascending:false}).limit(700));return r.reverse()},
   async upload(blob,ext){const p=me.id+'/'+rid()+'.'+ext;const r=await sb.storage.from('uy-media').upload(p,blob,{contentType:blob.type});if(r.error)throw r.error;return sb.storage.from('uy-media').getPublicUrl(p).data.publicUrl},
   async kvGet(k){const r=await sb.from('uy_kv').select('v').eq('k',k).maybeSingle();return r.data?r.data.v:null},
   async kvSet(k,v){ck(await sb.from('uy_kv').upsert({k,v}))}
@@ -338,7 +368,7 @@ const allUsers=()=>{const o=Object.assign({},USERS);for(const k in ONL)o[k]=Obje
 const pub=u=>({id:u.id,name:u.name,ext:u.ext,agent:!!u.agent});
 
 /* ============ เริ่มต้น / สมัคร-เข้าสู่ระบบ ============ */
-function mkT(){try{return CLOUD?CloudT():LocalT()}catch(e){return LocalT()}}
+function mkT(){try{if(CLOUD)return CloudT()}catch(e){}return{users:async()=>{throw Error('เชื่อมต่อฐานข้อมูลไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วรีเฟรชหน้า')},init:async()=>{throw Error('offline')},on(){},track(){},emit(){},onPresence(){}}}
 async function boot(){
  T=mkT();
  const me=(()=>{try{return JSON.parse(MS.getItem('uy_me')||'null')}catch(e){return null}})();
@@ -351,8 +381,7 @@ async function loginView(msg){
  '<div class="fld"><label for="ln">'+S.num+'</label><input type="tel" inputmode="numeric" id="ln" autocomplete="off" maxlength="8" placeholder="เช่น 1234"></div>'+
  '<button class="cta inline" id="lb" data-act="login">'+S.login+'</button>'+
  (msg?'<p class="hint err">'+msg+'</p>':'')+
- (msg&&msg===S.needTbl?'<button class="cta inline ghost" data-act="useLocal">'+S.useLocal+'</button>':'')+
- '<div id="setup"></div><p class="hint">'+S.loginHint+'<br>'+(CLOUD?S.netOn:S.netOff)+'</p></div></div>';
+  '<div id="setup"></div><p class="hint">'+S.loginHint+'<br>'+S.netOn+'</p></div></div>';
  const i=$('#ln');i&&i.focus();
  try{const us=await T.users();const el=$('#setup');
   if(el&&!us.some(u=>u.agent))el.innerHTML='<div class="fld" style="margin-top:18px;border-top:1px dashed var(--line);padding-top:6px"><label for="sn">ยังไม่มีแอดมินในระบบ — ตั้งแอดมินคนแรก</label><input type="text" id="sn" maxlength="40" placeholder="ชื่อแอดมิน"></div><button class="cta inline ghost" data-act="setup">สร้างแอดมินคนแรก (ระบบสร้างหมายเลขให้อัตโนมัติ)</button>'}catch(e){}
@@ -435,8 +464,9 @@ async function sendMsg(chat,kind,f){
  T.emit('msg',m);
 }
 function onMsg(m){
- const rel=m.chat==='inbox'?ME.agent:m.chat.split('|').includes(ME.id);if(!rel||m.sender===ME.id)return;
+ const rel=m.chat==='feed'||(m.chat==='inbox'?ME.agent:m.chat.split('|').includes(ME.id));if(!rel||m.sender===ME.id)return;
  if(!addMsg(m))return;
+ if(m.chat==='feed'){tone([660],.06,.04);render();return}
  delete TYP[m.chat];
  if(!USERS[m.sender])refreshUsers();
  if(OPEN===m.chat&&!document.hidden){READ[m.chat]=m.ts;SV('uy_read',READ)}
@@ -479,13 +509,14 @@ const NAVIC={
  calls:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
  set:'<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>'
 };
+const NAVFEED='<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 10h16M9 10v10"/>';
 const NAVAD='<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>';
 function drawNav(){
- const tot=Object.keys(MSGS).reduce((s,c)=>s+unread(c),0);
- const t=(k,l)=>'<button class="tab'+(VIEW===k?' on':'')+'" data-act="tab" data-v="'+k+'"><svg viewBox="0 0 24 24">'+(k==='admin'?NAVAD:NAVIC[k])+'</svg>'+l+(k==='chats'&&tot?'<span class="tb">'+tot+'</span>':'')+'</button>';
- $('#nav').innerHTML=t('chats',S.chats)+t('people',S.people)+t('calls',S.calls)+(ME.agent?t('admin',S.admin):'')+t('set',S.set);
+ const tot=Object.keys(MSGS).filter(c=>c!=='feed').reduce((s,c)=>s+unread(c),0);
+ const t=(k,l)=>'<button class="tab'+(VIEW===k?' on':'')+'" data-act="tab" data-v="'+k+'"><svg viewBox="0 0 24 24">'+(k==='admin'?NAVAD:k==='feed'?NAVFEED:NAVIC[k])+'</svg>'+l+(k==='chats'&&tot?'<span class="tb">'+tot+'</span>':'')+'</button>';
+ $('#nav').innerHTML=t('chats',S.chats)+t('feed',S.feed)+t('people',S.people)+t('calls',S.calls)+(ME.agent?t('admin',S.admin):'')+t('set',S.set);
 }
-const topbar=t=>'<div class="topbar"><div class="tt"><h1><span class="brand-dot"></span>'+t+'</h1><div class="clk" data-clock></div></div><button class="icon-btn callbtn" data-act="dialer" aria-label="โทร">'+PHI+'</button></div>';
+const topbar=t=>'<div class="topbar"><div class="tt"><h1><span class="brand-dot"></span>'+t+'</h1><div class="clk" data-clock></div></div></div>';
 const clk=()=>{const d=new Date();return d.toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'})+' · '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds())};
 function tickClock(){const t=clk();document.querySelectorAll('[data-clock]').forEach(e=>e.textContent=t)}
 function render(){
@@ -496,17 +527,62 @@ function render(){
  if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)&&page().contains(a))return;
  if(VIEW==='admin'&&!ME.agent)VIEW='chats';
  const y=window.scrollY;
- const V={chats:vChats,people:vPeople,calls:vCalls,set:vSet,admin:vAdmin}[VIEW]();
+ const V={chats:vChats,feed:vFeed,people:vPeople,calls:vCalls,set:vSet,admin:vAdmin}[VIEW]();
  page().className='';
- page().innerHTML=topbar({chats:S.app,people:S.people,calls:S.calls,set:S.set,admin:S.admin}[VIEW])+V;
+ page().innerHTML=topbar({chats:S.app,feed:S.feed,people:S.people,calls:S.calls,set:S.set,admin:S.admin}[VIEW])+V;
  $('#nav').classList.remove('hide');drawNav();tickClock();window.scrollTo(0,y);
 }
 function vChats(){
- const ids=Object.keys(MSGS).filter(c=>MSGS[c].length&&(c!=='inbox'||ME.agent)).sort((a,b)=>MSGS[b][MSGS[b].length-1].ts-MSGS[a][MSGS[a].length-1].ts);
- if(!ids.length)return '<div class="card empty">'+S.noChats+'</div>';
- return '<div class="list">'+ids.map(c=>{
+ const ids=Object.keys(MSGS).filter(c=>c!=='feed'&&MSGS[c].length&&(c!=='inbox'||ME.agent)).sort((a,b)=>MSGS[b][MSGS[b].length-1].ts-MSGS[a][MSGS[a].length-1].ts);
+ const dial='<div class="list"><button class="item" data-act="dialer"><div class="rb call">📞</div><div class="nm"><b>โทรด้วยหมายเลข</b><small>แป้นโทร · โทรระบบตอบรับอัตโนมัติ 100</small></div></button></div>';
+ if(!ids.length)return dial+'<div class="card empty">'+S.noChats+'</div>';
+ return dial+'<div class="list">'+ids.map(c=>{
   const l=MSGS[c][MSGS[c].length-1],inbox=c==='inbox',pid=inbox?null:c.split('|').find(x=>x!==ME.id),u=inbox?{id:'inbox',name:S.inbox}:(getUser(pid)||{id:pid,name:'?'}),n=unread(c);
-  return '<button class="item" data-act="open" data-c="'+esc(c)+'">'+av(u,'',pid&&ONL[pid])+'<div class="nm"><b>'+esc(u.name)+'</b><small>'+(l.sender===ME.id&&l.body!==UNS?'✓ ':'')+esc(prev(l))+'</small></div><div class="end"><span>'+hhmm(l.ts)+'</span>'+(n?'<span class="badge">'+n+'</span>':'')+'</div></button>'}).join('')+'</div>';
+  return '<div class="item" role="button" tabindex="0" data-act="open" data-c="'+esc(c)+'">'+av(u,'',pid&&ONL[pid])+'<div class="nm"><b>'+esc(u.name)+'</b><small>'+(l.sender===ME.id&&l.body!==UNS?'✓ ':'')+esc(prev(l))+'</small></div><div class="end"><span>'+hhmm(l.ts)+'</span>'+(n?'<span class="badge">'+n+'</span>':'')+'</div>'+(pid&&ONL[pid]?'<button class="rb call" data-act="callu" data-id="'+esc(pid)+'" aria-label="โทร">📞</button>':'')+'</div>'}).join('')+'</div>';
+}
+function feedData(){
+ const likes={},posts=[];
+ (MSGS.feed||[]).forEach(m=>{
+  const b=m.body||'';
+  if(b.startsWith('__like__|')){const id=b.slice(9);(likes[id]=likes[id]||{})[m.sender]=1}
+  else if(b.startsWith('__unlike__|')){const id=b.slice(11);(likes[id]=likes[id]||{})[m.sender]=0}
+  else if(!isUns(m))posts.push(m);
+ });
+ return{likes,posts:posts.reverse()};
+}
+const fdate=t=>{const d=new Date(t),n=new Date();return d.toDateString()===n.toDateString()?hhmm(t):d.toLocaleDateString('th-TH',{day:'numeric',month:'short'})+' '+hhmm(t)};
+function vFeed(){
+ const F=feedData();
+ const comp='<div class="card"><div style="display:flex;gap:10px;align-items:center">'+av(ME,'s')+'<input type="text" id="fi" class="fin" maxlength="500" placeholder="คุณคิดอะไรอยู่…" autocomplete="off"></div>'+
+  '<div style="display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:10px"><label class="btn" for="ff">📷 รูปภาพ</label><input type="file" id="ff" accept="image/*" hidden><button class="btn p" data-act="postT">โพสต์</button></div></div>';
+ if(!F.posts.length)return comp+'<div class="card empty">ยังไม่มีโพสต์ — เป็นคนแรกที่โพสต์เลย</div>';
+ return comp+F.posts.map(m=>{
+  const u=getUser(m.sender)||{id:m.sender,name:'?'},lk=F.likes[m.id]||{},n=Object.values(lk).reduce((a,b)=>a+b,0),me=!!lk[ME.id];
+  return '<div class="card post"><div style="display:flex;gap:10px;align-items:center">'+av(u,'s',ONL[u.id])+'<div style="flex:1;min-width:0"><b>'+esc(u.name)+(u.agent?'<span class="tag">แอดมิน</span>':'')+'</b><div class="sub">'+fdate(m.ts)+'</div></div>'+
+   ((m.sender===ME.id||ME.agent)?'<button class="mini r" data-act="postdel" data-id="'+esc(m.id)+'">'+S.del+'</button>':'')+'</div>'+
+   (m.kind==='image'&&m.url?'<img class="pimg" src="'+esc(m.url)+'" data-act="zoom" data-i="'+esc(m.id)+'" alt="'+S.photo+'">':'')+
+   (m.body?'<p class="pbody">'+esc(m.body).replace(/\n/g,'<br>')+'</p>':'')+
+   '<div style="margin-top:10px"><button class="btn sm'+(me?' p':'')+'" data-act="like" data-id="'+esc(m.id)+'">👍 ถูกใจ'+(n?' · '+n:'')+'</button></div></div>';
+ }).join('');
+}
+async function postText(){
+ const i=$('#fi'),t=((i&&i.value)||'').trim();if(!t)return toast('พิมพ์ข้อความก่อนโพสต์');
+ i.value='';i.blur();await sendMsg('feed','text',{body:t});
+}
+async function postImage(f){
+ if(!f)return;const i=$('#fi'),cap=((i&&i.value)||'').trim();
+ try{const b=await shrink(f);const url=await T.upload(b,'jpg');if(i){i.value='';i.blur()}await sendMsg('feed','image',{url,body:cap})}catch(e){toast(S.err)}
+}
+function likePost(t){
+ const id=t.dataset.id,cur=((feedData().likes[id]||{})[ME.id])===1;
+ sendMsg('feed','text',{body:(cur?'__unlike__|':'__like__|')+id});
+}
+async function delPost(t){
+ const id=t.dataset.id,m=(MSGS.feed||[]).find(x=>x.id===id);if(!m)return;
+ if(m.sender!==ME.id&&!ME.agent)return;
+ if(!confirm('ลบโพสต์นี้?'))return;
+ try{await T.unsendMsg(id)}catch(e){return toast(e.message==='tbl'?S.needTbl:e.message)}
+ applyUns(m);T.emit('unsend',{id,chat:'feed',from:ME.id});render();
 }
 function vPeople(){
  const us=Object.values(allUsers()).filter(u=>u.id!==ME.id&&u.name).sort((a,b)=>(!!ONL[b.id])-(!!ONL[a.id])||String(a.name).localeCompare(b.name));
@@ -523,8 +599,7 @@ function vCalls(){
 }
 function vSet(){
  return '<div class="card" style="display:flex;gap:14px;align-items:center">'+av(ME)+'<div style="flex:1;min-width:0"><b>'+esc(ME.name)+(ME.agent?'<span class="tag">แอดมิน</span>':'')+'</b><div class="sub">'+S.yourNo+': <b style="color:var(--green-dark);font-size:18px"><bdi>'+esc(ME.ext)+'</bdi></b></div></div></div>'+
- '<div class="card"><div class="sub"><b>'+S.netTitle+'</b><br>'+(CLOUD?S.netOn:S.netOff)+'</div></div>'+
- (CLOUD?'<button class="cta ghost" data-act="useLocal">'+S.useLocal+'</button>':(CFG.local?'<button class="cta ghost" data-act="useCloud">'+S.useCloud+'</button>':''))+
+ '<div class="card"><div class="sub"><b>'+S.netTitle+'</b><br>'+S.netOn+'</div></div>'+
  '<button class="cta danger" data-act="logout">'+S.logout+'</button>';
 }
 function vAdmin(){
@@ -919,9 +994,7 @@ async function edRec(k){
 /* ============ เหตุการณ์ ============ */
 const A={
  login,
- useLocal(){CFG.local=true;SV('uy_cfg',{local:true});location.reload()},
- useCloud(){try{localStorage.removeItem('uy_cfg')}catch(e){}location.reload()},
- tab(t){VIEW=t.dataset.v;window.scrollTo(0,0);render()},
+  tab(t){VIEW=t.dataset.v;window.scrollTo(0,0);render()},
  open(t){openChat(t.dataset.c)},
  chat(t){openChat(cid(ME.id,t.dataset.id))},
  back(){recEnd(false);OPEN=null;render()},
@@ -929,10 +1002,10 @@ const A={
  callx(t){const u=getUser(t.dataset.id);if(u)startCall(u);else toast(S.offline)},
  ivr(){closeSheet();startIVR()},
  sendT:sendText,recStart,recCancel(){recEnd(false)},recSend(){recEnd(true)},
- zoom(t){const m=(MSGS[OPEN]||[]).find(x=>x.id===t.dataset.i);if(!m)return;const d=document.createElement('div');d.className='lb';d.innerHTML='<img src="'+esc(m.url)+'">';d.onclick=()=>d.remove();document.body.appendChild(d)},
+ zoom(t){const m=(MSGS[OPEN||'feed']||[]).find(x=>x.id===t.dataset.i);if(!m)return;const d=document.createElement('div');d.className='lb';d.innerHTML='<img src="'+esc(m.url)+'">';d.onclick=()=>d.remove();document.body.appendChild(d)},
  answer,decline,hang,mute,dg(t){dig(t.dataset.d)},
  dialer,dk(t){if(DIAL.length<8){DIAL+=t.dataset.d;$('#dn').textContent=DIAL;tone(DT[t.dataset.d],.1,.08)}},dbs(){DIAL=DIAL.slice(0,-1);$('#dn').innerHTML=DIAL||'&nbsp;'},dgo:dialGo,
- closeSheet,adminAdd,adminDel,adminTg,msgmenu,unsend,setup:setupAdmin,
+ closeSheet,postT:postText,like:likePost,postdel:delPost,adminAdd,adminDel,adminTg,msgmenu,unsend,setup:setupAdmin,
  async logout(){if(CALL)hang();MS.removeItem('uy_me');location.reload()},
  ivrEd(){ED=JSON.parse(JSON.stringify(IVRC));T.kvGet('ivr').then(v=>{if(v){ED=JSON.parse(JSON.stringify(v));IVRC=v;edDraw()}}).catch(()=>{});edDraw()},
  edrec(t){edRec(t.dataset.k)},
@@ -950,6 +1023,7 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('change',async e=>{
  const t=e.target;
+ if(t.id==='ff'){const f=t.files[0];t.value='';postImage(f)}
  if(t.id==='pf'){const f=t.files[0];t.value='';pickImage(f)}
  if(t.dataset&&t.dataset.act==='agentTg'){ME.agent=t.checked;MS.setItem('uy_me',JSON.stringify(pub(ME)));try{await T.upsertUser(pub(ME));T.track(pub(ME))}catch(x){toast(x.message)}if(ME.agent)refresh();render()}
 });
@@ -959,6 +1033,8 @@ document.addEventListener('input',e=>{
  if(t.id==='ps'){const q=t.value.toLowerCase();document.querySelectorAll('#pl .item').forEach(r=>r.style.display=r.dataset.nm.includes(q)?'':'none')}
 });
 document.addEventListener('keydown',e=>{
+ if(e.key==='Enter'&&e.target.id==='fi'){e.preventDefault();postText()}
+ if(e.key==='Enter'&&e.target.dataset&&e.target.dataset.act==='open'){e.target.click()}
  if(e.key==='Enter'&&e.target.id==='mi'){e.preventDefault();sendText()}
  if(e.key==='Enter'&&e.target.id==='ln'){e.preventDefault();login()}
  if(e.key==='Escape')closeSheet();
