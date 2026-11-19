@@ -252,6 +252,17 @@ bdi{unicode-bidi:isolate}
 .post .pimg{margin-top:10px;width:100%;max-height:420px;object-fit:cover;border-radius:16px;cursor:zoom-in}
 .tab{font-size:12px}
 label.btn{cursor:pointer;display:inline-block}
+
+.post{background:#fff;margin:10px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.post .ph{display:flex;gap:10px;align-items:center;padding:10px 14px}
+.post .pimg{width:100%;max-height:560px;object-fit:cover;display:block;cursor:zoom-in}
+.post .ptxt{padding:8px 16px 4px;font-size:18px;line-height:1.6;word-break:break-word}
+.post .pact{display:flex;gap:12px;align-items:center;padding:8px 14px 2px}
+.post .hb{font-size:26px;line-height:1;background:none;transition:transform .15s}.post .hb:active{transform:scale(1.3)}
+.post .pcap{padding:2px 14px 14px;word-break:break-word}
+.cbtn{position:relative}.cbtn svg{width:24px;height:24px}
+.cbadge{position:absolute;top:-6px;right:-6px;background:#ff5a36;color:#fff;border-radius:99px;font-size:11px;min-width:18px;padding:0 5px;line-height:18px;text-align:center}
+@media(min-width:768px){.post{margin:12px 24px;border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:var(--shadow)}}
 </style>
 </head>
 <body>
@@ -433,7 +444,7 @@ async function enter(me,silent){
  T.on('msg',onMsg);T.on('sig',onSig);T.on('typing',onTyping);T.on('unsend',onUnsend);T.on('kick',onKick);
  T.onPresence(o=>{ONL=o;const k=Object.values(o).map(x=>x.id+'|'+x.name+'|'+!!x.agent).sort().join();if(k!==lastPres){lastPres=k;render()}});
  await refresh();setInterval(refreshUsers,15000);
- $('#nav').classList.remove('hide');VIEW='chats';render();
+ $('#nav').classList.remove('hide');VIEW='feed';render();
  return true;
 }
 function forceOut(){try{if(CALL)hang()}catch(e){};MS.removeItem('uy_me');try{alert('บัญชีของคุณถูกลบออกจากระบบแล้ว')}catch(e){};location.reload()}
@@ -444,7 +455,7 @@ async function refreshUsers(){
   if(us.length&&!us.some(u=>u.id===ME.id))return forceOut();
   USERS={};us.forEach(u=>USERS[u.id]=u);
   const m=USERS[ME.id];
-  if(m&&!!m.agent!==!!ME.agent){ME.agent=!!m.agent;MS.setItem('uy_me',JSON.stringify(pub(ME)));T.track(pub(ME));if(ME.agent)refresh();else if(VIEW==='admin')VIEW='chats'}
+  if(m&&!!m.agent!==!!ME.agent){ME.agent=!!m.agent;MS.setItem('uy_me',JSON.stringify(pub(ME)));T.track(pub(ME));if(ME.agent)refresh();else if(VIEW==='admin')VIEW='feed'}
   const k=JSON.stringify(us.map(u=>[u.id,u.name,u.ext,!!u.agent]).sort());
   if(k!==lastUsers){lastUsers=k;render()}
  }catch(e){}
@@ -514,7 +525,7 @@ const NAVAD='<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 1
 function drawNav(){
  const tot=Object.keys(MSGS).filter(c=>c!=='feed').reduce((s,c)=>s+unread(c),0);
  const t=(k,l)=>'<button class="tab'+(VIEW===k?' on':'')+'" data-act="tab" data-v="'+k+'"><svg viewBox="0 0 24 24">'+(k==='admin'?NAVAD:k==='feed'?NAVFEED:NAVIC[k])+'</svg>'+l+(k==='chats'&&tot?'<span class="tb">'+tot+'</span>':'')+'</button>';
- $('#nav').innerHTML=t('chats',S.chats)+t('feed',S.feed)+t('people',S.people)+t('calls',S.calls)+(ME.agent?t('admin',S.admin):'')+t('set',S.set);
+ $('#nav').innerHTML=t('feed',S.feed)+t('chats',S.chats)+t('people',S.people)+t('calls',S.calls)+(ME.agent?t('admin',S.admin):'')+t('set',S.set);
 }
 const topbar=t=>'<div class="topbar"><div class="tt"><h1><span class="brand-dot"></span>'+t+'</h1><div class="clk" data-clock></div></div></div>';
 const clk=()=>{const d=new Date();return d.toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'})+' · '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds())};
@@ -525,11 +536,14 @@ function render(){
  if(OPEN){chatHead();chatMsgs();return}
  const a=document.activeElement;
  if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)&&page().contains(a))return;
- if(VIEW==='admin'&&!ME.agent)VIEW='chats';
+ if(VIEW==='admin'&&!ME.agent)VIEW='feed';
  const y=window.scrollY;
  const V={chats:vChats,feed:vFeed,people:vPeople,calls:vCalls,set:vSet,admin:vAdmin}[VIEW]();
  page().className='';
- page().innerHTML=topbar({chats:S.app,feed:S.feed,people:S.people,calls:S.calls,set:S.set,admin:S.admin}[VIEW])+V;
+ let tb=topbar({chats:S.chats,feed:S.app,people:S.people,calls:S.calls,set:S.set,admin:S.admin}[VIEW]);
+ if(VIEW==='feed'){const tot=Object.keys(MSGS).filter(c=>c!=='feed').reduce((a,c)=>a+unread(c),0);
+  tb=tb.replace(/<\/div><\/div>$/,'</div><button class="icon-btn callbtn cbtn" data-act="tab" data-v="chats" aria-label="แชต"><svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round">'+NAVIC.chats+'</svg>'+(tot?'<span class="cbadge">'+tot+'</span>':'')+'</button></div>')}
+ page().innerHTML=tb+V;
  $('#nav').classList.remove('hide');drawNav();tickClock();window.scrollTo(0,y);
 }
 function vChats(){
@@ -553,16 +567,16 @@ function feedData(){
 const fdate=t=>{const d=new Date(t),n=new Date();return d.toDateString()===n.toDateString()?hhmm(t):d.toLocaleDateString('th-TH',{day:'numeric',month:'short'})+' '+hhmm(t)};
 function vFeed(){
  const F=feedData();
- const comp='<div class="card"><div style="display:flex;gap:10px;align-items:center">'+av(ME,'s')+'<input type="text" id="fi" class="fin" maxlength="500" placeholder="คุณคิดอะไรอยู่…" autocomplete="off"></div>'+
+ const comp='<div class="card"><div style="display:flex;gap:10px;align-items:center">'+av(ME,'s')+'<input type="text" id="fi" class="fin" maxlength="500" placeholder="แชร์อะไรสักหน่อย…" autocomplete="off"></div>'+
   '<div style="display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:10px"><label class="btn" for="ff">📷 รูปภาพ</label><input type="file" id="ff" accept="image/*" hidden><button class="btn p" data-act="postT">โพสต์</button></div></div>';
  if(!F.posts.length)return comp+'<div class="card empty">ยังไม่มีโพสต์ — เป็นคนแรกที่โพสต์เลย</div>';
  return comp+F.posts.map(m=>{
-  const u=getUser(m.sender)||{id:m.sender,name:'?'},lk=F.likes[m.id]||{},n=Object.values(lk).reduce((a,b)=>a+b,0),me=!!lk[ME.id];
-  return '<div class="card post"><div style="display:flex;gap:10px;align-items:center">'+av(u,'s',ONL[u.id])+'<div style="flex:1;min-width:0"><b>'+esc(u.name)+(u.agent?'<span class="tag">แอดมิน</span>':'')+'</b><div class="sub">'+fdate(m.ts)+'</div></div>'+
+  const u=getUser(m.sender)||{id:m.sender,name:'?'},lk=F.likes[m.id]||{},n=Object.values(lk).reduce((a,b)=>a+b,0),me=!!lk[ME.id],img=m.kind==='image'&&m.url;
+  return '<article class="post"><div class="ph">'+av(u,'s',ONL[u.id])+'<div style="flex:1;min-width:0"><b>'+esc(u.name)+(u.agent?'<span class="tag">แอดมิน</span>':'')+'</b><div class="sub">'+fdate(m.ts)+'</div></div>'+
    ((m.sender===ME.id||ME.agent)?'<button class="mini r" data-act="postdel" data-id="'+esc(m.id)+'">'+S.del+'</button>':'')+'</div>'+
-   (m.kind==='image'&&m.url?'<img class="pimg" src="'+esc(m.url)+'" data-act="zoom" data-i="'+esc(m.id)+'" alt="'+S.photo+'">':'')+
-   (m.body?'<p class="pbody">'+esc(m.body).replace(/\n/g,'<br>')+'</p>':'')+
-   '<div style="margin-top:10px"><button class="btn sm'+(me?' p':'')+'" data-act="like" data-id="'+esc(m.id)+'">👍 ถูกใจ'+(n?' · '+n:'')+'</button></div></div>';
+   (img?'<img class="pimg" src="'+esc(m.url)+'" data-act="zoom" data-i="'+esc(m.id)+'" alt="'+S.photo+'">':(m.body?'<div class="ptxt">'+esc(m.body).replace(/\n/g,'<br>')+'</div>':''))+
+   '<div class="pact"><button class="hb" data-act="like" data-id="'+esc(m.id)+'" aria-label="ถูกใจ">'+(me?'❤️':'🤍')+'</button><span class="sub">'+(n?'ถูกใจ '+n+' คน':'ยังไม่มีคนถูกใจ')+'</span></div>'+
+   (img&&m.body?'<div class="pcap"><b>'+esc(u.name)+'</b> '+esc(m.body).replace(/\n/g,'<br>')+'</div>':'<div style="height:12px"></div>')+'</article>';
  }).join('');
 }
 async function postText(){
