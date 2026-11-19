@@ -1,133 +1,203 @@
 <!doctype html>
-<html lang="th" dir="ltr">
+<html lang="th">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0f766e">
-<title>คุยกัน</title>
+<meta name="theme-color" content="#b6f51a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<title>คุยกัน – แชต โทร และระบบตอบรับอัตโนมัติ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--p:#0f766e;--p2:#14b8a6;--bg:#f1f5f4;--ink:#10201e;--mu:#6b7f7c;--ln:#dfe8e6;--red:#dc2626;--grn:#16a34a;--sab:env(safe-area-inset-bottom,0px);--sat:env(safe-area-inset-top,0px)}
+:root{
+  --lime:#b6f51a;--lime-soft:#e8fca0;--green:#6fa300;--green-dark:#3f6200;
+  --bg:#f7f7f7;--card:#fff;--text:#222;--muted:#777;--line:#e6e6e6;
+  --shadow:0 4px 16px rgba(0,0,0,.06);--radius:20px;
+  --red:#ffe1e1;--redInk:#b3261e;--sab:env(safe-area-inset-bottom,0px);--sat:env(safe-area-inset-top,0px);
+}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%}
-body{font-family:'Noto Sans Thai',system-ui,sans-serif;background:#cfdad8;color:var(--ink);display:flex;justify-content:center;line-height:1.6}
-#app{width:100%;max-width:520px;height:100vh;height:100dvh;background:var(--bg);position:relative;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 0 40px rgba(0,0,0,.15)}
-button{font:inherit;border:0;background:none;color:inherit;cursor:pointer;touch-action:manipulation}
-input,textarea,select{font:inherit;font-size:16px;color:inherit}
+html{-webkit-text-size-adjust:100%;width:100%}
+body{font-family:'Noto Sans Thai',system-ui,-apple-system,'Segoe UI',sans-serif;background:#e9ecdf;color:var(--text);min-height:100vh;min-height:100dvh;overflow-x:hidden;width:100%;line-height:1.55}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;touch-action:manipulation}
+input,select,textarea{font:inherit;font-size:16px;color:var(--text)}
+img{display:block;max-width:100%}
+.hide{display:none!important}
+.sub{color:var(--muted);font-size:13px}
+.in{color:#2e7d32}.out{color:#3f6200}.miss{color:#c62828}
 bdi{unicode-bidi:isolate}
-.top{background:var(--p);color:#fff;padding:calc(12px + var(--sat)) 16px 12px;display:flex;align-items:center;gap:10px;flex:none}
-.top h1{font-size:20px;flex:1}
-.hn{flex:1;min-width:0}.hn b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hn small{opacity:.85;font-size:12px}
-.ib{width:40px;height:40px;border-radius:50%;font-size:20px;display:grid;place-items:center;background:rgba(255,255,255,.15)}
-main{flex:1;overflow:auto;-webkit-overflow-scrolling:touch}
-nav{display:grid;grid-template-columns:repeat(4,1fr);background:#fff;border-top:1px solid var(--ln);padding-bottom:var(--sab);flex:none}
-nav button{padding:8px 0 6px;font-size:12px;color:var(--mu);display:flex;flex-direction:column;align-items:center;gap:0}
-nav button span{font-size:22px;line-height:1.3}nav button.on{color:var(--p);font-weight:700}
+
+#app{max-width:560px;margin:0 auto;min-height:100vh;min-height:100dvh;background:var(--bg);position:relative;box-shadow:0 0 40px rgba(0,0,0,.08)}
+#page{min-height:100vh;min-height:100dvh;padding-bottom:calc(104px + var(--sab))}
+#page.noNav{padding-bottom:24px}
+
+/* top bar */
+.topbar{display:flex;align-items:center;gap:12px;padding:calc(16px + var(--sat)) 16px 8px}
+.topbar h1{font-size:24px;flex:1;line-height:1.25;min-width:0}
+.icon-btn{width:42px;height:42px;border-radius:14px;background:#efeff1;display:grid;place-items:center;font-size:20px;flex:none}
+.icon-btn.call{background:var(--lime-soft)}
+.brand-dot{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--lime);margin-right:8px;box-shadow:0 0 0 3px var(--lime-soft)}
+.pill{background:var(--lime-soft);color:var(--green-dark);padding:6px 14px;border-radius:99px;font-size:13px;max-width:42vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.sync-dot{width:10px;height:10px;border-radius:50%;background:#43d17a;display:inline-block;box-shadow:0 0 8px #43d17a;margin-right:6px}
+.topsub{padding:0 16px 6px;color:var(--muted);font-size:14px}
+
+/* banner */
+.banner{margin:12px 16px;border-radius:var(--radius);min-height:128px;background:linear-gradient(120deg,#d9ff6a,#7de3b5 60%,#4cc9f0);padding:20px;box-shadow:var(--shadow);position:relative;overflow:hidden;display:block;width:calc(100% - 32px);text-align:left;color:#173300}
+.banner small{font-size:13px;opacity:.85}
+.banner h2{font-size:22px;line-height:1.25;margin:4px 0 6px;max-width:75%}
+.banner .circle{position:absolute;right:-30px;bottom:-40px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.35)}
+.banner .ph{position:absolute;right:22px;top:50%;transform:translateY(-50%);width:56px;height:56px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:26px;z-index:1;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.banner>*{position:relative;z-index:1}.banner .circle{z-index:0}
+
+/* cards / lists */
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin:12px 16px;padding:16px}
+.list{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:4px 16px;margin:10px 16px}
+.item{display:flex;align-items:center;gap:12px;width:100%;padding:12px 0;border-bottom:1px dashed var(--line);text-align:left}
+.item:last-child{border:0}
+.item .nm{flex:1;min-width:0}
+.item .nm b{display:block;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .nm small{display:block;color:var(--muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .end{text-align:right;font-size:12px;color:var(--muted);display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.badge{background:var(--green);color:#fff;border-radius:99px;min-width:22px;padding:0 7px;font-size:12px;text-align:center}
 .av{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:18px;flex:none;position:relative}
 .av.s{width:40px;height:40px;font-size:16px}
-.dot{position:absolute;bottom:0;inset-inline-end:0;width:12px;height:12px;border-radius:50%;background:var(--grn);border:2px solid #fff}
-.row{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--ln);background:#fff;width:100%;text-align:start}
-.row .mid{flex:1;min-width:0}.row .mid b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.row .mid small{color:var(--mu);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.row .end{text-align:end;font-size:12px;color:var(--mu);display:flex;flex-direction:column;align-items:flex-end;gap:4px}
-.badge{background:var(--p2);color:#fff;border-radius:99px;min-width:22px;padding:0 7px;font-size:12px;text-align:center}
-.rb{width:40px;height:40px;border-radius:50%;background:#e6f6f3;font-size:18px;display:grid;place-items:center;flex:none}
-.rb.call{background:#dcfce7}
-.search{margin:10px 16px;width:calc(100% - 32px);padding:11px 16px;border-radius:99px;border:1px solid var(--ln);background:#fff;outline:none}
-.sec{padding:10px 16px 4px;color:var(--mu);font-size:13px}
-.empty{padding:40px 20px;text-align:center;color:var(--mu)}
-.op{background:linear-gradient(120deg,#0f766e,#14b8a6);color:#fff;margin:12px 16px;border-radius:18px;padding:14px;display:flex;align-items:center;gap:12px}
-.op .mid{flex:1}.op small{opacity:.9}
-.op .rb{background:#fff;color:var(--grn)}
-.pri{background:var(--p);color:#fff;border-radius:14px;padding:13px;width:100%;font-weight:700;margin-top:12px}
-.sec2{background:#fff;border:1px solid var(--ln);border-radius:14px;padding:12px;width:100%;margin-top:10px}
-.fld{margin:12px 16px 0}.fld label{display:block;font-size:13px;color:var(--mu);margin-bottom:4px}
-.fld input[type=text],.fld input[type=password],.fld input[type=tel]{width:100%;padding:12px 14px;border:1px solid var(--ln);border-radius:12px;background:#fff;outline:none}
-.fld input:focus{border-color:var(--p2)}
-.login{padding:calc(40px + var(--sat)) 16px 24px;overflow:auto;flex:1}
-.logo{width:84px;height:84px;border-radius:26px;background:var(--p);color:#fff;font-size:42px;display:grid;place-items:center;margin:0 auto 8px}
-.login h1{text-align:center;font-size:26px}.login p.s{text-align:center;color:var(--mu);font-size:13px;margin:4px 0 8px}
-.chk{display:flex;gap:10px;align-items:center;margin:14px 16px 0;font-size:14px}.chk input{width:22px;height:22px;accent-color:var(--p)}
-.pad{padding:0 16px 16px}
-/* chat */
-#msgs{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:6px;background:#e7efed;-webkit-overflow-scrolling:touch}
-.b{max-width:80%;padding:8px 12px 4px;border-radius:16px;word-break:break-word;font-size:15px;position:relative}
-.b.me{align-self:flex-end;background:#d1f5ee;border-end-end-radius:4px}
-.b.ot{align-self:flex-start;background:#fff;border-end-start-radius:4px}
-.b i{display:block;font-style:normal;font-size:10px;color:var(--mu);text-align:end;margin-top:2px}
-.b .who{font-size:12px;color:var(--p);font-weight:700}
+.dot{position:absolute;bottom:0;right:0;width:12px;height:12px;border-radius:50%;background:#43d17a;border:2px solid #fff}
+.rb{width:40px;height:40px;border-radius:50%;background:#f1f6e3;font-size:18px;display:grid;place-items:center;flex:none}
+.rb.call{background:var(--lime-soft)}
+.section-title{padding:12px 20px 4px}.section-title h3{font-size:19px}
+.empty{text-align:center;padding:30px 10px;color:var(--muted)}
+.search{margin:6px 16px 4px;width:calc(100% - 32px);padding:13px 18px;border-radius:99px;border:2px solid var(--line);background:#fff;outline:none;min-height:50px}
+.search:focus,.fld input:focus{border-color:var(--green)}
+
+/* buttons / forms */
+.cta{display:block;width:calc(100% - 32px);margin:12px 16px;padding:16px;border-radius:16px;background:var(--lime);color:#222;font-size:18px;font-weight:700;transition:.15s;text-align:center}
+.cta:active,.btn:active{transform:scale(.97)}
+.cta.inline{width:100%;margin:16px 0 0}
+.cta.ghost{background:#fff;border:2px solid var(--line)}
+.cta.danger{background:#fff;color:#c62828;border:2px solid #f3c6c6}
+.cta:disabled{opacity:.6}
+.btn{padding:10px 18px;border-radius:99px;font-size:14px;background:#fff;border:2px solid var(--line)}
+.btn.p{background:var(--lime);border-color:var(--lime);font-weight:600}
+.btn.sm{padding:6px 14px;font-size:13px}
+.fld label{font-size:14px;color:var(--muted);display:block;margin:12px 0 6px}
+.fld input[type=text],.fld input[type=tel]{width:100%;padding:13px 16px;border-radius:99px;border:2px solid var(--line);background:#fff;outline:none;min-height:50px}
+.chk{display:flex;gap:12px;align-items:center;font-size:15px;padding:6px 0}.chk input{width:26px;height:26px;accent-color:var(--green)}
+.hint{text-align:center;color:var(--muted);font-size:13px;margin:14px 16px;line-height:1.7}
+.hint.err{color:var(--redInk);background:var(--red);border-radius:14px;padding:12px}
+
+/* auth */
+.auth{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:calc(24px + var(--sat)) 16px 24px;background:linear-gradient(160deg,#f3ffd0 0,#f7f7f7 45%)}
+.auth-card{width:100%;max-width:440px;background:var(--card);border-radius:28px;box-shadow:0 10px 40px rgba(0,0,0,.08);padding:28px 22px}
+.logo{width:76px;height:76px;border-radius:24px;background:var(--lime);display:grid;place-items:center;font-size:38px;margin:0 auto 8px;box-shadow:0 0 0 6px var(--lime-soft)}
+.auth-card h1{text-align:center;font-size:26px;margin-bottom:4px}
+.auth-card .lead{text-align:center;color:var(--muted);font-size:14px;margin-bottom:6px;line-height:1.6}
+
+/* bottom nav */
+#nav{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:560px;height:calc(84px + var(--sab));background:#fff;border-top:1px solid #eee;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;padding-bottom:calc(10px + var(--sab));z-index:20}
+.tab{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:13px;color:#555;position:relative}
+.tab svg{width:28px;height:28px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tab.on{color:var(--green);font-weight:700}
+.tab .tb{position:absolute;top:-6px;right:calc(50% - 26px);background:#ff5a36;color:#fff;border-radius:99px;font-size:11px;min-width:18px;padding:0 5px;line-height:18px;text-align:center}
+.scan .bubble{position:absolute;top:-34px;left:50%;transform:translateX(-50%);width:70px;height:70px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 -4px 14px rgba(0,0,0,.05)}
+.scan .bubble i{width:56px;height:56px;border-radius:50%;background:var(--lime);display:grid;place-items:center;color:#222}
+.scan span.l{margin-top:38px}
+
+/* chat page */
+.chatpage{position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:560px;display:flex;flex-direction:column;background:#eef4dc;z-index:15}
+.chatpage .topbar{background:#fff;padding-bottom:10px;box-shadow:0 1px 0 var(--line)}
+.hn{flex:1;min-width:0}.hn b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hn small{color:var(--muted);font-size:12px}
+#msgs{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:6px;-webkit-overflow-scrolling:touch}
+.b{max-width:80%;padding:8px 12px 4px;border-radius:16px;word-break:break-word;font-size:15px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.b.me{align-self:flex-end;background:var(--lime-soft);border-bottom-right-radius:4px}
+.b.ot{align-self:flex-start;background:#fff;border-bottom-left-radius:4px}
+.b i{display:block;font-style:normal;font-size:10px;color:var(--muted);text-align:right;margin-top:2px}
+.b .who{font-size:12px;color:var(--green);font-weight:700}
 .b img{max-width:100%;max-height:300px;border-radius:10px;display:block;cursor:zoom-in;margin-bottom:2px}
 .b audio{width:230px;max-width:100%;height:40px;margin:2px 0}
-#comp{display:flex;align-items:center;gap:8px;padding:8px 10px calc(8px + var(--sab));background:#fff;border-top:1px solid var(--ln);flex:none}
-#comp input[type=text]{flex:1;padding:11px 16px;border-radius:99px;border:1px solid var(--ln);background:var(--bg);outline:none;min-width:0}
-.cb2{width:44px;height:44px;border-radius:50%;background:var(--p);color:#fff;font-size:19px;display:grid;place-items:center;flex:none}
-.cb2.g{background:#e6f6f3;color:var(--p)}.cb2.r{background:var(--red)}
-.recbar{flex:1;display:flex;align-items:center;gap:10px;color:var(--red);font-weight:700}
-.recbar .d{width:12px;height:12px;border-radius:50%;background:var(--red);animation:bl 1s infinite}
+#comp{display:flex;align-items:center;gap:8px;padding:8px 10px calc(8px + var(--sab));background:#fff;border-top:1px solid var(--line);flex:none}
+#comp input[type=text]{flex:1;padding:12px 18px;border-radius:99px;border:2px solid var(--line);background:#fff;outline:none;min-width:0}
+#comp input[type=text]:focus{border-color:var(--green)}
+.cb2{width:44px;height:44px;border-radius:50%;background:var(--lime);color:#222;font-size:19px;display:grid;place-items:center;flex:none}
+.cb2.g{background:#f1f6e3;color:var(--green-dark)}.cb2.r{background:#e53935;color:#fff}
+.recbar{flex:1;display:flex;align-items:center;gap:10px;color:#e53935;font-weight:600}
+.recbar .d{width:12px;height:12px;border-radius:50%;background:#e53935;animation:bl 1s infinite}
 @keyframes bl{50%{opacity:.2}}
-/* call overlays */
-.ov{position:absolute;inset:0;z-index:50;background:linear-gradient(180deg,#0b3b37,#0f766e);color:#fff;display:none;flex-direction:column;align-items:center;padding:calc(50px + var(--sat)) 20px calc(30px + var(--sab));overflow:auto;text-align:center}
+
+/* call overlays (อยู่นอก #page จึงไม่โดนวาดใหม่) */
+.ov{position:fixed;inset:0;z-index:50;background:linear-gradient(180deg,#1c3300,#3f6200);color:#fff;display:none;flex-direction:column;align-items:center;padding:calc(50px + var(--sat)) 20px calc(30px + var(--sab));overflow:auto;text-align:center}
 .ov.on{display:flex}
+.oi{width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;flex:1}
 .cav{width:110px;height:110px;border-radius:50%;display:grid;place-items:center;font-size:44px;font-weight:700;margin-bottom:12px;box-shadow:0 0 0 10px rgba(255,255,255,.1)}
-.ov h2{font-size:26px}.ov p#cst,.ov p.st{opacity:.85;margin-top:4px}
-.sub{margin:14px 0 0;background:rgba(0,0,0,.25);border-radius:14px;padding:10px 14px;font-size:14px;min-height:44px;max-width:95%}
+.ov h2{font-size:26px}.ov p.st{opacity:.85;margin-top:4px}
+.sub2{margin:14px 0 0;background:rgba(0,0,0,.25);border-radius:14px;padding:10px 14px;font-size:14px;min-height:44px;max-width:95%}
 .extd{font-size:30px;letter-spacing:4px;min-height:44px;direction:ltr;margin-top:6px}
 .cctl{display:flex;gap:26px;margin-top:auto;padding-top:20px;justify-content:center;align-items:center}
 .cb{width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;font-size:26px;display:grid;place-items:center}
-.cb.on{background:#fff;color:var(--p)}.cb.red{background:var(--red)}.cb.grn{background:var(--grn)}
-.kp{display:grid;grid-template-columns:repeat(3,72px);gap:12px;justify-content:center;margin-top:14px;direction:ltr}
+.cb.on{background:#fff;color:var(--green-dark)}.cb.red{background:#e53935}.cb.grn{background:#2fb344}
+.cb.red span{display:inline-block;transform:rotate(135deg)}
+.kp{display:grid;grid-template-columns:repeat(3,72px);gap:12px;justify-content:center;margin-top:14px}
 .kp button{height:56px;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;font-size:24px}
 .kp button:active{background:rgba(255,255,255,.35)}
-.kp.lt button{background:#e6f6f3;color:var(--ink)}.kp.lt button:active{background:#bfeee6}
-/* sheet */
-#shBg{position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:60;display:none}
-#shBg.on{display:block}
-#sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:24px 24px 0 0;z-index:61;max-height:92%;overflow:auto;padding:16px 16px calc(20px + var(--sab));transform:translateY(105%);transition:transform .25s}
-#sheet.on{transform:none}
-#sheet h3{margin-bottom:8px;font-size:18px}
+.kp.lt button{background:#f1f6e3;color:var(--text)}.kp.lt button:active{background:var(--lime)}
+
+/* sheet / toast */
+#shBg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:60;opacity:0;pointer-events:none;transition:.25s}
+#shBg.on{opacity:1;pointer-events:auto}
+#sheet{position:fixed;left:50%;bottom:0;width:100%;max-width:560px;background:#fff;border-radius:28px 28px 0 0;z-index:61;transform:translate(-50%,105%);transition:transform .3s;max-height:90vh;max-height:90dvh;overflow:auto;-webkit-overflow-scrolling:touch;padding:12px 20px calc(24px + var(--sab))}
+#sheet.on{transform:translate(-50%,0)}
+#sheet .grab{width:48px;height:6px;border-radius:6px;background:#ddd;margin:0 auto 14px}
+#sheet h3{font-size:20px;margin-bottom:8px}
 .dn{direction:ltr;text-align:center;font-size:32px;min-height:50px;letter-spacing:3px}
-.ecard{border:1px solid var(--ln);border-radius:14px;padding:10px;margin-top:10px}
-.ecard b{font-size:14px;color:var(--p)}
-.ecard textarea{width:100%;margin-top:6px;border:1px solid var(--ln);border-radius:10px;padding:8px;min-height:70px;outline:none}
+.ecard{border:2px solid var(--line);border-radius:16px;padding:10px;margin-top:10px}
+.ecard b{font-size:14px;color:var(--green-dark)}
+.ecard textarea{width:100%;margin-top:6px;border:2px solid var(--line);border-radius:14px;padding:10px;min-height:76px;outline:none;line-height:1.6}
 .erow{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
-.erow button,.mini{background:#e6f6f3;color:var(--p);border-radius:99px;padding:6px 14px;font-size:13px}
-.mini.r{background:#fee2e2;color:var(--red)}
+.erow button,.mini{background:#f1f6e3;color:var(--green-dark);border-radius:99px;padding:6px 14px;font-size:13px}
+.mini.r{background:#ffe1e1;color:#b3261e}
 .orow{display:flex;gap:6px;margin-top:6px;align-items:center}
-.orow input{width:44px;text-align:center;border:1px solid var(--ln);border-radius:10px;padding:8px 0;direction:ltr}
-.orow select{flex:1;min-width:0;border:1px solid var(--ln);border-radius:10px;padding:8px;background:#fff}
-#toast{position:absolute;left:50%;bottom:90px;transform:translate(-50%,20px);background:#10201e;color:#fff;padding:10px 18px;border-radius:99px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:99;max-width:90%;text-align:center}
+.orow input{width:44px;text-align:center;border:2px solid var(--line);border-radius:12px;padding:8px 0}
+.orow select{flex:1;min-width:0;border:2px solid var(--line);border-radius:12px;padding:8px;background:#fff}
+#toast{position:fixed;left:50%;bottom:calc(104px + var(--sab));transform:translate(-50%,20px);background:#222;color:#fff;padding:11px 20px;border-radius:99px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:99;max-width:90vw;text-align:center}
 #toast.on{opacity:1;transform:translate(-50%,0)}
-.lb{position:absolute;inset:0;background:#000e;z-index:70;display:grid;place-items:center}.lb img{max-width:100%;max-height:100%}
-.in{color:var(--grn)}.out{color:var(--p)}.miss{color:var(--red)}
+.lb{position:fixed;inset:0;background:#000e;z-index:70;display:grid;place-items:center}.lb img{max-width:100%;max-height:100%}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<div id="app"></div>
+<div id="app"><main id="page"></main><nav id="nav" class="hide"></nav></div>
+<div class="ov" id="inc"></div>
+<div class="ov" id="call"></div>
+<div id="shBg" data-act="closeSheet"></div><div id="sheet" role="dialog" aria-modal="true"></div>
+<div id="toast" role="status"></div>
 <audio id="ra" autoplay playsinline style="display:none"></audio>
 <script>
 (()=>{
 'use strict';
-/* ============ ตั้งค่า (หรือกรอกในแอปที่ปุ่ม «เชื่อมต่อฐานข้อมูล» แล้วรีโหลด) ============ */
-const CFG=Object.assign({SB_URL:'',SB_KEY:''},(()=>{try{return JSON.parse(localStorage.uy_cfg||'{}')}catch(e){return{}}})());
-const CLOUD=!!(CFG.SB_URL&&CFG.SB_KEY&&window.supabase);
+/* ============ ตั้งค่าฐานข้อมูล (Supabase โปรเจกต์เดียวกับเว็บห้อง) ============ */
+const CFG=Object.assign({SB_URL:'https://iejmwihipfvtkbvjtude.supabase.co',SB_KEY:'sb_publishable_PybXrP5brR32CHIw3nm8Lg_-SruBwlg',local:false},(()=>{try{return JSON.parse(localStorage.uy_cfg||'{}')}catch(e){return{}}})());
+const CLOUD=!!(CFG.SB_URL&&CFG.SB_KEY&&!CFG.local&&window.supabase);
 const OPERATOR_EXT='100';
 
 /* ============ ข้อความภาษาไทย ============ */
-const S={app:'คุยกัน',chats:'แชต',calls:'โทร',people:'สมาชิก',set:'ตั้งค่า',
- name:'ชื่อของคุณ',ext:'เบอร์สั้น (3-6 หลัก)',start:'เริ่มใช้งาน',agent:'ฉันเป็นเจ้าหน้าที่ (รับสายจากระบบอัตโนมัติ)',
- dup:'เบอร์สั้นนี้มีคนใช้แล้ว เลือกเบอร์อื่น',badExt:'เบอร์สั้นต้องเป็นตัวเลข 3-6 หลัก (และห้ามเป็น 100)',
- online:'ออนไลน์',offline:'ออฟไลน์',type:'พิมพ์ข้อความ…',recording:'กำลังอัดเสียง…',cancel:'ยกเลิก',send:'ส่ง',
+const S={app:'คุยกัน',chats:'แชต',calls:'ประวัติ',people:'สมาชิก',set:'ตั้งค่า',dialTab:'โทร',
+ name:'ชื่อของคุณ',login:'เข้าสู่ระบบ',loginTitle:'สมัครสมาชิก / เข้าสู่ระบบ',
+ loginLead:'ใส่ชื่อของคุณแล้วกดเข้าสู่ระบบ ถ้ายังไม่เคยใช้ ระบบจะสมัครให้อัตโนมัติและให้เบอร์สั้นสำหรับโทรหากัน',
+ enterName:'กรอกชื่อของคุณก่อน',loginHint:'ใช้ชื่อเดิมเพื่อกลับเข้าบัญชีเดิม · ห้ามใช้ชื่อซ้ำกับคนอื่น',
+ yourNo:'เบอร์สั้นของคุณ',agent:'ฉันเป็นเจ้าหน้าที่ (รับสายที่โอนมาจากระบบอัตโนมัติ)',
+ online:'ออนไลน์',offline:'ออฟไลน์',type:'พิมพ์ข้อความ…',recording:'กำลังอัดเสียง…',
  photo:'รูปภาพ',voice:'ข้อความเสียง',calling:'กำลังโทร…',connecting:'กำลังเชื่อมต่อ…',incoming:'สายเรียกเข้า',
  toAgent:'กำลังโอนสายหาเจ้าหน้าที่…',ivrOn:'ระบบตอบรับอัตโนมัติ',vmRec:'กำลังอัดข้อความ — พูดจบแล้วกด #',
  noMic:'กรุณาอนุญาตการใช้ไมโครโฟน',noAns:'ไม่มีผู้รับสาย',rejected:'ปฏิเสธสาย',busy:'สายไม่ว่าง',ended:'วางสายแล้ว',failed:'การเชื่อมต่อขาด',
- inCall:'คุณกำลังอยู่ในสาย',dial:'กดเบอร์โทร',call:'โทร',operator:'ระบบตอบรับอัตโนมัติ',operatorSub:'IVR · เบอร์ 100',
- inbox:'กล่องข้อความเจ้าหน้าที่',noChats:'ยังไม่มีแชต เริ่มจากแท็บ “สมาชิก”',noCalls:'ยังไม่มีประวัติการโทร',noPeople:'ยังไม่มีสมาชิกคนอื่น ลองเปิดอีกแท็บแล้วล็อกอินอีกชื่อ',
+ inCall:'คุณกำลังอยู่ในสาย',dial:'กดเบอร์โทร',operator:'ระบบตอบรับอัตโนมัติ',operatorSub:'IVR · โทรเบอร์ 100',
+ inbox:'กล่องข้อความเจ้าหน้าที่',noChats:'ยังไม่มีแชต เริ่มจากแท็บ “สมาชิก”',noCalls:'ยังไม่มีประวัติการโทร',noPeople:'ยังไม่มีสมาชิกคนอื่น ลองเปิดอีกแท็บแล้วเข้าสู่ระบบด้วยอีกชื่อ',
  ivrSet:'ตั้งค่าระบบตอบรับอัตโนมัติ (IVR)',save:'บันทึก',rec:'อัดเสียง',del:'ลบ',extra:'ข้อมูลเพิ่มเติม',addNode:'+ เพิ่มข้อความข้อมูล',addOpt:'+ เพิ่มปุ่มกด',
- logout:'ออกจากระบบ',search:'ค้นหา…',saved:'บันทึกแล้ว',me:'ฉัน',missed:'ไม่ได้รับสาย',netSet:'เชื่อมต่อฐานข้อมูล',netInfo:'ใส่ Supabase URL และ anon key (รัน schema.sql ก่อน)',
- netOn:'โหมด: ออนไลน์ (Supabase)',netOff:'โหมด: ทดลองในเครื่อง — เปิดสองแท็บในเบราว์เซอร์เดียวกันเพื่อลอง',
- ok:'ตกลง',err:'ผิดพลาด',zoom:'รูปภาพ',tbl:'ไม่พบตาราง — รัน schema.sql ก่อน',
- optNode:'เมนู/ข้อมูล',optAgent:'โอนหาเจ้าหน้าที่',optExt:'ต่อเบอร์สั้น',optVm:'ฝากข้อความเสียง',optHang:'วางสาย',optRep:'ฟังซ้ำ'};
+ logout:'ออกจากระบบ',search:'ค้นหา…',saved:'บันทึกแล้ว',missed:'ไม่ได้รับสาย',rejectedLog:'ปฏิเสธสาย',
+ netTitle:'ฐานข้อมูล',netOn:'ออนไลน์ (Supabase) — ใช้ข้ามเครื่องได้',netOff:'โหมดทดลองในเครื่อง — ใช้ได้เฉพาะในเบราว์เซอร์นี้',
+ err:'ผิดพลาด',needTbl:'ฐานข้อมูลยังไม่มีตาราง — เปิด Supabase › SQL Editor แล้วรันไฟล์ schema.sql จากนั้นกดเข้าสู่ระบบใหม่',
+ useLocal:'ใช้โหมดทดลองในเครื่องก่อน',useCloud:'กลับไปใช้ฐานข้อมูลออนไลน์',
+ optAgent:'โอนหาเจ้าหน้าที่',optExt:'ต่อเบอร์สั้น',optVm:'ฝากข้อความเสียง',optHang:'วางสาย',optRep:'ฟังซ้ำ'};
 const NL={root:'คำทักทายและเมนูหลัก',info:'ข้อมูลทั่วไป',hours:'เวลาทำการ',agent:'กำลังโอนสายเจ้าหน้าที่',noagent:'ไม่มีเจ้าหน้าที่',extp:'ขอเบอร์สั้น',vmp:'ฝากข้อความเสียง',thx:'ขอบคุณ/ลาก่อน',bad:'เบอร์ไม่ถูกต้อง'};
 const defIVR=()=>({nodes:{
  root:{text:'ยินดีต้อนรับค่ะ กด 1 เพื่อฟังข้อมูลทั่วไป กด 2 เพื่อฟังเวลาทำการ กด 3 เพื่อสนทนากับเจ้าหน้าที่ กด 4 เพื่อต่อเบอร์สั้น กด 5 เพื่อฝากข้อความเสียง หรือกด 0 เพื่อฟังเมนูซ้ำ',audio:'',
@@ -150,19 +220,20 @@ const hhmm=t=>{const d=new Date(t);return pad(d.getHours())+':'+pad(d.getMinutes
 const mmss=s=>pad(Math.floor(s/60))+':'+pad(s%60);
 const LS=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}};
 const SV=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}};
-const col=id=>{let h=0;for(const c of String(id))h=(h*31+c.charCodeAt(0))>>>0;return 'hsl('+(h%360)+',45%,42%)'};
+const col=id=>{let h=0;for(const c of String(id))h=(h*31+c.charCodeAt(0))>>>0;return 'hsl('+(h%360)+',42%,40%)'};
 const ini=n=>[...String(n||'?').trim()][0]||'?';
 const av=(u,s,on)=>'<div class="av '+(s||'')+'" style="background:'+col(u.id)+'">'+esc(ini(u.name))+(on?'<span class="dot"></span>':'')+'</div>';
 const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2800)};
 const cid=(a,b)=>[a,b].sort().join('|');
 const MIC={audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}};
 const getMic=()=>navigator.mediaDevices.getUserMedia(MIC);
-const MS=CLOUD?localStorage:sessionStorage;   // โหมดทดลอง: แต่ละแท็บเป็นคนละบัญชี
+const MS=CLOUD?localStorage:sessionStorage;
+const page=()=>$('#page');
 
 /* ============ เสียงเรียกเข้า / DTMF ============ */
 let AC=null;
 const ac=()=>{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();return AC};
-function tone(fs,d,v){const c=ac(),g=c.createGain();g.gain.value=v||.15;g.connect(c.destination);fs.forEach(f=>{const o=c.createOscillator();o.frequency.value=f;o.connect(g);o.start();o.stop(c.currentTime+d)});setTimeout(()=>g.disconnect(),d*1000+60)}
+function tone(fs,d,v){try{const c=ac(),g=c.createGain();g.gain.value=v||.15;g.connect(c.destination);fs.forEach(f=>{const o=c.createOscillator();o.frequency.value=f;o.connect(g);o.start();o.stop(c.currentTime+d)});setTimeout(()=>g.disconnect(),d*1000+60)}catch(e){}}
 const DT={1:[697,1209],2:[697,1336],3:[697,1477],4:[770,1209],5:[770,1336],6:[770,1477],7:[852,1209],8:[852,1336],9:[852,1477],'*':[941,1209],0:[941,1336],'#':[941,1477]};
 let ringT=null;
 function ring(kind){stopRing();const inn=kind==='in';const go=()=>{if(inn){tone([440,480],.4);setTimeout(()=>tone([440,480],.4),600)}else tone([425],1)};go();ringT=setInterval(go,inn?3000:4000);if(inn&&navigator.vibrate)navigator.vibrate([400,200,400,1500,400,200,400])}
@@ -188,12 +259,12 @@ function LocalT(){
 }
 function CloudT(){
  const sb=supabase.createClient(CFG.SB_URL,CFG.SB_KEY),h={};let ch,pcb=()=>{},me;
- const ck=r=>{if(r.error){throw Error(r.error.code==='23505'?'dup':(/relation|does not exist|schema cache/i.test(r.error.message)?'tbl':r.error.message))}return r.data};
+ const ck=r=>{if(r.error){const m=r.error.message||'';throw Error(r.error.code==='23505'?'dup':(r.error.code==='PGRST205'||r.error.code==='42P01'||/relation|does not exist|schema cache|Could not find the table/i.test(m)?'tbl':m))}return r.data};
  return{
   async init(m){me=m;ch=sb.channel('uy-room',{config:{presence:{key:m.id}}});
    ch.on('broadcast',{event:'*'},x=>(h[x.event]||[]).forEach(f=>f(x.payload)));
    ch.on('presence',{event:'sync'},()=>{const s=ch.presenceState(),o={};for(const k in s){const a=s[k];o[k]=a[a.length-1]}pcb(o)});
-   await new Promise((res,rej)=>{const t=setTimeout(()=>rej(Error('timeout')),12000);ch.subscribe(s=>{if(s==='SUBSCRIBED'){clearTimeout(t);ch.track(m);res()}})})},
+   await new Promise((res,rej)=>{const t=setTimeout(()=>rej(Error('เชื่อมต่อเรียลไทม์ไม่สำเร็จ')),12000);ch.subscribe(s=>{if(s==='SUBSCRIBED'){clearTimeout(t);ch.track(m);res()}})})},
   track(m){me=m;ch.track(m)},
   emit(ev,p){ch.send({type:'broadcast',event:ev,payload:p})},on(ev,f){(h[ev]=h[ev]||[]).push(f)},onPresence(f){pcb=f},
   async upsertUser(u){ck(await sb.from('uy_users').upsert({id:u.id,name:u.name,ext:u.ext,agent:!!u.agent}))},
@@ -207,50 +278,65 @@ function CloudT(){
 }
 
 /* ============ สถานะ ============ */
-let T,ME=null,USERS={},ONL={},MSGS={},VIEW='chats',OPEN=null,CALL=null,IVRC=defIVR(),REC=null,DIAL='',ED=null,ER=null;
+let T=null,ME=null,USERS={},ONL={},MSGS={},VIEW='chats',OPEN=null,CALL=null,IVRC=defIVR(),REC=null,DIAL='',ED=null,ER=null,lastPres='',lastUsers='';
 const READ=LS('uy_read',{});
 const getUser=id=>USERS[id]||ONL[id];
 const allUsers=()=>{const o=Object.assign({},USERS);for(const k in ONL)o[k]=Object.assign({},o[k]||{},ONL[k]);return o};
 const pub=u=>({id:u.id,name:u.name,ext:u.ext,agent:!!u.agent});
 
-/* ============ เริ่มต้น / เข้าสู่ระบบ ============ */
+/* ============ เริ่มต้น / สมัคร-เข้าสู่ระบบ ============ */
+function mkT(){try{return CLOUD?CloudT():LocalT()}catch(e){return LocalT()}}
 async function boot(){
+ T=mkT();
  const me=(()=>{try{return JSON.parse(MS.getItem('uy_me')||'null')}catch(e){return null}})();
- if(me)await enter(me);else loginView();
+ if(me){const ok=await enter(me,true);if(ok)return}
+ loginView();
 }
-function loginView(){
- $('#app').innerHTML='<div class="login"><div class="logo">☎</div><h1>'+S.app+'</h1><p class="s">'+(CLOUD?S.netOn:S.netOff)+'</p>'+
- '<div class="fld"><label>'+S.name+'</label><input type="text" id="ln" autocomplete="name"></div>'+
- '<div class="fld"><label>'+S.ext+'</label><input type="tel" id="le" inputmode="numeric" maxlength="6" dir="ltr" style="text-align:start"></div>'+
- '<label class="chk"><input type="checkbox" id="la"><span>'+S.agent+'</span></label>'+
- '<div class="pad"><button class="pri" data-act="login">'+S.start+'</button><button class="sec2" data-act="net">'+S.netSet+'</button></div></div>';
+function loginView(msg){
+ $('#nav').classList.add('hide');page().className='';
+ page().innerHTML='<div class="auth"><div class="auth-card"><div class="logo">📞</div><h1>'+S.loginTitle+'</h1><p class="lead">'+S.loginLead+'</p>'+
+ '<div class="fld"><label for="ln">'+S.name+'</label><input type="text" id="ln" autocomplete="name" maxlength="40" placeholder="เช่น สมชาย ใจดี"></div>'+
+ '<button class="cta inline" id="lb" data-act="login">'+S.login+'</button>'+
+ (msg?'<p class="hint err">'+msg+'</p>':'')+
+ (msg&&msg===S.needTbl?'<button class="cta inline ghost" data-act="useLocal">'+S.useLocal+'</button>':'')+
+ '<p class="hint">'+S.loginHint+'<br>'+(CLOUD?S.netOn:S.netOff)+'</p></div></div>';
+ const i=$('#ln');i&&i.focus();
 }
 async function login(){
- const n=$('#ln').value.trim(),e=$('#le').value.trim();
- if(!n)return toast(S.name);
- if(!/^\d{3,6}$/.test(e)||e===OPERATOR_EXT)return toast(S.badExt);
+ const inp=$('#ln'),n=inp.value.trim().replace(/\s+/g,' ');
+ if(!n)return toast(S.enterName);
+ const b=$('#lb');b.disabled=true;b.textContent='กำลังเข้าสู่ระบบ…';
  ac();try{window.Notification&&Notification.requestPermission()}catch(x){}
- let id=LS('uy_id_'+e,null);
- const me={id:id||rid(),name:n,ext:e,agent:$('#la').checked};
- await enter(me,true);
+ let us=[];
+ try{us=await T.users()}catch(e){return loginView(e.message==='tbl'?S.needTbl:S.err+': '+esc(e.message))}
+ const ex=us.find(u=>String(u.name).trim().toLowerCase()===n.toLowerCase());
+ let me;
+ if(ex)me={id:ex.id,name:ex.name,ext:ex.ext,agent:!!ex.agent};
+ else{let e;do{e=String(1000+Math.floor(Math.random()*9000))}while(us.some(u=>u.ext===e));me={id:rid(),name:n,ext:e,agent:false}}
+ await enter(me);
 }
-async function enter(me,fresh){
- ME=me;T=CLOUD?CloudT():LocalT();
+async function enter(me,silent){
+ ME=me;
  try{
   await T.upsertUser(pub(ME));
   await T.init(pub(ME));
  }catch(e){
-  if(e.message==='dup'){toast(S.dup);MS.removeItem('uy_me');return loginView()}
-  toast(e.message==='tbl'?S.tbl:S.err+': '+e.message);MS.removeItem('uy_me');return loginView();
+  ME=null;T=mkT();MS.removeItem('uy_me');
+  if(silent)return false;
+  loginView(e.message==='tbl'?S.needTbl:(e.message==='dup'?'เบอร์ซ้ำ ลองเข้าสู่ระบบใหม่':S.err+': '+esc(e.message)));return false;
  }
- MS.setItem('uy_me',JSON.stringify(pub(ME)));SV('uy_id_'+ME.ext,ME.id);
- T.on('msg',onMsg);T.on('sig',onSig);T.onPresence(o=>{ONL=o;render()});
- await refresh();setInterval(refreshUsers,20000);
- render();
+ MS.setItem('uy_me',JSON.stringify(pub(ME)));
+ T.on('msg',onMsg);T.on('sig',onSig);
+ T.onPresence(o=>{ONL=o;const k=Object.values(o).map(x=>x.id+'|'+x.name+'|'+!!x.agent).sort().join();if(k!==lastPres){lastPres=k;render()}});
+ await refresh();setInterval(refreshUsers,30000);
+ $('#nav').classList.remove('hide');VIEW='chats';render();
+ return true;
 }
-async function refreshUsers(){try{(await T.users()).forEach(u=>USERS[u.id]=u);render()}catch(e){}}
+async function refreshUsers(){try{const us=await T.users();const k=JSON.stringify(us.map(u=>[u.id,u.name,u.ext,!!u.agent]).sort());us.forEach(u=>USERS[u.id]=u);if(k!==lastUsers){lastUsers=k;render()}}catch(e){}}
 async function refresh(){
- try{(await T.users()).forEach(u=>USERS[u.id]=u);const r=await T.recent(ME.id);MSGS={};r.forEach(m=>{if(m.chat!=='inbox'||ME.agent)addMsg(m)})}catch(e){toast(e.message==='tbl'?S.tbl:e.message)}
+ try{const us=await T.users();us.forEach(u=>USERS[u.id]=u);lastUsers=JSON.stringify(us.map(u=>[u.id,u.name,u.ext,!!u.agent]).sort());
+  const r=await T.recent(ME.id);MSGS={};r.forEach(m=>{if(m.chat!=='inbox'||ME.agent)addMsg(m)})}
+ catch(e){toast(e.message==='tbl'?S.needTbl:e.message)}
 }
 
 /* ============ ข้อความ ============ */
@@ -258,7 +344,7 @@ function addMsg(m){const a=MSGS[m.chat]=MSGS[m.chat]||[];if(a.some(x=>x.id===m.i
 async function sendMsg(chat,kind,f){
  const m=Object.assign({id:rid(),chat,sender:ME.id,kind,body:'',url:'',dur:0,ts:Date.now()},f||{});
  addMsg(m);render();
- try{await T.saveMsg(m)}catch(e){toast(e.message);return}
+ try{await T.saveMsg(m)}catch(e){toast(e.message==='tbl'?S.needTbl:e.message);return}
  T.emit('msg',m);
 }
 function onMsg(m){
@@ -295,58 +381,76 @@ async function recEnd(send){
  if(send&&r.dur>=1){try{const url=await T.upload(r.blob,R.rec.ext);sendMsg(OPEN,'voice',{url,dur:r.dur})}catch(e){toast(S.err)}}
 }
 
-/* ============ ส่วนแสดงผลหลัก ============ */
+/* ============ วาดหน้าจอ ============
+   สำคัญ: วาดเฉพาะ #page / #nav เท่านั้น ส่วน sheet, หน้าจอโทร, หน้ารับสาย อยู่นอก #page
+   จึงไม่ถูกลบเมื่อระบบอัปเดตข้อมูล และจะไม่วาดใหม่ระหว่างคุยสาย */
+const NAVIC={
+ chats:'<path d="M4 5h16v11H9l-5 4z"/>',
+ people:'<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-4 3-6 6-6s6 2 6 6M15 15c3 0 6 1 6 5"/>',
+ dial:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>',
+ calls:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+ set:'<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>'
+};
+function drawNav(){
+ const tot=Object.keys(MSGS).reduce((s,c)=>s+unread(c),0);
+ const t=(k,l)=>'<button class="tab'+(VIEW===k?' on':'')+'" data-act="tab" data-v="'+k+'"><svg viewBox="0 0 24 24">'+NAVIC[k]+'</svg>'+l+(k==='chats'&&tot?'<span class="tb">'+tot+'</span>':'')+'</button>';
+ $('#nav').innerHTML=t('chats',S.chats)+t('people',S.people)+
+  '<button class="tab scan" data-act="dialer"><div class="bubble"><i><svg viewBox="0 0 24 24" style="width:30px;height:30px">'+NAVIC.dial+'</svg></i></div><span class="l">'+S.dialTab+'</span></button>'+
+  t('calls',S.calls)+t('set',S.set);
+}
 function render(){
  if(!ME)return;
+ if(CALL)return;                       // ไม่วาดใหม่ระหว่างโทร
  if(OPEN){chatHead();chatMsgs();return}
- const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))return;
+ const a=document.activeElement;
+ if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)&&page().contains(a))return;   // ไม่ขัดจังหวะตอนพิมพ์
+ const y=window.scrollY;
  const V={chats:vChats,people:vPeople,calls:vCalls,set:vSet}[VIEW]();
- const tabs=[['chats','💬',S.chats],['calls','📞',S.calls],['people','👥',S.people],['set','⚙️',S.set]];
- const tot=Object.keys(MSGS).reduce((s,c)=>s+unread(c),0);
- $('#app').innerHTML='<header class="top"><h1>'+(VIEW==='chats'&&tot?S.app+' ('+tot+')':S.app)+'</h1><button class="ib" data-act="dialer">⌨</button></header><main>'+V+'</main><nav>'+
-  tabs.map(t=>'<button class="'+(VIEW===t[0]?'on':'')+'" data-act="tab" data-v="'+t[0]+'"><span>'+t[1]+'</span>'+t[2]+'</button>').join('')+'</nav>'+overlays();
- fixOverlays();
+ page().className='';
+ page().innerHTML='<div class="topbar"><h1><span class="brand-dot"></span>'+({chats:S.app,people:S.people,calls:S.calls,set:S.set}[VIEW])+'</h1><span class="pill"><span class="sync-dot"></span>'+esc(ME.name)+'</span></div>'+V;
+ $('#nav').classList.remove('hide');drawNav();window.scrollTo(0,y);
 }
-function overlays(){return '<div class="ov" id="inc"></div><div class="ov" id="call"></div><div id="shBg" data-act="closeSheet"></div><div id="sheet"></div><div id="toast"></div>'}
-function fixOverlays(){if(CALL){if(CALL.dir==='in'&&CALL.state==='ringing')incUI();else callUI()}}
-function opCard(){return '<div class="op"><div class="av" style="background:#fff3;font-size:24px">☎</div><div class="mid"><b>'+S.operator+'</b><br><small>'+S.operatorSub+'</small></div><button class="rb call" data-act="ivr">📞</button></div>'}
+const opBanner=()=>'<button class="banner" data-act="ivr"><small>'+S.operatorSub+'</small><h2>'+S.operator+'</h2><small>แตะเพื่อโทรหาระบบตอบรับอัตโนมัติ</small><div class="circle"></div><div class="ph">☎</div></button>';
 function vChats(){
  const ids=Object.keys(MSGS).filter(c=>MSGS[c].length&&(c!=='inbox'||ME.agent)).sort((a,b)=>MSGS[b][MSGS[b].length-1].ts-MSGS[a][MSGS[a].length-1].ts);
- let h=opCard();
- if(!ids.length)return h+'<div class="empty">'+S.noChats+'</div>';
- return h+ids.map(c=>{
+ const h=opBanner();
+ if(!ids.length)return h+'<div class="card empty">'+S.noChats+'</div>';
+ return h+'<div class="list">'+ids.map(c=>{
   const l=MSGS[c][MSGS[c].length-1],inbox=c==='inbox',pid=inbox?null:c.split('|').find(x=>x!==ME.id),u=inbox?{id:'inbox',name:S.inbox}:(getUser(pid)||{id:pid,name:'?'}),n=unread(c);
-  return '<button class="row" data-act="open" data-c="'+esc(c)+'">'+av(u,'',pid&&ONL[pid])+'<div class="mid"><b>'+esc(u.name)+'</b><small>'+(l.sender===ME.id?'✓ ':'')+esc(prev(l))+'</small></div><div class="end"><span>'+hhmm(l.ts)+'</span>'+(n?'<span class="badge">'+n+'</span>':'')+'</div></button>'}).join('');
+  return '<button class="item" data-act="open" data-c="'+esc(c)+'">'+av(u,'',pid&&ONL[pid])+'<div class="nm"><b>'+esc(u.name)+'</b><small>'+(l.sender===ME.id?'✓ ':'')+esc(prev(l))+'</small></div><div class="end"><span>'+hhmm(l.ts)+'</span>'+(n?'<span class="badge">'+n+'</span>':'')+'</div></button>'}).join('')+'</div>';
 }
 function vPeople(){
  const us=Object.values(allUsers()).filter(u=>u.id!==ME.id&&u.name).sort((a,b)=>(!!ONL[b.id])-(!!ONL[a.id])||String(a.name).localeCompare(b.name));
- return opCard()+'<input class="search" id="ps" placeholder="'+S.search+'" autocomplete="off">'+(us.length?'<div id="pl">'+us.map(u=>
-  '<div class="row" data-nm="'+esc((u.name||'').toLowerCase()+' '+u.ext)+'">'+av(u,'',ONL[u.id])+'<div class="mid"><b>'+esc(u.name)+(u.agent?' 🎧':'')+'</b><small><bdi dir="ltr">'+esc(u.ext)+'</bdi> · '+(ONL[u.id]?S.online:S.offline)+'</small></div>'+
-  '<button class="rb" data-act="chat" data-id="'+esc(u.id)+'">💬</button>'+(ONL[u.id]?'<button class="rb call" data-act="callu" data-id="'+esc(u.id)+'">📞</button>':'')+'</div>').join('')+'</div>':'<div class="empty">'+S.noPeople+'</div>');
+ return opBanner()+'<input class="search" id="ps" placeholder="'+S.search+'" autocomplete="off">'+(us.length?'<div class="list" id="pl">'+us.map(u=>
+  '<div class="item" data-nm="'+esc((u.name||'').toLowerCase()+' '+u.ext)+'">'+av(u,'',ONL[u.id])+'<div class="nm"><b>'+esc(u.name)+(u.agent?' 🎧':'')+'</b><small>เบอร์ <bdi>'+esc(u.ext)+'</bdi> · '+(ONL[u.id]?S.online:S.offline)+'</small></div>'+
+  '<button class="rb" data-act="chat" data-id="'+esc(u.id)+'">💬</button>'+(ONL[u.id]?'<button class="rb call" data-act="callu" data-id="'+esc(u.id)+'">📞</button>':'')+'</div>').join('')+'</div>':'<div class="card empty">'+S.noPeople+'</div>');
 }
 const CL=()=>LS('uy_calls_'+ME.id,[]);
 function vCalls(){
  const l=CL();
- return '<div class="pad"><button class="pri" data-act="dialer">⌨ '+S.dial+'</button></div>'+(l.length?l.map(c=>{
-  const cl=c.res==='missed'?'miss':(c.dir==='in'?'in':'out'),ar=c.dir==='in'?'↙':'↗';
-  return '<div class="row">'+av({id:c.pid,name:c.name})+'<div class="mid"><b>'+esc(c.name)+'</b><small class="'+cl+'">'+ar+' '+(c.res==='missed'?S.missed:c.res==='rej'?S.rejected:c.dur?mmss(c.dur):S.noAns)+' · '+hhmm(c.ts)+'</small></div><button class="rb call" data-act="callx" data-id="'+esc(c.pid)+'">📞</button></div>'}).join(''):'<div class="empty">'+S.noCalls+'</div>');
+ return l.length?'<div class="list">'+l.map(c=>{
+  const miss=c.res==='missed',cl=miss?'miss':(c.dir==='in'?'in':'out'),ar=c.dir==='in'?'↙':'↗';
+  return '<div class="item">'+av({id:c.pid,name:c.name})+'<div class="nm"><b>'+esc(c.name)+'</b><small class="'+cl+'">'+ar+' '+(miss?S.missed:c.res==='rej'?S.rejectedLog:c.dur?mmss(c.dur):S.noAns)+' · '+hhmm(c.ts)+'</small></div>'+(c.pid==='ivr'?'<button class="rb call" data-act="ivr">📞</button>':'<button class="rb call" data-act="callx" data-id="'+esc(c.pid)+'">📞</button>')+'</div>'}).join('')+'</div>':'<div class="card empty">'+S.noCalls+'</div>';
 }
 function vSet(){
- return '<div class="pad" style="padding-top:16px"><div class="row" style="border-radius:16px;border:1px solid var(--ln)">'+av(ME)+'<div class="mid"><b>'+esc(ME.name)+'</b><small><bdi dir="ltr">'+esc(ME.ext)+'</bdi></small></div></div>'+
- '<label class="chk" style="margin:14px 0 0"><input type="checkbox" data-act="agentTg" '+(ME.agent?'checked':'')+'><span>'+S.agent+'</span></label>'+
- (ME.agent?'<button class="sec2" data-act="ivrEd">🎛 '+S.ivrSet+'</button>':'')+
- '<button class="sec2" data-act="net">🌐 '+S.netSet+'</button><p class="mu" style="color:var(--mu);font-size:12px;margin:8px 4px">'+(CLOUD?S.netOn:S.netOff)+'</p>'+
- '<button class="sec2" style="color:var(--red)" data-act="logout">'+S.logout+'</button></div>';
+ return '<div class="card" style="display:flex;gap:14px;align-items:center">'+av(ME)+'<div style="flex:1;min-width:0"><b>'+esc(ME.name)+'</b><div class="sub">'+S.yourNo+': <b style="color:var(--green-dark);font-size:18px"><bdi>'+esc(ME.ext)+'</bdi></b></div></div></div>'+
+ '<div class="card"><label class="chk"><input type="checkbox" data-act="agentTg" '+(ME.agent?'checked':'')+'><span>'+S.agent+'</span></label></div>'+
+ (ME.agent?'<button class="cta ghost" data-act="ivrEd">🎛 '+S.ivrSet+'</button>':'')+
+ '<div class="card"><div class="sub"><b>'+S.netTitle+'</b><br>'+(CLOUD?S.netOn:S.netOff)+'</div></div>'+
+ (CLOUD?'<button class="cta ghost" data-act="useLocal">'+S.useLocal+'</button>':(CFG.local?'<button class="cta ghost" data-act="useCloud">'+S.useCloud+'</button>':''))+
+ '<button class="cta danger" data-act="logout">'+S.logout+'</button>';
 }
 
 /* ============ หน้าแชต ============ */
 function openChat(c){OPEN=c;READ[c]=Date.now();SV('uy_read',READ);buildChat()}
 function buildChat(){
  const c=OPEN,inbox=c==='inbox',pid=inbox?null:c.split('|').find(x=>x!==ME.id),u=inbox?{id:'inbox',name:S.inbox}:(getUser(pid)||{id:pid,name:'?'});
- $('#app').innerHTML='<header class="top"><button class="ib" data-act="back">←</button>'+av(u,'s')+'<div class="hn"><b>'+esc(u.name)+'</b><small id="hs"></small></div>'+(pid?'<button class="ib" data-act="callu" data-id="'+esc(pid)+'">📞</button>':'')+'</header><div id="msgs" data-c="'+esc(c)+'"></div><div id="comp"></div>'+overlays();
- comp();chatHead();chatMsgs(true);fixOverlays();
+ $('#nav').classList.add('hide');
+ page().className='noNav';
+ page().innerHTML='<div class="chatpage"><div class="topbar"><button class="icon-btn" data-act="back">←</button>'+av(u,'s')+'<div class="hn"><b>'+esc(u.name)+'</b><small id="hs"></small></div>'+(pid?'<button class="icon-btn call" data-act="callu" data-id="'+esc(pid)+'">📞</button>':'')+'</div><div id="msgs" data-c="'+esc(c)+'"></div><div id="comp"></div></div>';
+ comp();chatHead();chatMsgs(true);
 }
-function chatHead(){const e=$('#hs');if(!e)return;const c=OPEN;if(c==='inbox')return e.textContent=(MSGS.inbox||[]).length;const pid=c.split('|').find(x=>x!==ME.id);e.textContent=ONL[pid]?S.online:S.offline}
+function chatHead(){const e=$('#hs');if(!e)return;const c=OPEN;if(c==='inbox')return e.textContent=(MSGS.inbox||[]).length+' ข้อความ';const pid=c.split('|').find(x=>x!==ME.id);e.textContent=ONL[pid]?S.online:S.offline}
 function bub(m){
  const mine=m.sender===ME.id,u=getUser(m.sender)||{name:'?'};let c;
  if(m.kind==='image')c='<img src="'+esc(m.url)+'" data-act="zoom" data-i="'+esc(m.id)+'" alt="'+S.photo+'">';
@@ -369,19 +473,18 @@ function comp(){
 }
 async function sendText(){const i=$('#mi');if(!i)return;const t=i.value.trim();if(!t)return;i.value='';$('#bs').style.display='none';$('#bm').style.display='';sendMsg(OPEN,'text',{body:t});i.focus()}
 
-/* ============ Sheet ============ */
-function sheet(h){$('#sheet').innerHTML=h;$('#sheet').classList.add('on');$('#shBg').classList.add('on')}
-function closeSheet(){const s=$('#sheet');if(s){s.classList.remove('on');$('#shBg').classList.remove('on')}ER&&ER.st&&ER.st.getTracks().forEach(t=>t.stop());ER=null}
+/* ============ Sheet (อยู่นอก #page จึงไม่หาย) ============ */
+function sheet(h){$('#sheet').innerHTML='<div class="grab"></div>'+h;$('#sheet').classList.add('on');$('#shBg').classList.add('on')}
+function closeSheet(){$('#sheet').classList.remove('on');$('#shBg').classList.remove('on');if(ER&&ER.st)ER.st.getTracks().forEach(t=>t.stop());ER=null}
 const kpHtml=(act,cls)=>'<div class="kp '+(cls||'')+'">'+'123456789*0#'.split('').map(d=>'<button data-act="'+act+'" data-d="'+d+'">'+d+'</button>').join('')+'</div>';
-function dialer(){DIAL='';sheet('<h3>'+S.dial+'</h3><div class="dn" id="dn">&nbsp;</div>'+kpHtml('dk','lt')+'<div class="cctl" style="margin-top:14px"><button class="cb" style="background:#e6f6f3;color:var(--ink)" data-act="dbs">⌫</button><button class="cb grn" data-act="dgo">📞</button></div>')}
+function dialer(){DIAL='';sheet('<h3>'+S.dial+'</h3><div class="dn" id="dn">&nbsp;</div>'+kpHtml('dk','lt')+'<div class="cctl" style="margin-top:14px"><button class="cb" style="background:#f1f6e3;color:var(--text)" data-act="dbs">⌫</button><button class="cb grn" data-act="dgo">📞</button></div>')}
 function dialGo(){
  const n=DIAL;if(!n)return;
  if(n===OPERATOR_EXT){closeSheet();return startIVR()}
  const u=Object.values(allUsers()).find(x=>x.ext===n&&x.id!==ME.id);
- if(!u)return toast(S.bad);
+ if(!u)return toast('ไม่พบเบอร์นี้');
  closeSheet();startCall(u);
 }
-S.bad=IVRC.nodes.bad.text;
 
 /* ============ โทร (WebRTC) ============ */
 const sig=(to,type,callId,x)=>T.emit('sig',Object.assign({to,from:ME.id,type,callId},x||{}));
@@ -389,6 +492,7 @@ async function startCall(u){
  if(CALL)return toast(S.inCall);
  if(!ONL[u.id])return toast(S.offline);
  ac();CALL={id:rid(),dir:'out',pend:[],state:'calling',peer:u};
+ callUI();                               // แสดงหน้าจอโทรทันที ก่อนขอไมค์
  await beginOut(u);
 }
 async function beginOut(u){
@@ -406,7 +510,7 @@ async function mkPC(){
  pc.ontrack=e=>{const a=$('#ra');a.srcObject=e.streams[0];a.play().catch(()=>{})};
  pc.onconnectionstatechange=()=>{if(CALL!==C)return;if(pc.connectionState==='connected')connected();if(pc.connectionState==='failed')cleanup(S.failed)};
 }
-function connected(){const C=CALL;if(!C||C.state==='connected')return;C.state='connected';C.t0=Date.now();stopRing();callUI()}
+function connected(){const C=CALL;if(!C||C.state==='connected')return;clearTimeout(C.to);C.state='connected';C.t0=Date.now();stopRing();callUI()}
 async function flush(C){while(C.pend.length)try{await C.pc.addIceCandidate(C.pend.shift())}catch(e){}}
 async function onSig(p){
  if(p.to!==ME.id)return;
@@ -465,17 +569,17 @@ function cleanup(msg){
 const stTxt=C=>C.state==='calling'?S.calling:C.state==='agentring'?S.toAgent:C.state==='connecting'?S.connecting:(C.state==='ivr'||C.state==='connected')&&C.t0?mmss(Math.round((Date.now()-C.t0)/1000)):S.ivrOn;
 function incUI(){
  const C=CALL,e=$('#inc');if(!C||!e)return;
- e.innerHTML='<div class="cav" style="background:'+col(C.peer.id)+'">'+esc(ini(C.peer.name))+'</div><h2>'+esc(C.peer.name)+'</h2><p class="st">'+S.incoming+(C.grp?' · '+S.operator:'')+'</p><div class="cctl"><button class="cb red" data-act="decline">✕</button><button class="cb grn" data-act="answer">📞</button></div>';
+ e.innerHTML='<div class="oi"><div class="cav" style="background:'+col(C.peer.id)+'">'+esc(ini(C.peer.name))+'</div><h2>'+esc(C.peer.name)+'</h2><p class="st">'+S.incoming+(C.grp?' · '+S.operator:'')+'</p><div class="cctl"><button class="cb red" data-act="decline"><span>📞</span></button><button class="cb grn" data-act="answer">📞</button></div></div>';
  e.classList.add('on');
 }
 function callUI(){
  const C=CALL,e=$('#call');if(!C||!e)return;
- const ivr=C.state==='ivr';$('#inc')&&$('#inc').classList.remove('on');
+ const ivr=C.state==='ivr';$('#inc').classList.remove('on');
  clearInterval(C.tm);C.tm=setInterval(()=>{const s=$('#cst');if(s&&CALL===C&&(C.state==='connected'||C.state==='ivr'))s.textContent=stTxt(C)},1000);
- e.innerHTML='<div class="cav" style="background:'+(ivr?'#ffffff33':col(C.peer.id))+'">'+(ivr?'☎':esc(ini(C.peer.name)))+'</div><h2>'+esc(C.peer.name)+'</h2><p id="cst">'+stTxt(C)+'</p>'+
-  (ivr||C.ivrMode?'<div class="sub" id="sub">'+esc(C.sub||'')+'</div><div class="extd" id="ext">'+esc(C.ivr&&C.ivr.buf||'')+'</div>':'')+
+ e.innerHTML='<div class="oi"><div class="cav" style="background:'+(ivr?'#ffffff33':col(C.peer.id))+'">'+(ivr?'☎':esc(ini(C.peer.name)))+'</div><h2>'+esc(C.peer.name)+'</h2><p class="st" id="cst">'+stTxt(C)+'</p>'+
+  (ivr||C.ivrMode?'<div class="sub2" id="sub">'+esc(C.sub||'')+'</div><div class="extd" id="ext">'+esc(C.ivr&&C.ivr.buf||'')+'</div>':'')+
   (ivr?kpHtml('dg'):'')+
-  '<div class="cctl">'+(!ivr&&C.state!=='calling'&&C.state!=='agentring'?'<button class="cb '+(C.muted?'on':'')+'" data-act="mute">'+(C.muted?'🔇':'🎙')+'</button>':'')+'<button class="cb red" data-act="hang">📞</button></div>';
+  '<div class="cctl">'+(!ivr&&C.state!=='calling'&&C.state!=='agentring'?'<button class="cb '+(C.muted?'on':'')+'" data-act="mute">'+(C.muted?'🔇':'🎙')+'</button>':'')+'<button class="cb red" data-act="hang"><span>📞</span></button></div></div>';
  e.classList.add('on');
 }
 function updExt(){const e=$('#ext');if(e&&CALL&&CALL.ivr)e.textContent=CALL.ivr.buf}
@@ -513,7 +617,7 @@ async function ivrAct(a){
  if(a.t==='repeat')return ivrRun(I.node);
  if(a.t==='vm')return ivrVM();
  if(a.t==='agent')return ivrAgent();
- if(a.t==='hang'){const k=++I.tok;await say('thx');if(CALL===C)cleanup(S.ended);return}
+ if(a.t==='hang'){++I.tok;await say('thx');if(CALL===C)cleanup(S.ended);return}
  if(a.t==='ext'){const k=++I.tok;I.mode='ext';I.buf='';updExt();await say('extp');if(CALL!==C||I.tok!==k)return;I.tmo=setTimeout(()=>{if(CALL===C&&I.mode==='ext'&&!I.buf)ivrRun('root')},12000)}
 }
 function dig(d){
@@ -553,20 +657,20 @@ async function ivrVM(){
  const C=CALL;if(!C||!C.ivr)return;const I=C.ivr;const k=++I.tok;I.mode='vm';
  await say('vmp');if(CALL!==C||I.tok!==k)return;
  try{C.stream=C.stream||await getMic()}catch(e){await say('bad');return cleanup(S.noMic)}
- tone([1000],.35,.15);I.rec=recorder(C.stream);I.recExt=I.rec.ext;C.sub=S.vmRec;const s=$('#sub');if(s)s.textContent=S.vmRec;
+ tone([1000],.35,.15);I.rec=recorder(C.stream);C.sub=S.vmRec;const s=$('#sub');if(s)s.textContent=S.vmRec;
  I.vmT=setTimeout(ivrVMEnd,60000);
 }
 async function ivrVMEnd(){
  const C=CALL;if(!C||!C.ivr||!C.ivr.rec)return;const I=C.ivr;clearTimeout(I.vmT);const R=I.rec;I.rec=null;I.mode='done';
  const r=await R.stop();
- if(r.dur>=1){try{const url=await T.upload(r.blob,R.ext);await sendMsg('inbox','voice',{url,dur:r.dur,body:ME.name+' ('+ME.ext+')'})}catch(e){toast(S.err)}}
+ if(r.dur>=1){try{const url=await T.upload(r.blob,R.ext);const m={id:rid(),chat:'inbox',sender:ME.id,kind:'voice',body:ME.name+' (เบอร์ '+ME.ext+')',url,dur:r.dur,ts:Date.now()};await T.saveMsg(m);T.emit('msg',m)}catch(e){toast(S.err)}}
  if(CALL===C){await say('thx');if(CALL===C)cleanup(S.ended)}
 }
 
 /* ============ ตัวแก้ไข IVR ============ */
 function optsHtml(k,n){
  const nodes=Object.keys(ED.nodes).filter(x=>ED.nodes[x].after);
- const sel=(o)=>{const cur=o.t==='node'?'node:'+o.v:o.t;
+ const sel=o=>{const cur=o.t==='node'?'node:'+o.v:o.t;
   const opts=nodes.map(x=>['node:'+x,(NL[x]||ED.nodes[x].text.slice(0,22)||x)]).concat([['agent',S.optAgent],['ext',S.optExt],['vm',S.optVm],['hang',S.optHang],['repeat',S.optRep]]);
   return '<select class="ov2">'+opts.map(p=>'<option value="'+esc(p[0])+'" '+(p[0]===cur?'selected':'')+'>'+esc(p[1])+'</option>').join('')+'</select>'};
  return '<div class="opts">'+n.opts.map((o,i)=>'<div class="orow"><input class="od" maxlength="1" value="'+esc(o.d)+'"> '+sel(o)+'<button class="mini r" data-act="edoptdel" data-k="'+k+'" data-i="'+i+'">✕</button></div>').join('')+'<button class="mini" style="margin-top:6px" data-act="edoptadd" data-k="'+k+'">'+S.addOpt+'</button></div>';
@@ -581,7 +685,7 @@ function edSync(){
 function edDraw(){
  sheet('<h3>'+S.ivrSet+'</h3>'+Object.keys(ED.nodes).map(k=>{const n=ED.nodes[k];
   return '<div class="ecard" data-k="'+k+'"><b>'+esc(NL[k]||S.extra)+'</b><textarea class="et">'+esc(n.text)+'</textarea><div class="erow"><button data-act="edrec" data-k="'+k+'">'+(ER&&ER.k===k?'⏹':'🎙')+' '+S.rec+'</button>'+(n.audio?'<button data-act="edplay" data-k="'+k+'">▶</button><button class="mini r" data-act="edclr" data-k="'+k+'">✕</button>':'')+(NL[k]?'':'<button class="mini r" data-act="eddel" data-k="'+k+'">'+S.del+'</button>')+'</div>'+(n.opts?optsHtml(k,n):'')+'</div>'}).join('')+
-  '<button class="sec2" data-act="edadd">'+S.addNode+'</button><button class="pri" data-act="edsave">'+S.save+'</button>');
+  '<button class="cta inline ghost" data-act="edadd">'+S.addNode+'</button><button class="cta inline" data-act="edsave">'+S.save+'</button>');
 }
 async function edRec(k){
  edSync();
@@ -592,10 +696,9 @@ async function edRec(k){
 /* ============ เหตุการณ์ ============ */
 const A={
  login,
- net(){sheet('<h3>'+S.netSet+'</h3><p style="font-size:13px;color:var(--mu)">'+S.netInfo+'</p><div class="fld" style="margin:10px 0"><input type="text" id="nu" dir="ltr" placeholder="https://xxxx.supabase.co" value="'+esc(CFG.SB_URL)+'"></div><div class="fld" style="margin:10px 0"><input type="text" id="nk" dir="ltr" placeholder="anon key" value="'+esc(CFG.SB_KEY)+'"></div><button class="pri" data-act="netSave">'+S.save+'</button><button class="sec2" data-act="netClr">'+S.del+'</button>')},
- netSave(){localStorage.uy_cfg=JSON.stringify({SB_URL:$('#nu').value.trim().replace(/\/$/,''),SB_KEY:$('#nk').value.trim()});location.reload()},
- netClr(){localStorage.removeItem('uy_cfg');location.reload()},
- tab(t){VIEW=t.dataset.v;render()},
+ useLocal(){CFG.local=true;SV('uy_cfg',{local:true});location.reload()},
+ useCloud(){try{localStorage.removeItem('uy_cfg')}catch(e){}location.reload()},
+ tab(t){VIEW=t.dataset.v;window.scrollTo(0,0);render()},
  open(t){openChat(t.dataset.c)},
  chat(t){openChat(cid(ME.id,t.dataset.id))},
  back(){recEnd(false);OPEN=null;render()},
@@ -603,7 +706,7 @@ const A={
  callx(t){const u=getUser(t.dataset.id);if(u)startCall(u);else toast(S.offline)},
  ivr:startIVR,
  sendT:sendText,recStart,recCancel(){recEnd(false)},recSend(){recEnd(true)},
- zoom(t){const m=(MSGS[OPEN]||[]).find(x=>x.id===t.dataset.i);if(!m)return;const d=document.createElement('div');d.className='lb';d.innerHTML='<img src="'+esc(m.url)+'">';d.onclick=()=>d.remove();$('#app').appendChild(d)},
+ zoom(t){const m=(MSGS[OPEN]||[]).find(x=>x.id===t.dataset.i);if(!m)return;const d=document.createElement('div');d.className='lb';d.innerHTML='<img src="'+esc(m.url)+'">';d.onclick=()=>d.remove();document.body.appendChild(d)},
  answer,decline,hang,mute,dg(t){dig(t.dataset.d)},
  dialer,dk(t){if(DIAL.length<8){DIAL+=t.dataset.d;$('#dn').textContent=DIAL;tone(DT[t.dataset.d],.1,.08)}},dbs(){DIAL=DIAL.slice(0,-1);$('#dn').innerHTML=DIAL||'&nbsp;'},dgo:dialGo,
  closeSheet,
@@ -616,7 +719,7 @@ const A={
  edadd(){edSync();ED.nodes['n'+rid().slice(0,5)]={text:'',audio:'',after:{t:'node',v:'root'}};edDraw()},
  edoptadd(t){edSync();ED.nodes[t.dataset.k].opts.push({d:'',t:'agent'});edDraw()},
  edoptdel(t){edSync();ED.nodes[t.dataset.k].opts.splice(+t.dataset.i,1);edDraw()},
- async edsave(){edSync();try{await T.kvSet('ivr',ED);IVRC=JSON.parse(JSON.stringify(ED));closeSheet();toast(S.saved)}catch(e){toast(e.message)}}
+ async edsave(){edSync();try{await T.kvSet('ivr',ED);IVRC=JSON.parse(JSON.stringify(ED));closeSheet();toast(S.saved)}catch(e){toast(e.message==='tbl'?S.needTbl:e.message)}}
 };
 document.addEventListener('click',e=>{
  const t=e.target.closest('[data-act]');if(!t||t.type==='checkbox')return;
@@ -625,16 +728,16 @@ document.addEventListener('click',e=>{
 document.addEventListener('change',async e=>{
  const t=e.target;
  if(t.id==='pf'){const f=t.files[0];t.value='';pickImage(f)}
- if(t.dataset&&t.dataset.act==='agentTg'){ME.agent=t.checked;MS.setItem('uy_me',JSON.stringify(pub(ME)));try{await T.upsertUser(pub(ME));T.track(pub(ME))}catch(x){toast(x.message)}render()}
+ if(t.dataset&&t.dataset.act==='agentTg'){ME.agent=t.checked;MS.setItem('uy_me',JSON.stringify(pub(ME)));try{await T.upsertUser(pub(ME));T.track(pub(ME))}catch(x){toast(x.message)}if(ME.agent)refresh();render()}
 });
 document.addEventListener('input',e=>{
  const t=e.target;
  if(t.id==='mi'){const has=!!t.value.trim();$('#bs').style.display=has?'':'none';$('#bm').style.display=has?'none':''}
- if(t.id==='ps'){const q=t.value.toLowerCase();document.querySelectorAll('#pl .row').forEach(r=>r.style.display=r.dataset.nm.includes(q)?'':'none')}
+ if(t.id==='ps'){const q=t.value.toLowerCase();document.querySelectorAll('#pl .item').forEach(r=>r.style.display=r.dataset.nm.includes(q)?'':'none')}
 });
 document.addEventListener('keydown',e=>{
  if(e.key==='Enter'&&e.target.id==='mi'){e.preventDefault();sendText()}
- if(e.key==='Enter'&&(e.target.id==='ln'||e.target.id==='le'))login();
+ if(e.key==='Enter'&&e.target.id==='ln'){e.preventDefault();login()}
  if(e.key==='Escape')closeSheet();
 });
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&OPEN){READ[OPEN]=Date.now();SV('uy_read',READ);render()}});
