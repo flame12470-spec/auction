@@ -263,6 +263,19 @@ label.btn{cursor:pointer;display:inline-block}
 .cbtn{position:relative}.cbtn svg{width:24px;height:24px}
 .cbadge{position:absolute;top:-6px;right:-6px;background:#ff5a36;color:#fff;border-radius:99px;font-size:11px;min-width:18px;padding:0 5px;line-height:18px;text-align:center}
 @media(min-width:768px){.post{margin:12px 24px;border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:var(--shadow)}}
+
+/* ===== หน้าตั้งค่า IVR ===== */
+details.ecard2{background:#fff;border-radius:20px;box-shadow:var(--shadow);margin:10px 16px;padding:0 16px}
+details.ecard2>summary{list-style:none;padding:14px 0;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px}
+details.ecard2>summary::-webkit-details-marker{display:none}
+details.ecard2>summary::after{content:'▾';margin-left:auto;color:var(--muted)}
+details.ecard2[open]>summary::after{content:'▴'}
+.edb{padding:0 0 16px;border-top:1px dashed var(--line)}
+.edb textarea{width:100%;border:2px solid var(--line);border-radius:14px;padding:10px;min-height:84px;outline:none;line-height:1.6}
+.edb textarea:focus{border-color:var(--green)}
+.orow input.od{width:66px}.orow span{color:var(--muted);white-space:nowrap}
+.section-title .sub{margin-top:2px}
+@media(min-width:768px){details.ecard2{margin-left:24px;margin-right:24px}}
 </style>
 </head>
 <body>
@@ -280,7 +293,7 @@ const CFG=Object.assign({SB_URL:'https://iejmwihipfvtkbvjtude.supabase.co',SB_KE
 const CLOUD=!!(CFG.SB_URL&&CFG.SB_KEY&&window.supabase);
 const OPERATOR_EXT='100';
 const UNS='__unsent__';
-const AGENT_WAIT=180000,HOLD_CYCLE=30000; /* รอเจ้าหน้าที่สูงสุด 3 นาที / เล่นเพลงรอรอบละ 30 วิ */
+const HOLD_CYCLE=30000; /* เพลงรอรอบละ 30 วิ แล้วแจ้งคิว วนไปเรื่อยๆ จนกว่าจะมีคนรับสาย (ไม่ตัดสายอัตโนมัติ) */
 const DONE=new Set();
 const ICE=CFG.ICE||[
  {urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302','stun:global.stun.twilio.com:3478']},
@@ -296,7 +309,7 @@ const S={app:'คุยกัน',chats:'แชต',calls:'ประวัติ
  yourNo:'เบอร์สั้นของคุณ',agent:'ฉันเป็นเจ้าหน้าที่ (รับสายที่โอนมาจากระบบอัตโนมัติ)',
  online:'ออนไลน์',offline:'ออฟไลน์',type:'พิมพ์ข้อความ…',recording:'กำลังอัดเสียง…',
  photo:'รูปภาพ',voice:'ข้อความเสียง',calling:'กำลังโทร…',connecting:'กำลังเชื่อมต่อ…',incoming:'สายเรียกเข้า',
- toAgent:'กำลังโอนสายไปยังเจ้าหน้าที่… 🎵',ivrOn:'ระบบตอบรับอัตโนมัติ',vmRec:'กำลังอัดข้อความ — พูดจบแล้วกด #',
+ toAgent:'กำลังรอเจ้าหน้าที่ 🎵',ivrOn:'ระบบตอบรับอัตโนมัติ',vmRec:'กำลังอัดข้อความ — พูดจบแล้วกด #',
  noMic:'กรุณาอนุญาตการใช้ไมโครโฟน',noAns:'ไม่มีผู้รับสาย',rejected:'ปฏิเสธสาย',busy:'สายไม่ว่าง',ended:'วางสายแล้ว',failed:'การเชื่อมต่อขาด',
  inCall:'คุณกำลังอยู่ในสาย',dial:'กดเบอร์โทร',operator:'ระบบตอบรับอัตโนมัติ',operatorSub:'IVR · โทรเบอร์ 100',
  inbox:'กล่องข้อความเจ้าหน้าที่',noChats:'ยังไม่มีแชต เริ่มจากแท็บ “สมาชิก”',noCalls:'ยังไม่มีประวัติการโทร',noPeople:'ยังไม่มีสมาชิกคนอื่น ลองเปิดอีกแท็บแล้วเข้าสู่ระบบด้วยอีกชื่อ',
@@ -306,18 +319,21 @@ const S={app:'คุยกัน',chats:'แชต',calls:'ประวัติ
  err:'ผิดพลาด',needTbl:'ฐานข้อมูลยังไม่มีตาราง — เปิด Supabase › SQL Editor แล้วรันไฟล์ schema.sql จากนั้นกดเข้าสู่ระบบใหม่',
  
  optAgent:'โอนหาเจ้าหน้าที่',optExt:'ต่อเบอร์สั้น',optVm:'ฝากข้อความเสียง',optHang:'วางสาย',optRep:'ฟังซ้ำ'};
-const NL={root:'คำทักทายและเมนูหลัก',info:'ข้อมูลทั่วไป',hours:'เวลาทำการ',agent:'กำลังโอนสายเจ้าหน้าที่',noagent:'ไม่มีเจ้าหน้าที่',extp:'ขอเบอร์สั้น',vmp:'ฝากข้อความเสียง',thx:'ขอบคุณ/ลาก่อน',bad:'เบอร์ไม่ถูกต้อง'};
+const NL={root:'เมนูหลัก',info:'ข้อมูลทั่วไป',hours:'เวลาทำการ',agent:'เริ่มโอนสายเจ้าหน้าที่',queue:'ประโยคนำก่อนแจ้งคิว',noagent:'ยังไม่มีเจ้าหน้าที่ออนไลน์',extp:'ขอเบอร์สั้น',vmp:'ฝากข้อความเสียง',thx:'ขอบคุณ/ลาก่อน',bad:'กดผิด/ไม่พบเบอร์'};
 const defIVR=()=>({nodes:{
  root:{text:'ยินดีต้อนรับค่ะ กด 1 เพื่อฟังข้อมูลทั่วไป กด 2 เพื่อฟังเวลาทำการ กด 3 เพื่อสนทนากับเจ้าหน้าที่ กด 4 เพื่อต่อเบอร์สั้น กด 5 เพื่อฝากข้อความเสียง หรือกด 0 เพื่อฟังเมนูซ้ำ',audio:'',
   opts:[{d:'1',t:'node',v:'info'},{d:'2',t:'node',v:'hours'},{d:'3',t:'agent'},{d:'4',t:'ext'},{d:'5',t:'vm'},{d:'0',t:'repeat'}]},
  info:{text:'ระบบนี้ใช้ส่งข้อความ รูปภาพ ข้อความเสียง และโทรหากันได้ภายในกลุ่ม',audio:'',after:{t:'node',v:'root'}},
  hours:{text:'เวลาทำการ ทุกวัน ตั้งแต่เก้าโมงเช้า ถึงหกโมงเย็น',audio:'',after:{t:'node',v:'root'}},
  agent:{text:'กรุณารอสักครู่ กำลังโอนสายไปยังเจ้าหน้าที่',audio:''},
- noagent:{text:'ขณะนี้ไม่มีเจ้าหน้าที่ว่าง',audio:''},
+ queue:{text:'กรุณาถือสายรอสักครู่ กำลังติดต่อเจ้าหน้าที่',audio:''},
+ noagent:{text:'ขณะนี้เจ้าหน้าที่ไม่ว่าง กรุณารอสักครู่',audio:''},
  extp:{text:'กรุณากดเบอร์สั้นที่ต้องการติดต่อ แล้วกดปุ่มสี่เหลี่ยม',audio:''},
  vmp:{text:'กรุณาฝากข้อความหลังเสียงสัญญาณ เมื่อพูดจบให้กดปุ่มสี่เหลี่ยม',audio:''},
  thx:{text:'ขอบคุณที่ใช้บริการ สวัสดีค่ะ',audio:''},
  bad:{text:'เบอร์ไม่ถูกต้อง หรือผู้ใช้ไม่ได้ออนไลน์',audio:''}}});
+const SYS=['agent','queue','noagent','extp','vmp','thx','bad'];
+function normIVR(v){const d=defIVR();if(!v||!v.nodes)return d;SYS.concat(['root']).forEach(k=>{if(!v.nodes[k])v.nodes[k]=d.nodes[k]});return v}
 
 /* ============ ตัวช่วย ============ */
 const $=s=>document.querySelector(s);
@@ -396,7 +412,7 @@ function CloudT(){
 /* ============ สถานะ ============ */
 let T=null,ME=null,USERS={},ONL={},MSGS={},VIEW='chats',OPEN=null,CALL=null,IVRC=defIVR(),REC=null,DIAL='',ED=null,ER=null,lastPres='',lastUsers='';
 const READ=LS('uy_read',{});
-const TYP={};let lastTyp=0;
+const TYP={};let lastTyp=0;const PARK={};
 const getUser=id=>USERS[id]||ONL[id];
 const allUsers=()=>{const o=Object.assign({},USERS);for(const k in ONL)o[k]=Object.assign({},ONL[k],o[k]||{});return o};
 const pub=u=>({id:u.id,name:u.name,ext:u.ext,agent:!!u.agent});
@@ -465,7 +481,7 @@ async function enter(me,silent){
  }
  MS.setItem('uy_me',JSON.stringify(pub(ME)));
  T.on('msg',onMsg);T.on('sig',onSig);T.on('typing',onTyping);T.on('unsend',onUnsend);T.on('kick',onKick);
- T.onPresence(o=>{ONL=o;const k=Object.values(o).map(x=>x.id+'|'+x.name+'|'+!!x.agent).sort().join();if(k!==lastPres){lastPres=k;render()}});
+ T.onPresence(o=>{ONL=o;if(CALL&&CALL.state==='agentring'&&CALL.wq){CALL.qpos=queueAhead(CALL)+1;const sq=$('#cst');if(sq)sq.textContent=stTxt(CALL)}const k=Object.values(o).map(x=>x.id+'|'+x.name+'|'+!!x.agent).sort().join();if(k!==lastPres){lastPres=k;render()}});
  await refresh();setInterval(refreshUsers,15000);
  $('#nav').classList.remove('hide');VIEW='feed';render();
  return true;
@@ -547,7 +563,7 @@ const NAVFEED='<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 10h1
 const NAVAD='<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>';
 function drawNav(){
  const tot=Object.keys(MSGS).filter(c=>c!=='feed').reduce((s,c)=>s+unread(c),0);
- const t=(k,l)=>'<button class="tab'+(VIEW===k?' on':'')+'" data-act="tab" data-v="'+k+'"><svg viewBox="0 0 24 24">'+(k==='admin'?NAVAD:k==='feed'?NAVFEED:NAVIC[k])+'</svg>'+l+(k==='chats'&&tot?'<span class="tb">'+tot+'</span>':'')+'</button>';
+ const t=(k,l)=>'<button class="tab'+((VIEW===k||(k==='admin'&&VIEW==='ivr'))?' on':'')+'" data-act="tab" data-v="'+k+'"><svg viewBox="0 0 24 24">'+(k==='admin'?NAVAD:k==='feed'?NAVFEED:NAVIC[k])+'</svg>'+l+(k==='chats'&&tot?'<span class="tb">'+tot+'</span>':'')+(k==='admin'&&Object.keys(PARK).length?'<span class="tb">'+Object.keys(PARK).length+'</span>':'')+'</button>';
  $('#nav').innerHTML=t('feed',S.feed)+t('chats',S.chats)+t('people',S.people)+t('calls',S.calls)+(ME.agent?t('admin',S.admin):'')+t('set',S.set);
 }
 const topbar=t=>'<div class="topbar"><div class="tt"><h1><span class="brand-dot"></span>'+t+'</h1><div class="clk" data-clock></div></div></div>';
@@ -556,6 +572,7 @@ function tickClock(){const t=clk();document.querySelectorAll('[data-clock]').for
 function render(){
  if(!ME)return;
  if(CALL)return;                       // ไม่วาดใหม่ระหว่างโทร
+ if(VIEW==='ivr')return;               // หน้าตั้งค่า IVR วาดเอง
  if(OPEN){chatHead();chatMsgs();return}
  const a=document.activeElement;
  if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)&&page().contains(a))return;
@@ -567,7 +584,7 @@ function render(){
  if(VIEW==='feed'){const tot=Object.keys(MSGS).filter(c=>c!=='feed').reduce((a,c)=>a+unread(c),0);
   tb=tb.replace(/<\/div><\/div>$/,'</div><button class="icon-btn callbtn cbtn" data-act="tab" data-v="chats" aria-label="แชต"><svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round">'+NAVIC.chats+'</svg>'+(tot?'<span class="cbadge">'+tot+'</span>':'')+'</button></div>')}
  page().innerHTML=tb+V;
- $('#nav').classList.remove('hide');drawNav();tickClock();window.scrollTo(0,y);if(VIEW==='admin')holdInfo();
+ $('#nav').classList.remove('hide');drawNav();tickClock();window.scrollTo(0,y);
 }
 function vChats(){
  const ids=Object.keys(MSGS).filter(c=>c!=='feed'&&MSGS[c].length&&(c!=='inbox'||ME.agent)).sort((a,b)=>MSGS[b][MSGS[b].length-1].ts-MSGS[a][MSGS[a].length-1].ts);
@@ -640,33 +657,37 @@ function vSet(){
  '<div class="card"><div class="sub"><b>'+S.netTitle+'</b><br>'+S.netOn+'</div></div>'+
  '<button class="cta danger" data-act="logout">'+S.logout+'</button>';
 }
+function parkedHtml(){
+ const l=Object.values(PARK).sort((a,b)=>a.ts-b.ts);
+ return '<div class="card"><b>⏸ สายที่พักไว้ (รอสายก่อน)</b><div class="sub" style="margin:4px 0 6px">ผู้โทรจะยังฟังเพลงรอสายและรับแจ้งคิวต่อไป จนกว่าคุณจะรับสาย</div>'+
+ (l.length?l.map(p=>'<div class="item">'+av(p.peer,'s')+'<div class="nm"><b>'+esc(p.peer.name)+'</b><small>หมายเลข <bdi>'+esc(p.peer.ext||'')+'</bdi> · พักไว้ตั้งแต่ '+hhmm(p.ts)+'</small></div><div class="acts"><button class="btn p sm" data-act="unpark" data-id="'+esc(p.id)+'">รับสาย</button><button class="mini r" data-act="parkdel" data-id="'+esc(p.id)+'">ปฏิเสธ</button></div></div>').join(''):'<div class="sub" style="padding:6px 0">ไม่มีสายที่พักไว้</div>')+'</div>';
+}
 function vAdmin(){
  const us=Object.values(allUsers()).filter(u=>u.name).sort((a,b)=>(!!b.agent)-(!!a.agent)||String(a.name).localeCompare(b.name));
  return '<div class="card"><b>➕ เพิ่มผู้ใช้ใหม่</b><div class="fld"><label for="an">ชื่อผู้ใช้</label><input type="text" id="an" maxlength="40" autocomplete="off" placeholder="เช่น สมชาย ใจดี"></div>'+
   '<label class="chk" style="margin-top:8px"><input type="checkbox" id="aag"><span>ให้เป็นแอดมินด้วย</span></label>'+
   '<button class="cta inline" data-act="adminAdd">เพิ่มผู้ใช้ (ระบบสร้างหมายเลขให้อัตโนมัติ)</button></div>'+
-  '<div class="card"><b>🎵 เพลงรอสาย</b><div class="sub" style="margin:4px 0 10px">เล่นระหว่าง "กำลังโอนสายไปยังเจ้าหน้าที่" · <span id="holdinfo">กำลังโหลด…</span></div><div class="erow"><label class="btn p" for="hf" style="cursor:pointer">⬆ อัปโหลดเพลง</label><input type="file" id="hf" accept="audio/*" hidden><button class="btn" data-act="holdPrev">▶ ฟัง</button><button class="btn" data-act="holdDel">✕ ใช้เพลงมาตรฐาน</button></div></div>'+
-  '<button class="cta ghost" data-act="ivrEd">🎛 '+S.ivrSet+'</button>'+
+  parkedHtml()+'<button class="cta ghost" data-act="ivrEd">🎛 '+S.ivrSet+'</button>'+
   '<div class="section-title"><h3>ผู้ใช้ทั้งหมด ('+us.length+')</h3></div><div class="list">'+us.map(u=>
    '<div class="item">'+av(u,'',ONL[u.id])+'<div class="nm"><b>'+esc(u.name)+(u.agent?'<span class="tag">แอดมิน</span>':'')+'</b><small>หมายเลข <bdi>'+esc(u.ext)+'</bdi> · '+(ONL[u.id]?S.online:S.offline)+'</small></div>'+
    (u.id!==ME.id?'<div class="acts"><button class="mini" data-act="adminTg" data-id="'+esc(u.id)+'">'+(u.agent?'ถอดแอดมิน':'ตั้งเป็นแอดมิน')+'</button><button class="mini r" data-act="adminDel" data-id="'+esc(u.id)+'">🗑 '+S.del+'</button></div>':'<span class="sub">คุณ</span>')+'</div>').join('')+'</div>';
 }
-async function holdInfo(){
- const el=$('#holdinfo');if(!el)return;
- try{const v=await T.kvGet('ivr');if(v)IVRC=v}catch(e){}
- const h=IVRC.hold,e2=$('#holdinfo');if(e2)e2.textContent=h&&h.url?(h.name||'เพลงที่อัปโหลด'):'ใช้เพลงมาตรฐานของระบบ';
+function holdInfo(){
+ const e=$('#holdinfo');if(!e)return;
+ const h=(ED||IVRC).hold;e.textContent=h&&h.url?(h.name||'เพลงที่อัปโหลด'):'เพลงมาตรฐานของระบบ';
 }
 async function holdSave(h){
- const cur=(await T.kvGet('ivr'))||defIVR();
- if(h)cur.hold=h;else delete cur.hold;
- await T.kvSet('ivr',cur);IVRC=cur;holdInfo();
+ const base=ED||normIVR(await T.kvGet('ivr'));
+ if(ED)edSync();
+ if(h)base.hold=h;else delete base.hold;
+ await T.kvSet('ivr',base);IVRC=JSON.parse(JSON.stringify(base));holdInfo();
 }
 async function holdPick(f){
  if(!f||!ME.agent)return;
  if(f.size>10*1024*1024)return toast('ไฟล์ใหญ่เกิน 10 MB');
  if(!/^audio\//.test(f.type)&&!/\.(mp3|m4a|wav|ogg|aac|webm)$/i.test(f.name))return toast('เลือกไฟล์เสียงเท่านั้น');
  toast('กำลังอัปโหลดเพลง…');
- try{const ext=(f.name.split('.').pop()||'mp3').toLowerCase();const url=await T.upload(f,ext);await holdSave({url,name:f.name});toast(S.saved)}catch(e){toast(e.message||S.err)}
+ try{const ext=(f.name.split('.').pop()||'mp3').toLowerCase();const url=await T.upload(f,ext);await holdSave({url,name:f.name});toast('อัปโหลดและบันทึกเพลงรอสายแล้ว')}catch(e){toast(e.message||S.err)}
 }
 let PREV=null;
 function holdPrev(){
@@ -826,6 +847,7 @@ function connected(){const C=CALL;if(!C||C.state==='connected')return;clearTimeo
 async function flush(C){while(C.pend.length)try{await C.pc.addIceCandidate(C.pend.shift())}catch(e){}}
 async function onSig(p){
  if(p.to!==ME.id)return;
+ if(PARK[p.callId]){if(p.type==='cancel'||p.type==='hangup'){delete PARK[p.callId];render()}return}
  let C=CALL;
  if(p.type==='invite'){
   if(DONE.has(p.callId))return;
@@ -850,7 +872,8 @@ async function onSig(p){
    break;
   case 'reject':case 'busy':
    C.invited=(C.invited||[]).filter(i=>i!==p.from);
-   if(!C.invited.length){if(C.state==='agentring')ivrNoAgent();else if(C.state==='calling')cleanup(p.type==='busy'?S.busy:S.rejected)}break;
+   if(C.state==='calling'&&!C.invited.length)cleanup(p.type==='busy'?S.busy:S.rejected);   // สายจากระบบ IVR: ไม่ตัดสาย รอคิวต่อ
+   break;
   case 'cancel':if(C.dir==='in'&&C.state==='ringing'){C.missed=1;cleanup()}break;
   case 'offer':{
    if(!C.pc)break;
@@ -891,10 +914,10 @@ function cleanup(msg){
  ['#call','#inc'].forEach(s=>{const e=$(s);e&&e.classList.remove('on')});
  if(msg)toast(msg);render();
 }
-const stTxt=C=>C.state==='calling'?S.calling:C.state==='agentring'?S.toAgent:C.state==='connecting'?S.connecting:(C.state==='ivr'||C.state==='connected')&&C.t0?mmss(Math.round((Date.now()-C.t0)/1000)):S.ivrOn;
+const stTxt=C=>C.state==='calling'?S.calling:C.state==='agentring'?S.toAgent+(C.qpos?' · คิวที่ '+C.qpos:''):C.state==='connecting'?S.connecting:(C.state==='ivr'||C.state==='connected')&&C.t0?mmss(Math.round((Date.now()-C.t0)/1000)):S.ivrOn;
 function incUI(){
  const C=CALL,e=$('#inc');if(!C||!e)return;
- e.innerHTML='<div class="oi"><div class="cav pulse" style="background:'+col(C.peer.id)+'">'+esc(ini(C.peer.name))+'</div><h2>'+esc(C.peer.name)+'</h2><p class="st">'+S.incoming+(C.grp?' · '+S.operator:'')+'</p><div class="cctl"><button class="cb red" data-act="decline"><span>'+PHI+'</span></button><button class="cb grn ring" data-act="answer"><span>'+PHI+'</span></button></div></div>';
+ e.innerHTML='<div class="oi"><div class="cav pulse" style="background:'+col(C.peer.id)+'">'+esc(ini(C.peer.name))+'</div><h2>'+esc(C.peer.name)+'</h2><p class="st">'+S.incoming+(C.grp?' · '+S.operator:'')+'</p>'+(C.grp?'<button class="btn p" data-act="park" style="margin-top:18px">⏸ รอสายก่อน (ยังไม่รับสาย)</button>':'')+'<div class="cctl"><button class="cb red" data-act="decline"><span>'+PHI+'</span></button><button class="cb grn ring" data-act="answer"><span>'+PHI+'</span></button></div></div>';
  e.classList.add('on');
 }
 function callUI(){
@@ -960,7 +983,7 @@ async function say(key,override){
 }
 async function startIVR(){
  if(CALL)return toast(S.inCall);
- ac();unlockAudio();try{IVRC=(await T.kvGet('ivr'))||defIVR()}catch(e){IVRC=defIVR()}
+ ac();unlockAudio();try{IVRC=normIVR(await T.kvGet('ivr'))}catch(e){IVRC=defIVR()}
  CALL={id:rid(),dir:'out',state:'ivr',pend:[],t0:Date.now(),peer:{id:'ivr',name:S.operator,ext:OPERATOR_EXT},ivr:{tok:0,idle:0,buf:'',mode:'menu',node:'root'}};
  tone([480,620],.3,.1);callUI();ivrRun('root');
 }
@@ -968,9 +991,10 @@ async function ivrRun(key){
  const C=CALL;if(!C||C.state!=='ivr'||!C.ivr)return;const I=C.ivr,tok=++I.tok;I.node=key;I.mode='menu';I.buf='';updExt();clearTimeout(I.tmo);
  await say(key);if(CALL!==C||I.tok!==tok)return;
  const n=IVRC.nodes[key]||{};
+ const again=()=>{I.tmo=setTimeout(()=>{if(CALL===C&&I.tok===tok)ivrRun(key)},10000)};   // เงียบ: อ่านเมนูซ้ำ ไม่ตัดสาย
  if(n.after)return ivrAct(n.after);
- if(!n.opts||!n.opts.length)return ivrAct({t:'node',v:'root'});
- I.tmo=setTimeout(()=>{if(CALL!==C||I.tok!==tok)return;if(++I.idle>=2){say('thx').then(()=>CALL===C&&cleanup(S.ended))}else ivrRun(key)},8000);
+ if(!n.opts||!n.opts.length){if(key==='root')return again();return ivrAct({t:'node',v:'root'})}
+ again();
 }
 async function ivrAct(a){
  const C=CALL;if(!C||!C.ivr)return;const I=C.ivr;
@@ -986,14 +1010,27 @@ function dig(d){
  const C=CALL;if(!C||C.state!=='ivr'||!C.ivr)return;
  const I=C.ivr;clearTimeout(I.tmo);
  if(I.mode==='vm'){if(d==='#')ivrVMEnd();return}
+ if(I.mode==='done')return;
  if(I.mode==='ext'){
   I.cancel&&I.cancel();
   if(d==='#')return ivrDial();if(d==='*'){I.buf='';updExt();return}
   I.buf+=d;updExt();I.tmo=setTimeout(ivrDial,4000);return;
  }
- I.tok++;I.cancel&&I.cancel();
- const o=((IVRC.nodes[I.node]||{}).opts||[]).find(x=>x.d===d);
- if(o)ivrAct(o);else say('bad').then(()=>CALL===C&&ivrRun(I.node));
+ const k=++I.tok;I.cancel&&I.cancel();            // กดแทรกระหว่างฟังเมนู
+ if(d==='*'){I.buf='';updExt();I.tmo=setTimeout(()=>{if(CALL===C&&I.tok===k)ivrRun(I.node)},6000);return}
+ if(d!=='#'){if(I.buf.length>=3)I.buf='';I.buf+=d}
+ updExt();menuResolve(C,I,d==='#');
+}
+/* รหัสปุ่มกด 1-3 หลัก: ถ้ายังมีรหัสที่ยาวกว่าขึ้นต้นเหมือนกัน จะรอตัวเลขถัดไป 2 วิ หรือกด # เพื่อยืนยันทันที */
+function menuResolve(C,I,force){
+ const opts=(IVRC.nodes[I.node]||{}).opts||[],b=I.buf;
+ const bad=()=>{I.buf='';updExt();const k=++I.tok;say('bad').then(()=>{if(CALL===C&&I.tok===k)ivrRun(I.node)})};
+ if(!b)return;
+ const exact=opts.find(o=>o.d===b),longer=opts.some(o=>o.d.length>b.length&&o.d.startsWith(b));
+ if(exact&&(force||!longer)){I.buf='';updExt();return ivrAct(exact)}
+ if(!longer||force)return bad();
+ const k=I.tok;
+ I.tmo=setTimeout(()=>{if(CALL!==C||I.tok!==k)return;const ex=opts.find(o=>o.d===I.buf);if(ex){I.buf='';updExt();ivrAct(ex)}else bad()},2000);
 }
 async function ivrDial(){
  const C=CALL;if(!C||!C.ivr)return;const I=C.ivr;clearTimeout(I.tmo);const ext=I.buf;I.buf='';updExt();if(!ext)return;
@@ -1001,34 +1038,32 @@ async function ivrDial(){
  if(!u||!ONL[u.id]){I.tok++;await say('bad');if(CALL===C)ivrRun('root');return}
  I.tok++;I.cancel&&I.cancel();await beginOut(u);
 }
-/* ----- โอนสายหาเจ้าหน้าที่: เพลงรอ 30 วิ → ประกาศคิว → วนจนครบ 3 นาที → ฝากข้อความเสียง ----- */
+/* ----- โอนสายหาเจ้าหน้าที่: เพลงรอ 30 วิ → แจ้งคิว → วนไปเรื่อยๆ จนกว่าจะมีคนรับ หรือผู้โทรวางสายเอง ----- */
 const queueAhead=C=>Object.values(ONL).filter(x=>x.wq&&x.wq<C.wq&&x.id!==ME.id).length;
-function clearWq(C){if(C&&C.wq){C.wq=0;try{T.track(pub(ME))}catch(e){}}}
+const trackMe=()=>{try{T.track(Object.assign(pub(ME),CALL&&CALL.wq?{wq:CALL.wq}:{}))}catch(e){}};
+function clearWq(C){if(C&&C.wq){C.wq=0;trackMe()}}
+function inviteAgents(C){
+ C.invited=C.invited||[];
+ Object.values(ONL).filter(x=>x.agent&&x.id!==ME.id&&!C.invited.includes(x.id)).forEach(x=>{C.invited.push(x.id);sig(x.id,'invite',C.id,{name:ME.name,ext:ME.ext,grp:1})});
+}
 async function ivrAgent(){
  const C=CALL;if(!C||!C.ivr)return;const I=C.ivr,k=++I.tok;
- const ag=Object.values(ONL).filter(x=>x.agent&&x.id!==ME.id);
- if(!ag.length){await say('noagent');if(CALL===C&&I.tok===k)ivrVM();return}
- await say('agent');if(CALL!==C||I.tok!==k)return;
- C.state='agentring';C.invited=ag.map(x=>x.id);C.seen=new Set(C.invited);C.ivrMode=1;callUI();
- C.wq=Date.now();T.track(Object.assign(pub(ME),{wq:C.wq}));   // บอกคนอื่นว่ากำลังรออยู่ในคิว
- ag.forEach(x=>sig(x.id,'invite',C.id,{name:ME.name,ext:ME.ext,grp:1}));
- C.agEnd=Date.now()+AGENT_WAIT;
- C.to=setTimeout(()=>{if(CALL===C&&C.state==='agentring'){C.invited.forEach(i=>sig(i,'cancel',C.id));ivrNoAgent()}},AGENT_WAIT);
+ const none=!Object.values(ONL).some(x=>x.agent&&x.id!==ME.id);
+ await say(none?'noagent':'agent');if(CALL!==C||I.tok!==k)return;
+ C.state='agentring';C.invited=[];C.ivrMode=1;C.wq=Date.now();trackMe();C.qpos=queueAhead(C)+1;callUI();
+ inviteAgents(C);
  const ok=()=>CALL===C&&I.tok===k&&C.state==='agentring';
- while(ok()&&Date.now()<C.agEnd){
-  holdStart();                                   // เล่นเพลงรอ 30 วิ
-  await new Promise(r=>setTimeout(r,Math.min(HOLD_CYCLE,Math.max(0,C.agEnd-Date.now()))));
-  if(!ok()||Date.now()>=C.agEnd)break;
-  stopRing();
-  Object.values(ONL).filter(x=>x.agent&&x.id!==ME.id&&!C.seen.has(x.id)).forEach(x=>{   // เจ้าหน้าที่ที่เพิ่งออนไลน์
-   C.seen.add(x.id);C.invited.push(x.id);sig(x.id,'invite',C.id,{name:ME.name,ext:ME.ext,grp:1})});
-  const n=queueAhead(C);
-  await say(null,'กรุณาถือสายรอสักครู่ กำลังติดต่อเจ้าหน้าที่ '+(n>0?'ขณะนี้เหลืออีกประมาณ '+n+' คิว':'ท่านเป็นคิวถัดไป'));
+ while(ok()){
+  holdStart();                                              // เพลงรอ 30 วิ
+  await new Promise(r=>setTimeout(r,HOLD_CYCLE));
+  if(!ok())break;
+  stopRing();inviteAgents(C);                               // ชวนเจ้าหน้าที่ที่เพิ่งออนไลน์ / ที่เคยไม่ว่าง
+  const n=queueAhead(C);C.qpos=n+1;const sc=$('#cst');if(sc)sc.textContent=stTxt(C);
+  const info='ท่านอยู่คิวที่ '+(n+1)+(n>0?' เหลืออีก '+n+' คิวก่อนถึงท่าน':' เป็นคิวถัดไป');
+  const q=IVRC.nodes.queue||{text:'',audio:''};
+  if(q.audio){await say('queue');if(!ok())break;await say(null,info)}
+  else await say(null,(q.text||'กรุณาถือสายรอสักครู่ กำลังติดต่อเจ้าหน้าที่')+' '+info);
  }
-}
-async function ivrNoAgent(){
- const C=CALL;if(!C||!C.ivr)return;stopRing();clearWq(C);clearTimeout(C.to);C.state='ivr';C.invited=[];callUI();
- const k=++C.ivr.tok;await say('noagent');if(CALL===C&&C.ivr.tok===k)ivrVM();
 }
 async function ivrVM(){
  const C=CALL;if(!C||!C.ivr)return;const I=C.ivr;const k=++I.tok;I.mode='vm';
@@ -1044,56 +1079,93 @@ async function ivrVMEnd(){
  if(CALL===C){await say('thx');if(CALL===C)cleanup(S.ended)}
 }
 
-/* ============ ตัวแก้ไข IVR ============ */
-function optsHtml(k,n){
- const nodes=Object.keys(ED.nodes).filter(x=>ED.nodes[x].after);
- const sel=o=>{const cur=o.t==='node'?'node:'+o.v:o.t;
-  const opts=nodes.map(x=>['node:'+x,(NL[x]||ED.nodes[x].text.slice(0,22)||x)]).concat([['agent',S.optAgent],['ext',S.optExt],['vm',S.optVm],['hang',S.optHang],['repeat',S.optRep]]);
-  return '<select class="ov2">'+opts.map(p=>'<option value="'+esc(p[0])+'" '+(p[0]===cur?'selected':'')+'>'+esc(p[1])+'</option>').join('')+'</select>'};
- return '<div class="opts">'+n.opts.map((o,i)=>'<div class="orow"><input class="od" maxlength="1" value="'+esc(o.d)+'"> '+sel(o)+'<button class="mini r" data-act="edoptdel" data-k="'+k+'" data-i="'+i+'">✕</button></div>').join('')+'<button class="mini" style="margin-top:6px" data-act="edoptadd" data-k="'+k+'">'+S.addOpt+'</button></div>';
+/* ============ ตัวแก้ไข IVR (หน้าเต็ม แยกเป็นหมวด บันทึกอัตโนมัติ) ============ */
+const SYSH={agent:'เล่นตอนเริ่มโอนสายไปหาเจ้าหน้าที่',queue:'ประโยคนำก่อนแจ้งคิว ระบบจะต่อท้ายลำดับคิวให้เอง เช่น “ท่านอยู่คิวที่ 2 เหลืออีก 1 คิวก่อนถึงท่าน”',noagent:'เล่นก่อนเข้าคิวเมื่อยังไม่มีเจ้าหน้าที่ออนไลน์',extp:'เล่นตอนให้ผู้โทรกดเบอร์สั้น',vmp:'เล่นก่อนเริ่มอัดข้อความเสียง',thx:'เล่นก่อนวางสาย',bad:'เล่นเมื่อกดผิดหรือไม่พบเบอร์'};
+const actVal=o=>o.t==='node'?'node:'+o.v:o.t;
+const actParse=v=>v.startsWith('node:')?{t:'node',v:v.slice(5)}:{t:v};
+const isCustom=k=>k!=='root'&&!SYS.includes(k);
+function nodeLabel(k){const n=ED.nodes[k]||{};return k==='root'?'เมนูหลัก':(n.name||NL[k]||((n.opts?'เมนูย่อย ':'ข้อความ ')+k.slice(-3)))}
+function actSel(cur,cls){
+ const ks=Object.keys(ED.nodes).filter(k=>k==='root'||isCustom(k));
+ return '<select class="'+cls+'"><optgroup label="ไปที่เมนู / ข้อความ">'+ks.map(k=>'<option value="node:'+k+'"'+(cur==='node:'+k?' selected':'')+'>'+esc(nodeLabel(k))+'</option>').join('')+'</optgroup><optgroup label="ทำงาน">'+[['agent',S.optAgent],['ext',S.optExt],['vm',S.optVm],['repeat',S.optRep],['hang',S.optHang]].map(p=>'<option value="'+p[0]+'"'+(cur===p[0]?' selected':'')+'>'+esc(p[1])+'</option>').join('')+'</optgroup></select>';
+}
+function audioRow(k,n){
+ return '<div class="erow"><label class="btn p sm" for="ivrf_'+k+'">⬆ อัปโหลดไฟล์เสียง</label><input type="file" id="ivrf_'+k+'" data-ivr-file="'+k+'" accept="audio/*,.mp3,.m4a,.wav,.ogg,.aac,.webm" hidden><button class="btn sm" data-act="edrec" data-k="'+k+'">'+(ER&&ER.k===k?'⏹ หยุดและบันทึก':'🎙 อัดเสียง')+'</button>'+(n.audio?'<button class="btn sm" data-act="edplay" data-k="'+k+'">▶ ฟัง</button><button class="mini r" data-act="edclr" data-k="'+k+'">✕ ลบเสียง</button>':'')+'</div><div class="sub" style="margin-top:6px'+(n.audio?';color:var(--green-dark)':'')+'">'+(n.audio?'✓ ใช้ไฟล์เสียงที่อัปโหลดไว้ (อัปโหลดแล้วบันทึกให้อัตโนมัติ)':'ยังไม่มีไฟล์เสียง — ระบบจะอ่านข้อความด้านบนด้วยเสียงสังเคราะห์')+'</div>';
+}
+function edCard(k,open){
+ const n=ED.nodes[k],sys=SYS.includes(k),menu=!!n.opts,info=!!n.after&&!menu;
+ const sum='<span>'+esc(nodeLabel(k))+(n.audio?' 🔊':'')+'</span>'+(menu?'<span class="tag">'+n.opts.length+' ปุ่ม</span>':'');
+ let b='';
+ if(isCustom(k))b+='<div class="fld"><label>ชื่อ (ใช้แสดงในรายการเลือกปลายทาง)</label><input type="text" class="en fin" maxlength="30" value="'+esc(n.name||'')+'" placeholder="เช่น ราคาสินค้า"></div>';
+ if(sys)b+='<div class="sub" style="margin-top:10px">'+esc(SYSH[k]||'')+'</div>';
+ b+='<div class="fld"><label>ข้อความที่ระบบพูด</label><textarea class="et">'+esc(n.text)+'</textarea></div>'+audioRow(k,n);
+ if(menu)b+='<div class="sub" style="margin:14px 0 4px"><b>ปุ่มกดของเมนูนี้</b> · รหัส 1–3 หลัก (เช่น 1, 12, 101) กด # เพื่อยืนยันทันที</div>'+n.opts.map((o,i)=>'<div class="orow"><input class="od" inputmode="numeric" maxlength="3" value="'+esc(o.d)+'" placeholder="รหัส"><span>→</span>'+actSel(actVal(o),'ov2')+'<button class="mini r" data-act="edoptdel" data-k="'+k+'">✕</button></div>').join('')+'<button class="mini" style="margin-top:8px" data-act="edoptadd" data-k="'+k+'">'+S.addOpt+'</button>';
+ if(info)b+='<div class="orow" style="margin-top:12px"><span>พูดจบแล้ว →</span>'+actSel(actVal(n.after),'af')+'</div>';
+ if(isCustom(k))b+='<div style="margin-top:14px"><button class="mini r" data-act="eddel" data-k="'+k+'">🗑 ลบรายการนี้</button></div>';
+ return '<details class="ecard2" data-k="'+k+'"'+(open?' open':'')+'><summary>'+sum+'</summary><div class="edb">'+b+'</div></details>';
+}
+function edDraw(openKey){
+ if(!ED)return;
+ const had=!!document.querySelector('.ecard2'),open=new Set([...document.querySelectorAll('.ecard2[open]')].map(e=>e.dataset.k));
+ if(!had)open.add('root');if(openKey)open.add(openKey);
+ const N=ED.nodes,ks=Object.keys(N).filter(isCustom),menus=ks.filter(k=>N[k].opts),infos=ks.filter(k=>!N[k].opts);
+ const sec=(t,s)=>'<div class="section-title"><h3>'+t+'</h3>'+(s?'<div class="sub">'+s+'</div>':'')+'</div>';
+ const keep=($('#edst')||{}).textContent,y=window.scrollY;
+ page().className='';
+ page().innerHTML='<div class="topbar"><button class="icon-btn" data-act="ivrBack" aria-label="กลับ">←</button><div class="tt"><h1>ระบบตอบรับอัตโนมัติ</h1><div class="clk" id="edst">'+esc(keep||'บันทึกอัตโนมัติทุกครั้งที่แก้ไข')+'</div></div></div>'+
+  sec('🎵 เพลงรอสาย','เล่นวนระหว่างรอเจ้าหน้าที่ สลับกับประกาศคิวทุก 30 วินาที ระบบไม่ตัดสายเอง')+
+  '<div class="card"><div class="sub" style="margin-bottom:10px">ใช้อยู่: <b id="holdinfo"></b></div><div class="erow"><label class="btn p sm" for="hf" style="cursor:pointer">⬆ อัปโหลดเพลง</label><input type="file" id="hf" accept="audio/*" hidden><button class="btn sm" data-act="holdPrev">▶ ฟัง</button><button class="btn sm" data-act="holdDel">✕ ใช้เพลงมาตรฐาน</button></div></div>'+
+  sec('1 · เมนูหลัก','สิ่งที่ผู้โทรได้ยินเป็นอันดับแรก')+edCard('root',open.has('root'))+
+  sec('2 · เมนูย่อย','เมนูที่มีปุ่มกดของตัวเอง')+menus.map(k=>edCard(k,open.has(k))).join('')+'<button class="cta ghost" data-act="edaddmenu">+ เพิ่มเมนูย่อย</button>'+
+  sec('3 · ข้อความข้อมูล','พูดข้อความแล้วไปต่อ เช่น เวลาทำการ ราคา ที่อยู่')+infos.map(k=>edCard(k,open.has(k))).join('')+'<button class="cta ghost" data-act="edaddinfo">'+S.addNode+'</button>'+
+  sec('4 · ข้อความระบบ','เสียงที่ระบบใช้ตอนโอนสาย รอคิว ฝากข้อความ และวางสาย')+SYS.map(k=>edCard(k,open.has(k))).join('');
+ holdInfo();window.scrollTo(0,y);
 }
 function edSync(){
- document.querySelectorAll('#sheet .ecard').forEach(el=>{
+ if(!ED)return;
+ document.querySelectorAll('.ecard2').forEach(el=>{
   const k=el.dataset.k,n=ED.nodes[k];if(!n)return;
-  n.text=el.querySelector('.et').value;
-  if(n.opts)n.opts=[...el.querySelectorAll('.orow')].map(r=>{const v=r.querySelector('.ov2').value,d=r.querySelector('.od').value.trim();return v.startsWith('node:')?{d,t:'node',v:v.slice(5)}:{d,t:v}}).filter(o=>o.d);
+  const tx=el.querySelector('.et');if(tx)n.text=tx.value;
+  const nm=el.querySelector('.en');if(nm)n.name=nm.value.trim();
+  if(n.opts)n.opts=[...el.querySelectorAll('.orow')].map(r=>Object.assign({d:r.querySelector('.od').value.replace(/\D/g,'').slice(0,3)},actParse(r.querySelector('.ov2').value))).filter(o=>o.d);
+  const af=el.querySelector('.af');if(af)n.after=actParse(af.value);
  });
 }
-function edDraw(){
- sheet('<h3>'+S.ivrSet+'</h3>'+Object.keys(ED.nodes).map(k=>{const n=ED.nodes[k];
-  return '<div class="ecard" data-k="'+k+'"><b>'+esc(NL[k]||S.extra)+'</b><textarea class="et">'+esc(n.text)+'</textarea><div class="erow"><button data-act="edrec" data-k="'+k+'">'+(ER&&ER.k===k?'⏹':'🎙')+' '+S.rec+'</button><label class="btn p" for="ivrf_'+k+'">⬆ เลือกไฟล์เสียง</label><input type="file" id="ivrf_'+k+'" data-ivr-file="'+k+'" accept="audio/*,.mp3,.m4a,.wav,.ogg,.aac,.webm" hidden>'+(n.audio?'<button data-act="edplay" data-k="'+k+'">▶ ฟังเสียง</button><button class="mini r" data-act="edclr" data-k="'+k+'">✕ ลบเสียง</button>':'')+(NL[k]?'':'<button class="mini r" data-act="eddel" data-k="'+k+'">'+S.del+'</button>')+'</div>'+(n.audio?'<div class="sub" style="margin-top:6px;color:var(--green-dark)">✓ มีไฟล์เสียงแล้ว</div>':'<div class="sub" style="margin-top:6px">ยังไม่มีไฟล์เสียง · เลือกไฟล์เพื่อใช้แทนเสียงอ่านข้อความ</div>')+(n.opts?optsHtml(k,n):'')+'</div>'}).join('')+
-  '<button class="cta inline ghost" data-act="edadd">'+S.addNode+'</button><button class="cta inline" data-act="edsave">'+S.save+'</button>');
+let edTm=null;
+const edSt=t=>{const e=$('#edst');if(e)e.textContent=t};
+function edLater(){clearTimeout(edTm);edSt('กำลังบันทึก…');edTm=setTimeout(edSave,700)}
+function edDup(E){
+ for(const k of Object.keys(E.nodes)){const n=E.nodes[k];if(!n.opts)continue;const seen=new Set();for(const o of n.opts){if(seen.has(o.d))return 'รหัส '+o.d+' ซ้ำในเมนู “'+(k==='root'?'เมนูหลัก':(n.name||NL[k]||k))+'”';seen.add(o.d)}}
+ return '';
+}
+async function edSave(){
+ clearTimeout(edTm);edTm=null;const E=ED;if(!E)return;edSync();
+ try{await T.kvSet('ivr',E);IVRC=JSON.parse(JSON.stringify(E));const w=edDup(E);edSt(w?'⚠ '+w+' (บันทึกแล้ว แต่ควรแก้)':'✓ บันทึกอัตโนมัติแล้ว '+hhmm(Date.now()))}
+ catch(e){edSt('✗ บันทึกไม่สำเร็จ');toast(e.message==='tbl'?S.needTbl:(e.message||S.err))}
 }
 async function edFilePick(k,f){
  if(!f)return;
- if(!ME||!ME.agent){toast('ไม่มีสิทธิ์อัปโหลดไฟล์เสียง กรุณาเข้าสู่ระบบด้วยบัญชีแอดมิน');return}
- if(!ED||!ED.nodes||!ED.nodes[k]){toast('ไม่พบรายการ IVR ที่ต้องการเพิ่มเสียง กรุณาปิดแล้วเปิดเมนู IVR ใหม่');return}
+ if(!ME||!ME.agent)return toast('ไม่มีสิทธิ์อัปโหลดไฟล์เสียง กรุณาเข้าสู่ระบบด้วยบัญชีแอดมิน');
+ if(!ED||!ED.nodes||!ED.nodes[k])return toast('ไม่พบรายการ IVR กรุณาปิดแล้วเปิดหน้านี้ใหม่');
  edSync();
- if(f.size>10*1024*1024){toast('ไฟล์เสียงต้องมีขนาดไม่เกิน 10 MB');return}
- const ext=(f.name.split('.').pop()||'').toLowerCase();
- const allowed=['mp3','m4a','wav','ogg','aac','webm'];
- if(!allowed.includes(ext)&&!String(f.type||'').toLowerCase().startsWith('audio/')){toast('ไฟล์นี้ไม่ใช่ไฟล์เสียงที่รองรับ กรุณาเลือก MP3, M4A, WAV, OGG, AAC หรือ WEBM');return}
- toast('กำลังอัปโหลดไฟล์เสียง…');
- try{
-  const url=await T.upload(f,allowed.includes(ext)?ext:'mp3');
-  ED.nodes[k].audio=url;
-  edDraw();
-  toast('อัปโหลดสำเร็จแล้ว กด “บันทึก” เพื่อบันทึกการตั้งค่า IVR');
- }catch(e){
-  console.error('IVR audio upload failed:',e);
-  toast('อัปโหลดไม่สำเร็จ: '+(e&&e.message?e.message:'ตรวจสอบ Storage และสิทธิ์ Supabase'));
- }
+ if(f.size>10*1024*1024)return toast('ไฟล์เสียงต้องมีขนาดไม่เกิน 10 MB');
+ const ext=(f.name.split('.').pop()||'').toLowerCase(),allowed=['mp3','m4a','wav','ogg','aac','webm'];
+ if(!allowed.includes(ext)&&!String(f.type||'').toLowerCase().startsWith('audio/'))return toast('ไฟล์นี้ไม่ใช่ไฟล์เสียงที่รองรับ เลือก MP3, M4A, WAV, OGG, AAC หรือ WEBM');
+ edSt('กำลังอัปโหลดไฟล์เสียง…');toast('กำลังอัปโหลดไฟล์เสียง…');
+ try{const url=await T.upload(f,allowed.includes(ext)?ext:'mp3');if(!ED||!ED.nodes[k])return;ED.nodes[k].audio=url;edDraw(k);await edSave();toast('อัปโหลดและบันทึกแล้ว')}
+ catch(e){console.error(e);edSt('✗ อัปโหลดไม่สำเร็จ');toast('อัปโหลดไม่สำเร็จ: '+(e&&e.message?e.message:'ตรวจสอบ Storage และสิทธิ์ Supabase'))}
 }
 async function edRec(k){
  edSync();
- if(ER&&ER.k===k){const R=ER;ER=null;const r=await R.rec.stop();R.st.getTracks().forEach(t=>t.stop());try{ED.nodes[k].audio=await T.upload(r.blob,R.rec.ext)}catch(e){toast(S.err)}return edDraw()}
- try{const st=await getMic();ER={k,st,rec:recorder(st)};edDraw()}catch(e){toast(S.noMic)}
+ if(ER&&ER.k===k){const R=ER;ER=null;const r=await R.rec.stop();R.st.getTracks().forEach(t=>t.stop());try{const url=await T.upload(r.blob,R.rec.ext);if(ED&&ED.nodes[k])ED.nodes[k].audio=url}catch(e){toast(e.message||S.err)}edDraw(k);return edSave()}
+ if(ER)return toast('กำลังอัดเสียงอยู่ที่รายการอื่น');
+ try{const st=await getMic();ER={k,st,rec:recorder(st)};edDraw(k)}catch(e){toast(micMsg(e))}
 }
 
 /* ============ เหตุการณ์ ============ */
 const A={
  login,
-  tab(t){VIEW=t.dataset.v;window.scrollTo(0,0);render()},
+  tab(t){if(ED){if(edTm)edSave();ED=null}VIEW=t.dataset.v;window.scrollTo(0,0);render()},
  open(t){openChat(t.dataset.c)},
  chat(t){openChat(cid(ME.id,t.dataset.id))},
  back(){recEnd(false);OPEN=null;render()},
@@ -1106,15 +1178,20 @@ const A={
  dialer,dk(t){if(DIAL.length<8){DIAL+=t.dataset.d;$('#dn').textContent=DIAL;tone(DT[t.dataset.d],.1,.08)}},dbs(){DIAL=DIAL.slice(0,-1);$('#dn').innerHTML=DIAL||'&nbsp;'},dgo:dialGo,
  closeSheet,holdPrev,holdDel,postT:postText,like:likePost,postdel:delPost,adminAdd,adminDel,adminTg,msgmenu,unsend,setup:setupAdmin,
  async logout(){if(CALL)hang();MS.removeItem('uy_me');location.reload()},
- ivrEd(){ED=JSON.parse(JSON.stringify(IVRC));T.kvGet('ivr').then(v=>{if(v){ED=JSON.parse(JSON.stringify(v));IVRC=v;edDraw()}}).catch(()=>{});edDraw()},
- edrec(t){edRec(t.dataset.k)},
- edplay(t){const a=ED.nodes[t.dataset.k].audio;if(a)new Audio(a).play().catch(()=>{})},
- edclr(t){edSync();ED.nodes[t.dataset.k].audio='';edDraw()},
- eddel(t){edSync();delete ED.nodes[t.dataset.k];ED.nodes.root.opts=ED.nodes.root.opts.filter(o=>!(o.t==='node'&&o.v===t.dataset.k));edDraw()},
- edadd(){edSync();ED.nodes['n'+rid().slice(0,5)]={text:'',audio:'',after:{t:'node',v:'root'}};edDraw()},
- edoptadd(t){edSync();ED.nodes[t.dataset.k].opts.push({d:'',t:'agent'});edDraw()},
- edoptdel(t){edSync();ED.nodes[t.dataset.k].opts.splice(+t.dataset.i,1);edDraw()},
- async edsave(){edSync();try{await T.kvSet('ivr',ED);IVRC=JSON.parse(JSON.stringify(ED));closeSheet();toast(S.saved)}catch(e){toast(e.message==='tbl'?S.needTbl:e.message)}}
+ park(){const C=CALL;if(!C||C.dir!=='in'||C.state!=='ringing')return;PARK[C.id]={id:C.id,peer:C.peer,ts:Date.now()};CALL=null;stopRing();$('#inc').classList.remove('on');toast('พักสายไว้แล้ว — ผู้โทรยังฟังเพลงรอและอยู่ในคิว ดูได้ที่เมนูแอดมิน');if(!OPEN)VIEW='admin';render()},
+ unpark(t){if(CALL)return toast(S.inCall);const p=PARK[t.dataset.id];if(!p)return;delete PARK[p.id];ac();CALL={id:p.id,dir:'in',state:'ringing',pend:[],peer:p.peer,grp:true};return answer()},
+ parkdel(t){const p=PARK[t.dataset.id];if(!p)return;delete PARK[p.id];DONE.add(p.id);sig(p.peer.id,'reject',p.id);render()},
+ ivrEd(){VIEW='ivr';ED=null;window.scrollTo(0,0);page().innerHTML='<div class="card empty">กำลังโหลด…</div>';drawNav();
+  return T.kvGet('ivr').then(v=>{if(VIEW!=='ivr')return;ED=JSON.parse(JSON.stringify(normIVR(v)));IVRC=JSON.parse(JSON.stringify(ED));edDraw()},e=>{toast(e.message==='tbl'?S.needTbl:(e.message||S.err));VIEW='admin';render()})},
+ async ivrBack(){if(edTm)await edSave();if(ER&&ER.st)ER.st.getTracks().forEach(t=>t.stop());ER=null;ED=null;VIEW='admin';window.scrollTo(0,0);render()},
+ edrec(t){return edRec(t.dataset.k)},
+ edplay(t){const a=ED.nodes[t.dataset.k].audio;if(a)new Audio(a).play().catch(()=>toast(S.err))},
+ edclr(t){edSync();ED.nodes[t.dataset.k].audio='';edDraw();return edSave()},
+ eddel(t){const k=t.dataset.k;if(!confirm('ลบรายการนี้? ปุ่มที่ชี้มาจะถูกลบ และข้อความที่ต่อมาจะกลับไปเมนูหลัก'))return;edSync();delete ED.nodes[k];Object.values(ED.nodes).forEach(n=>{if(n.opts)n.opts=n.opts.filter(o=>!(o.t==='node'&&o.v===k));if(n.after&&n.after.t==='node'&&n.after.v===k)n.after={t:'node',v:'root'}});edDraw();return edSave()},
+ edaddmenu(){edSync();const k='m'+rid().slice(0,5);ED.nodes[k]={name:'เมนูย่อยใหม่',text:'',audio:'',opts:[{d:'0',t:'node',v:'root'}]};edDraw(k);return edSave()},
+ edaddinfo(){edSync();const k='i'+rid().slice(0,5);ED.nodes[k]={name:'ข้อความใหม่',text:'',audio:'',after:{t:'node',v:'root'}};edDraw(k);return edSave()},
+ edoptadd(t){edSync();ED.nodes[t.dataset.k].opts.push({d:'',t:'agent'});edDraw(t.dataset.k)},
+ edoptdel(t){const r=t.closest('.orow');if(r)r.remove();edSync();edDraw(t.dataset.k);return edSave()}
 };
 document.addEventListener('click',e=>{
  const t=e.target.closest('[data-act]');if(!t||t.type==='checkbox')return;
@@ -1122,6 +1199,7 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('change',async e=>{
  const t=e.target;
+ if(ED&&t.closest&&t.closest('.ecard2')&&(t.classList.contains('ov2')||t.classList.contains('af')))edLater();
  if(t.id==='hf'){const f=t.files[0];t.value='';holdPick(f)}
  if(t.dataset&&t.dataset.ivrFile){const k=t.dataset.ivrFile,f=t.files[0];t.value='';edFilePick(k,f)}
  if(t.id==='ff'){const f=t.files[0];t.value='';postImage(f)}
@@ -1130,6 +1208,7 @@ document.addEventListener('change',async e=>{
 });
 document.addEventListener('input',e=>{
  const t=e.target;
+ if(ED&&t.closest&&t.closest('.ecard2')&&(t.classList.contains('et')||t.classList.contains('od')||t.classList.contains('en'))){if(t.classList.contains('od'))t.value=t.value.replace(/\D/g,'');edLater()}
  if(t.id==='mi'){const has=!!t.value.trim();if(has&&OPEN&&OPEN!=='inbox'&&Date.now()-lastTyp>1500){lastTyp=Date.now();T.emit('typing',{chat:OPEN,from:ME.id})}$('#bs').style.display=has?'':'none';$('#bm').style.display=has?'none':''}
  if(t.id==='ps'){const q=t.value.toLowerCase();document.querySelectorAll('#pl .item').forEach(r=>r.style.display=r.dataset.nm.includes(q)?'':'none')}
 });
