@@ -280,6 +280,7 @@ const CFG=Object.assign({SB_URL:'https://iejmwihipfvtkbvjtude.supabase.co',SB_KE
 const CLOUD=!!(CFG.SB_URL&&CFG.SB_KEY&&window.supabase);
 const OPERATOR_EXT='100';
 const UNS='__unsent__';
+const AGENT_WAIT=180000,HOLD_CYCLE=30000; /* รอเจ้าหน้าที่สูงสุด 3 นาที / เล่นเพลงรอรอบละ 30 วิ */
 const DONE=new Set();
 const ICE=CFG.ICE||[
  {urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302','stun:global.stun.twilio.com:3478']},
@@ -836,7 +837,7 @@ async function onSig(p){
  try{switch(p.type){
   case 'accept':
    if(C.dir==='out'&&(C.state==='calling'||C.state==='agentring')){
-    clearTimeout(C.to);clearInterval(C.rs);stopRing();stopPrompt();
+    clearTimeout(C.to);clearInterval(C.rs);stopRing();stopPrompt();clearWq(C);
     (C.invited||[]).filter(i=>i!==p.from).forEach(i=>sig(i,'cancel',C.id));
     C.peer=getUser(p.from)||C.peer;C.ivr&&(C.ivr.tok++);C.ivr=null;C.state='connecting';
     C.to=setTimeout(()=>{if(CALL===C&&C.state==='connecting')cleanup(S.failed)},30000);
@@ -879,7 +880,7 @@ function hang(){
  cleanup(S.ended);
 }
 function cleanup(msg){
- const C=CALL;if(!C)return;CALL=null;
+ const C=CALL;if(!C)return;CALL=null;clearWq(C);
  stopRing();DONE.add(C.id);clearInterval(C.tm);clearTimeout(C.to);clearInterval(C.rs);clearInterval(C.ra);clearTimeout(C.dc);clearTimeout(C.icT);
  if(C.ivr){const I=C.ivr;clearTimeout(I.tmo);clearTimeout(I.vmT);I.tok++;I.cancel&&I.cancel();I.rec&&I.rec.stop().catch(()=>{})}
  try{C.pc&&C.pc.close()}catch(e){}
@@ -945,9 +946,9 @@ function speakGoogle(text,I){return new Promise(res=>{
  const next=()=>{if(done)return;if(i>=parts.length)return fin(true);a.onended=next;a.onerror=()=>fin(i>1);a.src='https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=th&q='+encodeURIComponent(parts[i++]);a.play().catch(()=>fin(i>1))};
  next();
 })}
-async function say(key){
+async function say(key,override){
  const C=CALL,I=C&&C.ivr;if(!I)return;
- const n=IVRC.nodes[key]||{text:'',audio:''};I.cancel&&I.cancel();
+ const n=override!=null?{text:override,audio:''}:(IVRC.nodes[key]||{text:'',audio:''});I.cancel&&I.cancel();
  C.sub=n.text;const s=$('#sub');if(s)s.textContent=n.text;
  if(n.audio){
   return new Promise(res=>{const a=new Audio(n.audio);let d=false;const fin=()=>{if(d)return;d=true;I.cancel=null;res()};I.cancel=()=>{a.pause();fin()};a.onended=fin;a.onerror=fin;a.play().catch(fin)});
@@ -1000,17 +1001,33 @@ async function ivrDial(){
  if(!u||!ONL[u.id]){I.tok++;await say('bad');if(CALL===C)ivrRun('root');return}
  I.tok++;I.cancel&&I.cancel();await beginOut(u);
 }
+/* ----- โอนสายหาเจ้าหน้าที่: เพลงรอ 30 วิ → ประกาศคิว → วนจนครบ 3 นาที → ฝากข้อความเสียง ----- */
+const queueAhead=C=>Object.values(ONL).filter(x=>x.wq&&x.wq<C.wq&&x.id!==ME.id).length;
+function clearWq(C){if(C&&C.wq){C.wq=0;try{T.track(pub(ME))}catch(e){}}}
 async function ivrAgent(){
- const C=CALL;if(!C||!C.ivr)return;const I=C.ivr;const k=++I.tok;
+ const C=CALL;if(!C||!C.ivr)return;const I=C.ivr,k=++I.tok;
  const ag=Object.values(ONL).filter(x=>x.agent&&x.id!==ME.id);
  if(!ag.length){await say('noagent');if(CALL===C&&I.tok===k)ivrVM();return}
  await say('agent');if(CALL!==C||I.tok!==k)return;
- C.state='agentring';C.invited=ag.map(x=>x.id);C.ivrMode=1;callUI();holdStart();
+ C.state='agentring';C.invited=ag.map(x=>x.id);C.seen=new Set(C.invited);C.ivrMode=1;callUI();
+ C.wq=Date.now();T.track(Object.assign(pub(ME),{wq:C.wq}));   // บอกคนอื่นว่ากำลังรออยู่ในคิว
  ag.forEach(x=>sig(x.id,'invite',C.id,{name:ME.name,ext:ME.ext,grp:1}));
- C.to=setTimeout(()=>{if(CALL===C&&C.state==='agentring'){C.invited.forEach(i=>sig(i,'cancel',C.id));ivrNoAgent()}},30000);
+ C.agEnd=Date.now()+AGENT_WAIT;
+ C.to=setTimeout(()=>{if(CALL===C&&C.state==='agentring'){C.invited.forEach(i=>sig(i,'cancel',C.id));ivrNoAgent()}},AGENT_WAIT);
+ const ok=()=>CALL===C&&I.tok===k&&C.state==='agentring';
+ while(ok()&&Date.now()<C.agEnd){
+  holdStart();                                   // เล่นเพลงรอ 30 วิ
+  await new Promise(r=>setTimeout(r,Math.min(HOLD_CYCLE,Math.max(0,C.agEnd-Date.now()))));
+  if(!ok()||Date.now()>=C.agEnd)break;
+  stopRing();
+  Object.values(ONL).filter(x=>x.agent&&x.id!==ME.id&&!C.seen.has(x.id)).forEach(x=>{   // เจ้าหน้าที่ที่เพิ่งออนไลน์
+   C.seen.add(x.id);C.invited.push(x.id);sig(x.id,'invite',C.id,{name:ME.name,ext:ME.ext,grp:1})});
+  const n=queueAhead(C);
+  await say(null,'กรุณาถือสายรอสักครู่ กำลังติดต่อเจ้าหน้าที่ '+(n>0?'ขณะนี้เหลืออีกประมาณ '+n+' คิว':'ท่านเป็นคิวถัดไป'));
+ }
 }
 async function ivrNoAgent(){
- const C=CALL;if(!C||!C.ivr)return;stopRing();clearTimeout(C.to);C.state='ivr';C.invited=[];callUI();
+ const C=CALL;if(!C||!C.ivr)return;stopRing();clearWq(C);clearTimeout(C.to);C.state='ivr';C.invited=[];callUI();
  const k=++C.ivr.tok;await say('noagent');if(CALL===C&&C.ivr.tok===k)ivrVM();
 }
 async function ivrVM(){
