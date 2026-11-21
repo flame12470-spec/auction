@@ -276,6 +276,12 @@ details.ecard2[open]>summary::after{content:'▴'}
 .orow input.od{width:66px}.orow span{color:var(--muted);white-space:nowrap}
 .section-title .sub{margin-top:2px}
 @media(min-width:768px){details.ecard2{margin-left:24px;margin-right:24px}}
+
+.qgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.qslot{border:2px solid var(--line);border-radius:14px;padding:8px 10px}
+.qslot.has{border-color:var(--green);background:#f6fbe6}
+.qslot b{font-size:14px}
+@media(min-width:768px){.qgrid{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 <body>
@@ -293,6 +299,18 @@ const CFG=Object.assign({SB_URL:'https://iejmwihipfvtkbvjtude.supabase.co',SB_KE
 const CLOUD=!!(CFG.SB_URL&&CFG.SB_KEY&&window.supabase);
 const OPERATOR_EXT='100';
 const UNS='__unsent__';
+const AUDEXTS=['mp3','m4a','mp4','aac','wav','wave','ogg','oga','opus','webm','weba','flac','amr','3gp','3gpp','aif','aiff','caf','wma','mka'];
+const AUDACC='audio/*,.'+AUDEXTS.join(',.');
+const AUDMAX=25*1024*1024;
+const AUDMIME={mp3:'audio/mpeg',m4a:'audio/mp4',mp4:'audio/mp4',aac:'audio/aac',wav:'audio/wav',wave:'audio/wav',ogg:'audio/ogg',oga:'audio/ogg',opus:'audio/ogg',webm:'audio/webm',weba:'audio/webm',flac:'audio/flac',amr:'audio/amr','3gp':'audio/3gpp','3gpp':'audio/3gpp',aif:'audio/aiff',aiff:'audio/aiff',caf:'audio/x-caf',wma:'audio/x-ms-wma',mka:'audio/x-matroska'};
+/* ตรวจไฟล์เสียง: คืนนามสกุลที่ใช้ หรือ null (พร้อมแจ้งเหตุผล) */
+function audExt(f){
+ if(!f)return null;
+ if(f.size>AUDMAX){toast('ไฟล์เสียงต้องมีขนาดไม่เกิน 25 MB');return null}
+ const ext=(f.name.split('.').pop()||'').toLowerCase(),isA=String(f.type||'').toLowerCase().startsWith('audio/');
+ if(!AUDEXTS.includes(ext)&&!isA){toast('ไฟล์นี้ไม่ใช่ไฟล์เสียงที่รองรับ (รองรับ MP3, M4A, WAV, OGG, OPUS, AAC, FLAC, WEBM, AMR, 3GP, AIFF ฯลฯ)');return null}
+ return AUDEXTS.includes(ext)?ext:'mp3';
+}
 const HOLD_CYCLE=30000; /* เพลงรอรอบละ 30 วิ แล้วแจ้งคิว วนไปเรื่อยๆ จนกว่าจะมีคนรับสาย (ไม่ตัดสายอัตโนมัติ) */
 const DONE=new Set();
 const ICE=CFG.ICE||[
@@ -392,10 +410,10 @@ function CloudT(){
   async saveMsg(m){ck(await sb.from('uy_msgs').insert(m))},
   async unsendMsg(id){const r=ck(await sb.from('uy_msgs').update({kind:'text',body:UNS,url:''}).eq('id',id).select());if(!r||!r.length)throw Error('ยกเลิกข้อความไม่ได้ — ต้องเปิดสิทธิ์ update ของตาราง uy_msgs ใน Supabase')},
   async delUser(id){const r=ck(await sb.from('uy_users').delete().eq('id',id).select());if(!r||!r.length)throw Error('ลบผู้ใช้ไม่ได้ — ต้องเปิดสิทธิ์ delete ของตาราง uy_users ใน Supabase')},
-  async recent(id){const r=ck(await sb.from('uy_msgs').select('*').or('chat.like.*'+id+'*,chat.eq.inbox,chat.eq.feed').order('ts',{ascending:false}).limit(700));return r.reverse()},
+  async recent(id,ag){const r=ck(await sb.from('uy_msgs').select('*').or('chat.like.*'+id+'*,chat.eq.inbox,chat.eq.feed'+(ag?',chat.like.sup|*':'')).order('ts',{ascending:false}).limit(700));return r.reverse()},
   async upload(blob,ext){
    if(!me||!me.id)throw Error('ยังไม่ได้เข้าสู่ระบบ กรุณาออกจากระบบแล้วเข้าใหม่');
-   const types={mp3:'audio/mpeg',m4a:'audio/mp4',wav:'audio/wav',ogg:'audio/ogg',aac:'audio/aac',webm:'audio/webm',jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png'};
+   const types=Object.assign({},AUDMIME,{jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png'});
    const p=me.id+'/'+rid()+'.'+ext;
    const contentType=blob.type||types[ext]||'application/octet-stream';
    const r=await sb.storage.from('uy-media').upload(p,blob,{contentType,upsert:true});
@@ -483,8 +501,13 @@ async function enter(me,silent){
  T.on('msg',onMsg);T.on('sig',onSig);T.on('typing',onTyping);T.on('unsend',onUnsend);T.on('kick',onKick);
  T.onPresence(o=>{ONL=o;if(CALL&&CALL.state==='agentring'&&CALL.wq){CALL.qpos=queueAhead(CALL)+1;const sq=$('#cst');if(sq)sq.textContent=stTxt(CALL)}const k=Object.values(o).map(x=>x.id+'|'+x.name+'|'+!!x.agent).sort().join();if(k!==lastPres){lastPres=k;render()}});
  await refresh();setInterval(refreshUsers,15000);
- $('#nav').classList.remove('hide');VIEW='feed';render();
+ $('#nav').classList.remove('hide');VIEW=ME.agent?'feed':'chats';render();
+ if(!ME.agent)setTimeout(contactPrompt,350);
  return true;
+}
+function contactPrompt(){
+ if(!ME||ME.agent||CALL||OPEN)return;
+ sheet('<h3>ต้องการติดต่อเจ้าหน้าที่หรือไม่?</h3><p class="hint" style="margin:4px 0 10px">เลือก “ใช่” เพื่อโทรเข้าระบบตอบรับอัตโนมัติ หรือเลือก “ไม่” เพื่อไปหน้าแชต</p><button class="cta inline" data-act="contactYes">📞 ใช่ ติดต่อเจ้าหน้าที่</button><button class="cta inline ghost" data-act="contactNo">💬 ไม่ ไปหน้าแชต</button>');
 }
 function forceOut(){try{if(CALL)hang()}catch(e){};MS.removeItem('uy_me');try{alert('บัญชีของคุณถูกลบออกจากระบบแล้ว')}catch(e){};location.reload()}
 function onKick(p){if(p&&ME&&p.id===ME.id)forceOut()}
@@ -501,7 +524,7 @@ async function refreshUsers(){
 }
 async function refresh(){
  try{const us=await T.users();us.forEach(u=>USERS[u.id]=u);lastUsers=JSON.stringify(us.map(u=>[u.id,u.name,u.ext,!!u.agent]).sort());
-  const r=await T.recent(ME.id);MSGS={};r.forEach(m=>{if(m.chat!=='inbox'||ME.agent)addMsg(m)})}
+  const r=await T.recent(ME.id,ME.agent);MSGS={};r.forEach(m=>{if((m.chat!=='inbox'&&m.chat!=='feed')||ME.agent)addMsg(m)})}
  catch(e){toast(e.message==='tbl'?S.needTbl:e.message)}
 }
 
@@ -514,7 +537,7 @@ async function sendMsg(chat,kind,f){
  T.emit('msg',m);
 }
 function onMsg(m){
- const rel=m.chat==='feed'||(m.chat==='inbox'?ME.agent:m.chat.split('|').includes(ME.id));if(!rel||m.sender===ME.id)return;
+ const rel=(m.chat==='feed'||m.chat==='inbox')?ME.agent:isSup(m.chat)?(ME.agent||supOwner(m.chat)===ME.id):m.chat.split('|').includes(ME.id);if(!rel||m.sender===ME.id)return;
  if(!addMsg(m))return;
  if(m.chat==='feed'){tone([660],.06,.04);render();return}
  delete TYP[m.chat];
@@ -564,7 +587,7 @@ const NAVAD='<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 1
 function drawNav(){
  const tot=Object.keys(MSGS).filter(c=>c!=='feed').reduce((s,c)=>s+unread(c),0);
  const t=(k,l)=>'<button class="tab'+((VIEW===k||(k==='admin'&&VIEW==='ivr'))?' on':'')+'" data-act="tab" data-v="'+k+'"><svg viewBox="0 0 24 24">'+(k==='admin'?NAVAD:k==='feed'?NAVFEED:NAVIC[k])+'</svg>'+l+(k==='chats'&&tot?'<span class="tb">'+tot+'</span>':'')+(k==='admin'&&Object.keys(PARK).length?'<span class="tb">'+Object.keys(PARK).length+'</span>':'')+'</button>';
- $('#nav').innerHTML=t('feed',S.feed)+t('chats',S.chats)+t('people',S.people)+t('calls',S.calls)+(ME.agent?t('admin',S.admin):'')+t('set',S.set);
+ $('#nav').innerHTML=ME.agent?t('feed',S.feed)+t('chats',S.chats)+t('people',S.people)+t('calls',S.calls)+t('admin',S.admin)+t('set',S.set):t('chats',S.chats)+t('set',S.set);
 }
 const topbar=t=>'<div class="topbar"><div class="tt"><h1><span class="brand-dot"></span>'+t+'</h1><div class="clk" data-clock></div></div></div>';
 const clk=()=>{const d=new Date();return d.toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'})+' · '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds())};
@@ -576,23 +599,31 @@ function render(){
  if(OPEN){chatHead();chatMsgs();return}
  const a=document.activeElement;
  if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)&&page().contains(a))return;
- if(VIEW==='admin'&&!ME.agent)VIEW='feed';
+ if(!ME.agent&&VIEW!=='chats'&&VIEW!=='set')VIEW='chats';   // ผู้ใช้ทั่วไปมีแค่ แชต / ตั้งค่า
  const y=window.scrollY;
  const V={chats:vChats,feed:vFeed,people:vPeople,calls:vCalls,set:vSet,admin:vAdmin}[VIEW]();
  page().className='';
  let tb=topbar({chats:S.chats,feed:S.app,people:S.people,calls:S.calls,set:S.set,admin:S.admin}[VIEW]);
  if(VIEW==='feed'){const tot=Object.keys(MSGS).filter(c=>c!=='feed').reduce((a,c)=>a+unread(c),0);
   tb=tb.replace(/<\/div><\/div>$/,'</div><button class="icon-btn callbtn cbtn" data-act="tab" data-v="chats" aria-label="แชต"><svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round">'+NAVIC.chats+'</svg>'+(tot?'<span class="cbadge">'+tot+'</span>':'')+'</button></div>')}
+ if(VIEW==='chats'&&!ME.agent)tb=tb.replace(/<\/div><\/div>$/,'</div><button class="icon-btn callbtn" data-act="ivr" aria-label="โทรติดต่อเจ้าหน้าที่">'+PHI+'</button></div>');
  page().innerHTML=tb+V;
  $('#nav').classList.remove('hide');drawNav();tickClock();window.scrollTo(0,y);
 }
+const SUP='sup|';
+const isSup=c=>String(c).startsWith(SUP);
+const supOwner=c=>String(c).slice(4);
+const supId=()=>SUP+ME.id;
+const pidOf=c=>c==='inbox'?null:isSup(c)?(supOwner(c)===ME.id?null:supOwner(c)):String(c).split('|').find(x=>x!==ME.id);
+const chatUser=c=>{if(c==='inbox')return{id:'inbox',name:S.inbox};if(isSup(c)&&supOwner(c)===ME.id)return{id:'sup',name:'แชตกับเจ้าหน้าที่'};const p=pidOf(c);return getUser(p)||{id:p,name:'?'}};
 function vChats(){
- const ids=Object.keys(MSGS).filter(c=>c!=='feed'&&MSGS[c].length&&(c!=='inbox'||ME.agent)).sort((a,b)=>MSGS[b][MSGS[b].length-1].ts-MSGS[a][MSGS[a].length-1].ts);
- const dial='';
- if(!ids.length)return dial+'<div class="card empty">'+S.noChats+'</div>';
- return dial+'<div class="list">'+ids.map(c=>{
-  const l=MSGS[c][MSGS[c].length-1],inbox=c==='inbox',pid=inbox?null:c.split('|').find(x=>x!==ME.id),u=inbox?{id:'inbox',name:S.inbox}:(getUser(pid)||{id:pid,name:'?'}),n=unread(c);
-  return '<div class="item" role="button" tabindex="0" data-act="open" data-c="'+esc(c)+'">'+av(u,'',pid&&ONL[pid])+'<div class="nm"><b>'+esc(u.name)+'</b><small>'+(l.sender===ME.id&&l.body!==UNS?'✓ ':'')+esc(prev(l))+'</small></div><div class="end"><span>'+hhmm(l.ts)+'</span>'+(n?'<span class="badge">'+n+'</span>':'')+'</div>'+'</div>'}).join('')+'</div>';
+ let ids=Object.keys(MSGS).filter(c=>c!=='feed'&&MSGS[c].length&&(c!=='inbox'||ME.agent)).sort((a,b)=>MSGS[b][MSGS[b].length-1].ts-MSGS[a][MSGS[a].length-1].ts);
+ if(!ME.agent){ids=ids.filter(c=>c!==supId());ids.unshift(supId())}      // แชตเจ้าหน้าที่อยู่บนสุดเสมอ
+ if(!ids.length)return '<div class="card empty">'+S.noChats+'</div>';
+ return '<div class="list">'+ids.map(c=>{
+  const l=(MSGS[c]||[])[(MSGS[c]||[]).length-1],pid=pidOf(c),u=chatUser(c),n=unread(c),mine=isSup(c)&&supOwner(c)===ME.id;
+  const sub=l?((l.sender===ME.id&&l.body!==UNS?'✓ ':'')+prev(l)):'พิมพ์ข้อความถึงเจ้าหน้าที่ได้ที่นี่';
+  return '<div class="item" role="button" tabindex="0" data-act="open" data-c="'+esc(c)+'">'+(mine?'<div class="av" style="background:var(--green)">💬</div>':av(u,'',pid&&ONL[pid]))+'<div class="nm"><b>'+esc(u.name)+(isSup(c)&&ME.agent?'<span class="tag">ขอความช่วยเหลือ</span>':'')+'</b><small>'+esc(sub)+'</small></div><div class="end"><span>'+(l?hhmm(l.ts):'')+'</span>'+(n?'<span class="badge">'+n+'</span>':'')+'</div></div>'}).join('')+'</div>';
 }
 function feedData(){
  const likes={},posts=[];
@@ -684,10 +715,9 @@ async function holdSave(h){
 }
 async function holdPick(f){
  if(!f||!ME.agent)return;
- if(f.size>10*1024*1024)return toast('ไฟล์ใหญ่เกิน 10 MB');
- if(!/^audio\//.test(f.type)&&!/\.(mp3|m4a|wav|ogg|aac|webm)$/i.test(f.name))return toast('เลือกไฟล์เสียงเท่านั้น');
+ const ext=audExt(f);if(!ext)return;
  toast('กำลังอัปโหลดเพลง…');
- try{const ext=(f.name.split('.').pop()||'mp3').toLowerCase();const url=await T.upload(f,ext);await holdSave({url,name:f.name});toast('อัปโหลดและบันทึกเพลงรอสายแล้ว')}catch(e){toast(e.message||S.err)}
+ try{const url=await T.upload(f,ext);await holdSave({url,name:f.name});toast('อัปโหลดและบันทึกเพลงรอสายแล้ว')}catch(e){toast(e.message||S.err)}
 }
 let PREV=null;
 function holdPrev(){
@@ -724,10 +754,10 @@ async function adminTg(t){
 /* ============ หน้าแชต ============ */
 function openChat(c){OPEN=c;READ[c]=Date.now();SV('uy_read',READ);buildChat()}
 function buildChat(){
- const c=OPEN,inbox=c==='inbox',pid=inbox?null:c.split('|').find(x=>x!==ME.id),u=inbox?{id:'inbox',name:S.inbox}:(getUser(pid)||{id:pid,name:'?'});
+ const c=OPEN,inbox=c==='inbox',pid=pidOf(c),u=chatUser(c);
  $('#nav').classList.add('hide');
  page().className='noNav';
- page().innerHTML='<div class="chatpage"><div class="topbar"><button class="icon-btn" data-act="back">←</button>'+av(u,'s')+'<div class="hn"><b>'+esc(u.name)+'</b><div class="hl"><small id="hs"></small><small class="ck" data-clock></small></div></div>'+(pid?'<button class="icon-btn callbtn" data-act="callu" data-id="'+esc(pid)+'" aria-label="โทร">'+PHI+'</button>':'')+'</div><div id="msgs" data-c="'+esc(c)+'"></div><div id="tp" class="tp hide"><span class="dts"><i></i><i></i><i></i></span><span>'+S.typing+'</span></div><div id="comp"></div></div>';
+ page().innerHTML='<div class="chatpage"><div class="topbar"><button class="icon-btn" data-act="back">←</button>'+av(u,'s')+'<div class="hn"><b>'+esc(u.name)+'</b><div class="hl"><small id="hs"></small><small class="ck" data-clock></small></div></div>'+(pid?'<button class="icon-btn callbtn" data-act="callu" data-id="'+esc(pid)+'" aria-label="โทร">'+PHI+'</button>':(isSup(c)&&!ME.agent?'<button class="icon-btn callbtn" data-act="ivr" aria-label="โทรติดต่อเจ้าหน้าที่">'+PHI+'</button>':''))+'</div><div id="msgs" data-c="'+esc(c)+'"></div><div id="tp" class="tp hide"><span class="dts"><i></i><i></i><i></i></span><span>'+S.typing+'</span></div><div id="comp"></div></div>';
  comp();chatHead();chatMsgs(true);tickClock();
 }
 const isTyp=c=>Date.now()-(TYP[c]||0)<3000;
@@ -735,12 +765,12 @@ function chatHead(){
  const e=$('#hs');if(!e)return;const c=OPEN;
  const tp=$('#tp');
  if(c==='inbox'){e.textContent=(MSGS.inbox||[]).length+' ข้อความ';return}
- const pid=c.split('|').find(x=>x!==ME.id),ty=isTyp(c);
- e.textContent=ty?S.typing:(ONL[pid]?S.online:S.offline);e.classList.toggle('typ',ty);
+ const pid=pidOf(c),ty=isTyp(c);
+ e.textContent=ty?S.typing:(!pid?(Object.values(ONL).some(x=>x.agent)?'มีเจ้าหน้าที่ออนไลน์':'เจ้าหน้าที่ออฟไลน์ — ฝากข้อความไว้ได้'):(ONL[pid]?S.online:S.offline));e.classList.toggle('typ',ty);
  if(tp){const was=tp.classList.contains('hide');tp.classList.toggle('hide',!ty);if(ty&&was){const b=$('#msgs');if(b)b.scrollTop=b.scrollHeight}}
 }
 function onTyping(p){
- if(!p||p.from===ME.id||!String(p.chat).split('|').includes(ME.id))return;
+ if(!p||p.from===ME.id)return;if(isSup(p.chat)?!(ME.agent||supOwner(p.chat)===ME.id):!String(p.chat).split('|').includes(ME.id))return;
  TYP[p.chat]=Date.now();
  if(OPEN===p.chat)chatHead();
  setTimeout(()=>{if(OPEN===p.chat)chatHead()},3100);
@@ -755,7 +785,7 @@ function bub(m){
   else c=esc(m.body).replace(/\n/g,'<br>');
   if(mine&&OPEN!=='inbox')menu='<button class="bm" data-act="msgmenu" data-id="'+esc(m.id)+'" aria-label="ตัวเลือกข้อความ">⋯</button>';
  }
- return '<div class="b '+(mine?'me':'ot')+(isUns(m)?' un':'')+'" data-id="'+esc(m.id)+'">'+((!mine&&OPEN==='inbox')?'<div class="who">'+esc(u.name)+'</div>':'')+c+'<i>'+hhmm(m.ts)+menu+'</i></div>';
+ return '<div class="b '+(mine?'me':'ot')+(isUns(m)?' un':'')+'" data-id="'+esc(m.id)+'">'+((!mine&&(OPEN==='inbox'||isSup(OPEN)))?'<div class="who">'+esc(u.name)+'</div>':'')+c+'<i>'+hhmm(m.ts)+menu+'</i></div>';
 }
 function chatMsgs(first){
  const box=$('#msgs');if(!box)return;
@@ -847,7 +877,7 @@ function connected(){const C=CALL;if(!C||C.state==='connected')return;clearTimeo
 async function flush(C){while(C.pend.length)try{await C.pc.addIceCandidate(C.pend.shift())}catch(e){}}
 async function onSig(p){
  if(p.to!==ME.id)return;
- if(PARK[p.callId]){if(p.type==='cancel'||p.type==='hangup'){delete PARK[p.callId];render()}return}
+ if(PARK[p.callId]){if(p.type==='cancel'||p.type==='hangup'){const pk=PARK[p.callId];delete PARK[p.callId];toast(p.why==='taken'?'สายที่พักไว้มีเจ้าหน้าที่อื่นรับแล้ว':'ผู้โทรจากระบบอัตโนมัติวางสายแล้ว'+(pk?' ('+pk.peer.name+')':''));render()}return}
  let C=CALL;
  if(p.type==='invite'){
   if(DONE.has(p.callId))return;
@@ -860,7 +890,7 @@ async function onSig(p){
   case 'accept':
    if(C.dir==='out'&&(C.state==='calling'||C.state==='agentring')){
     clearTimeout(C.to);clearInterval(C.rs);stopRing();stopPrompt();clearWq(C);
-    (C.invited||[]).filter(i=>i!==p.from).forEach(i=>sig(i,'cancel',C.id));
+    (C.invited||[]).filter(i=>i!==p.from).forEach(i=>sig(i,'cancel',C.id,{why:'taken'}));
     C.peer=getUser(p.from)||C.peer;C.ivr&&(C.ivr.tok++);C.ivr=null;C.state='connecting';
     C.to=setTimeout(()=>{if(CALL===C&&C.state==='connecting')cleanup(S.failed)},30000);
     try{C.stream=C.stream||await getMic()}catch(e){sig(p.from,'hangup',C.id);return cleanup(S.noMic)}
@@ -874,7 +904,7 @@ async function onSig(p){
    C.invited=(C.invited||[]).filter(i=>i!==p.from);
    if(C.state==='calling'&&!C.invited.length)cleanup(p.type==='busy'?S.busy:S.rejected);   // สายจากระบบ IVR: ไม่ตัดสาย รอคิวต่อ
    break;
-  case 'cancel':if(C.dir==='in'&&C.state==='ringing'){C.missed=1;cleanup()}break;
+  case 'cancel':if(C.dir==='in'&&C.state==='ringing'){C.missed=1;cleanup(p.why==='taken'?'สายนี้มีเจ้าหน้าที่อื่นรับแล้ว':(C.grp?'ผู้โทรจากระบบอัตโนมัติวางสายแล้ว ('+C.peer.name+')':'ผู้โทรยกเลิกสายแล้ว'))}break;
   case 'offer':{
    if(!C.pc)break;
    C.gotOffer=1;clearInterval(C.ra);
@@ -883,7 +913,7 @@ async function onSig(p){
    await C.pc.setRemoteDescription(p.sdp);await flush(C);const a=await C.pc.createAnswer();await C.pc.setLocalDescription(a);sig(C.peer.id,'answer',C.id,{sdp:a});break}
   case 'answer':if(C.pc&&C.pc.signalingState==='have-local-offer'){await C.pc.setRemoteDescription(p.sdp);await flush(C)}break;
   case 'ice':{const cs=p.cs||(p.c?[p.c]:[]);cs.forEach(c=>{if(C.pc&&C.pc.remoteDescription)C.pc.addIceCandidate(c).catch(()=>{});else C.pend.push(c)});break}
-  case 'hangup':cleanup(S.ended);break;
+  case 'hangup':cleanup(C.grp?'ผู้โทรจากระบบอัตโนมัติวางสายแล้ว':'อีกฝ่ายวางสายแล้ว');break;
  }}catch(e){console.error(e)}
 }
 async function answer(){
@@ -898,7 +928,7 @@ function decline(){const C=CALL;if(!C)return;sig(C.peer.id,'reject',C.id);C.reje
 function hang(){
  const C=CALL;if(!C)return;
  if(C.dir==='in'&&C.state==='ringing')sig(C.peer.id,'reject',C.id);
- else if(C.state==='calling'||C.state==='agentring')(C.invited||[]).forEach(i=>sig(i,'cancel',C.id));
+ else if(C.state==='calling'||C.state==='agentring')(C.invited||[]).forEach(i=>sig(i,'cancel',C.id,{why:'hangup'}));
  else if(C.state!=='ivr'&&C.peer.id!=='ivr')sig(C.peer.id,'hangup',C.id);
  cleanup(S.ended);
 }
@@ -1046,6 +1076,24 @@ function inviteAgents(C){
  C.invited=C.invited||[];
  Object.values(ONL).filter(x=>x.agent&&x.id!==ME.id&&!C.invited.includes(x.id)).forEach(x=>{C.invited.push(x.id);sig(x.id,'invite',C.id,{name:ME.name,ext:ME.ext,grp:1})});
 }
+function playUrl(url,I){return new Promise(res=>{const a=new Audio(url);let d=false;const fin=()=>{if(d)return;d=true;I.cancel=null;res()};I.cancel=()=>{a.pause();fin()};a.onended=fin;a.onerror=fin;a.play().catch(fin)})}
+async function speakText(text,I,C){
+ let ok=await speakNative(text,I);
+ if(!ok&&CALL===C&&C.ivr===I)ok=await speakGoogle(text,I);
+ if(!ok&&CALL===C&&C.ivr===I)await new Promise(r=>{const t=setTimeout(()=>{I.cancel=null;r()},Math.min(9000,1500+text.length*55));I.cancel=()=>{clearTimeout(t);I.cancel=null;r()}});
+}
+/* ประกอบประโยคแจ้งคิวจากไฟล์เสียงที่อัปโหลด (เลข 0-9 ทีละหลัก) ช่องไหนไม่มีไฟล์ใช้เสียงอ่านแทน */
+async function queueAnnounce(C,I,ok,n){
+ const Q=IVRC.qa||{},nums=Q.d||{};
+ const num=v=>{const ds=String(v).split('');return ds.every(d=>nums[d])?ds.map(d=>({url:nums[d]})):[{text:String(v)}]};
+ const seg=(key,text)=>[Q[key]?{url:Q[key]}:{text}];
+ const pos=n+1;
+ const list=[].concat(seg('pre','ท่านอยู่คิวที่'),num(pos),n>0?[].concat(seg('mid','เหลืออีก'),num(n),seg('post','คิวก่อนถึงท่าน')):seg('next','เป็นคิวถัดไป'));
+ const txt='ท่านอยู่คิวที่ '+pos+(n>0?' เหลืออีก '+n+' คิวก่อนถึงท่าน':' เป็นคิวถัดไป');
+ C.sub=txt;const sb=$('#sub');if(sb)sb.textContent=txt;
+ const merged=[];list.forEach(it=>{const l=merged[merged.length-1];if(it.text&&l&&l.text)l.text+=' '+it.text;else merged.push(Object.assign({},it))});
+ for(const it of merged){if(!ok())return;if(it.url)await playUrl(it.url,I);else await speakText(it.text,I,C)}
+}
 async function ivrAgent(){
  const C=CALL;if(!C||!C.ivr)return;const I=C.ivr,k=++I.tok;
  const none=!Object.values(ONL).some(x=>x.agent&&x.id!==ME.id);
@@ -1059,10 +1107,8 @@ async function ivrAgent(){
   if(!ok())break;
   stopRing();inviteAgents(C);                               // ชวนเจ้าหน้าที่ที่เพิ่งออนไลน์ / ที่เคยไม่ว่าง
   const n=queueAhead(C);C.qpos=n+1;const sc=$('#cst');if(sc)sc.textContent=stTxt(C);
-  const info='ท่านอยู่คิวที่ '+(n+1)+(n>0?' เหลืออีก '+n+' คิวก่อนถึงท่าน':' เป็นคิวถัดไป');
-  const q=IVRC.nodes.queue||{text:'',audio:''};
-  if(q.audio){await say('queue');if(!ok())break;await say(null,info)}
-  else await say(null,(q.text||'กรุณาถือสายรอสักครู่ กำลังติดต่อเจ้าหน้าที่')+' '+info);
+  await say('queue');if(!ok())break;
+  await queueAnnounce(C,I,ok,n);
  }
 }
 async function ivrVM(){
@@ -1090,7 +1136,7 @@ function actSel(cur,cls){
  return '<select class="'+cls+'"><optgroup label="ไปที่เมนู / ข้อความ">'+ks.map(k=>'<option value="node:'+k+'"'+(cur==='node:'+k?' selected':'')+'>'+esc(nodeLabel(k))+'</option>').join('')+'</optgroup><optgroup label="ทำงาน">'+[['agent',S.optAgent],['ext',S.optExt],['vm',S.optVm],['repeat',S.optRep],['hang',S.optHang]].map(p=>'<option value="'+p[0]+'"'+(cur===p[0]?' selected':'')+'>'+esc(p[1])+'</option>').join('')+'</optgroup></select>';
 }
 function audioRow(k,n){
- return '<div class="erow"><label class="btn p sm" for="ivrf_'+k+'">⬆ อัปโหลดไฟล์เสียง</label><input type="file" id="ivrf_'+k+'" data-ivr-file="'+k+'" accept="audio/*,.mp3,.m4a,.wav,.ogg,.aac,.webm" hidden><button class="btn sm" data-act="edrec" data-k="'+k+'">'+(ER&&ER.k===k?'⏹ หยุดและบันทึก':'🎙 อัดเสียง')+'</button>'+(n.audio?'<button class="btn sm" data-act="edplay" data-k="'+k+'">▶ ฟัง</button><button class="mini r" data-act="edclr" data-k="'+k+'">✕ ลบเสียง</button>':'')+'</div><div class="sub" style="margin-top:6px'+(n.audio?';color:var(--green-dark)':'')+'">'+(n.audio?'✓ ใช้ไฟล์เสียงที่อัปโหลดไว้ (อัปโหลดแล้วบันทึกให้อัตโนมัติ)':'ยังไม่มีไฟล์เสียง — ระบบจะอ่านข้อความด้านบนด้วยเสียงสังเคราะห์')+'</div>';
+ return '<div class="erow"><label class="btn p sm" for="ivrf_'+k+'">⬆ อัปโหลดไฟล์เสียง</label><input type="file" id="ivrf_'+k+'" data-ivr-file="'+k+'" accept="'+AUDACC+'" hidden><button class="btn sm" data-act="edrec" data-k="'+k+'">'+(ER&&ER.k===k?'⏹ หยุดและบันทึก':'🎙 อัดเสียง')+'</button>'+(n.audio?'<button class="btn sm" data-act="edplay" data-k="'+k+'">▶ ฟัง</button><button class="mini r" data-act="edclr" data-k="'+k+'">✕ ลบเสียง</button>':'')+'</div><div class="sub" style="margin-top:6px'+(n.audio?';color:var(--green-dark)':'')+'">'+(n.audio?'✓ ใช้ไฟล์เสียงที่อัปโหลดไว้ (อัปโหลดแล้วบันทึกให้อัตโนมัติ)':'ยังไม่มีไฟล์เสียง — ระบบจะอ่านข้อความด้านบนด้วยเสียงสังเคราะห์')+'</div>';
 }
 function edCard(k,open){
  const n=ED.nodes[k],sys=SYS.includes(k),menu=!!n.opts,info=!!n.after&&!menu;
@@ -1114,11 +1160,11 @@ function edDraw(openKey){
  page().className='';
  page().innerHTML='<div class="topbar"><button class="icon-btn" data-act="ivrBack" aria-label="กลับ">←</button><div class="tt"><h1>ระบบตอบรับอัตโนมัติ</h1><div class="clk" id="edst">'+esc(keep||'บันทึกอัตโนมัติทุกครั้งที่แก้ไข')+'</div></div></div>'+
   sec('🎵 เพลงรอสาย','เล่นวนระหว่างรอเจ้าหน้าที่ สลับกับประกาศคิวทุก 30 วินาที ระบบไม่ตัดสายเอง')+
-  '<div class="card"><div class="sub" style="margin-bottom:10px">ใช้อยู่: <b id="holdinfo"></b></div><div class="erow"><label class="btn p sm" for="hf" style="cursor:pointer">⬆ อัปโหลดเพลง</label><input type="file" id="hf" accept="audio/*" hidden><button class="btn sm" data-act="holdPrev">▶ ฟัง</button><button class="btn sm" data-act="holdDel">✕ ใช้เพลงมาตรฐาน</button></div></div>'+
+  '<div class="card"><div class="sub" style="margin-bottom:10px">ใช้อยู่: <b id="holdinfo"></b></div><div class="erow"><label class="btn p sm" for="hf" style="cursor:pointer">⬆ อัปโหลดเพลง</label><input type="file" id="hf" accept="'+AUDACC+'" hidden><button class="btn sm" data-act="holdPrev">▶ ฟัง</button><button class="btn sm" data-act="holdDel">✕ ใช้เพลงมาตรฐาน</button></div></div>'+
   sec('1 · เมนูหลัก','สิ่งที่ผู้โทรได้ยินเป็นอันดับแรก')+edCard('root',open.has('root'))+
   sec('2 · เมนูย่อย','เมนูที่มีปุ่มกดของตัวเอง')+menus.map(k=>edCard(k,open.has(k))).join('')+'<button class="cta ghost" data-act="edaddmenu">+ เพิ่มเมนูย่อย</button>'+
   sec('3 · ข้อความข้อมูล','พูดข้อความแล้วไปต่อ เช่น เวลาทำการ ราคา ที่อยู่')+infos.map(k=>edCard(k,open.has(k))).join('')+'<button class="cta ghost" data-act="edaddinfo">'+S.addNode+'</button>'+
-  sec('4 · ข้อความระบบ','เสียงที่ระบบใช้ตอนโอนสาย รอคิว ฝากข้อความ และวางสาย')+SYS.map(k=>edCard(k,open.has(k))).join('');
+  sec('4 · ข้อความระบบ','เสียงที่ระบบใช้ตอนโอนสาย รอคิว ฝากข้อความ และวางสาย')+SYS.map(k=>edCard(k,open.has(k))).join('')+sec('5 · เสียงแจ้งคิว','อัปโหลดเสียงตัวเลข 0–9 และคำพูดประกอบ ระบบจะประกอบเป็นประโยคแจ้งคิวให้เอง')+qaCard();
  holdInfo();window.scrollTo(0,y);
 }
 function edSync(){
@@ -1130,6 +1176,37 @@ function edSync(){
   if(n.opts)n.opts=[...el.querySelectorAll('.orow')].map(r=>Object.assign({d:r.querySelector('.od').value.replace(/\D/g,'').slice(0,3)},actParse(r.querySelector('.ov2').value))).filter(o=>o.d);
   const af=el.querySelector('.af');if(af)n.after=actParse(af.value);
  });
+}
+const QSL=[['pre','ท่านอยู่คิวที่'],['mid','เหลืออีก'],['post','คิวก่อนถึงท่าน'],['next','เป็นคิวถัดไป']];
+function qaUrl(id){const Q=(ED&&ED.qa)||{};return /^d\d$/.test(id)?(Q.d||{})[id[1]]:Q[id]}
+function qaCard(){
+ const slot=(id,label)=>{const url=qaUrl(id);return '<div class="qslot'+(url?' has':'')+'"><b>'+label+'</b><div class="erow"><label class="btn sm'+(url?'':' p')+'" for="qaf_'+id+'">'+(url?'เปลี่ยน':'⬆ อัปโหลด')+'</label><input type="file" id="qaf_'+id+'" data-qa-file="'+id+'" accept="'+AUDACC+'" hidden>'+(url?'<button class="btn sm" data-act="qaplay" data-id="'+id+'">▶</button><button class="mini r" data-act="qaclr" data-id="'+id+'">✕</button>':'')+'</div></div>'};
+ return '<div class="card"><div class="sub" style="margin-bottom:10px">ระบบอ่านเลขทีละหลัก เช่น คิว 12 = “หนึ่ง สอง” ช่องไหนไม่มีไฟล์เสียง ระบบจะอ่านด้วยเสียงสังเคราะห์แทน</div>'+
+  '<div class="erow"><label class="btn p sm" for="qaf_bulk">⬆ อัปโหลดเลข 0–9 ทีเดียว</label><input type="file" id="qaf_bulk" data-qa-bulk multiple accept="'+AUDACC+'" hidden></div>'+
+  '<div class="sub" style="margin:6px 0 12px">เลือกหลายไฟล์พร้อมกัน ตั้งชื่อไฟล์ให้มีเลขหลักเดียว เช่น 0.mp3, 1.mp3 … 9.mp3</div>'+
+  '<div class="qgrid">'+[0,1,2,3,4,5,6,7,8,9].map(d=>slot('d'+d,'เลข '+d)).join('')+'</div>'+
+  '<div class="sub" style="margin:16px 0 8px"><b>คำพูดประกอบ</b></div><div class="qgrid">'+QSL.map(q=>slot(q[0],'“'+q[1]+'”')).join('')+'</div></div>';
+}
+function qaSet(id,url){ED.qa=ED.qa||{};if(/^d\d$/.test(id)){ED.qa.d=ED.qa.d||{};if(url)ED.qa.d[id[1]]=url;else delete ED.qa.d[id[1]]}else{if(url)ED.qa[id]=url;else delete ED.qa[id]}}
+async function qaPick(id,f){
+ if(!f||!ED)return;if(!ME.agent)return toast('ไม่มีสิทธิ์อัปโหลด');
+ edSync();const ext=audExt(f);if(!ext)return;
+ edSt('กำลังอัปโหลดไฟล์เสียง…');
+ try{const url=await T.upload(f,ext);if(!ED)return;qaSet(id,url);edDraw();await edSave();toast('อัปโหลดและบันทึกแล้ว')}
+ catch(e){edSt('✗ อัปโหลดไม่สำเร็จ');toast('อัปโหลดไม่สำเร็จ: '+(e&&e.message||S.err))}
+}
+async function qaBulk(fs){
+ if(!fs.length||!ED)return;if(!ME.agent)return toast('ไม่มีสิทธิ์อัปโหลด');
+ edSync();let ok=0;const skip=[];
+ edSt('กำลังอัปโหลด '+fs.length+' ไฟล์…');
+ for(const f of fs){
+  const m=f.name.replace(/\.[^.]+$/,'').match(/\d/g);
+  if(!m||m.length!==1){skip.push(f.name);continue}
+  const ext=audExt(f);if(!ext){skip.push(f.name);continue}
+  try{const url=await T.upload(f,ext);if(!ED)return;qaSet('d'+m[0],url);ok++}catch(e){skip.push(f.name)}
+ }
+ edDraw();await edSave();
+ toast('อัปโหลดเสียงเลขแล้ว '+ok+' ไฟล์'+(skip.length?' · ข้าม '+skip.length+' ไฟล์ (ชื่อต้องมีเลข 0–9 หนึ่งตัว): '+skip.slice(0,3).join(', '):''));
 }
 let edTm=null;
 const edSt=t=>{const e=$('#edst');if(e)e.textContent=t};
@@ -1148,11 +1225,9 @@ async function edFilePick(k,f){
  if(!ME||!ME.agent)return toast('ไม่มีสิทธิ์อัปโหลดไฟล์เสียง กรุณาเข้าสู่ระบบด้วยบัญชีแอดมิน');
  if(!ED||!ED.nodes||!ED.nodes[k])return toast('ไม่พบรายการ IVR กรุณาปิดแล้วเปิดหน้านี้ใหม่');
  edSync();
- if(f.size>10*1024*1024)return toast('ไฟล์เสียงต้องมีขนาดไม่เกิน 10 MB');
- const ext=(f.name.split('.').pop()||'').toLowerCase(),allowed=['mp3','m4a','wav','ogg','aac','webm'];
- if(!allowed.includes(ext)&&!String(f.type||'').toLowerCase().startsWith('audio/'))return toast('ไฟล์นี้ไม่ใช่ไฟล์เสียงที่รองรับ เลือก MP3, M4A, WAV, OGG, AAC หรือ WEBM');
+ const ext=audExt(f);if(!ext)return;
  edSt('กำลังอัปโหลดไฟล์เสียง…');toast('กำลังอัปโหลดไฟล์เสียง…');
- try{const url=await T.upload(f,allowed.includes(ext)?ext:'mp3');if(!ED||!ED.nodes[k])return;ED.nodes[k].audio=url;edDraw(k);await edSave();toast('อัปโหลดและบันทึกแล้ว')}
+ try{const url=await T.upload(f,ext);if(!ED||!ED.nodes[k])return;ED.nodes[k].audio=url;edDraw(k);await edSave();toast('อัปโหลดและบันทึกแล้ว')}
  catch(e){console.error(e);edSt('✗ อัปโหลดไม่สำเร็จ');toast('อัปโหลดไม่สำเร็จ: '+(e&&e.message?e.message:'ตรวจสอบ Storage และสิทธิ์ Supabase'))}
 }
 async function edRec(k){
@@ -1178,6 +1253,10 @@ const A={
  dialer,dk(t){if(DIAL.length<8){DIAL+=t.dataset.d;$('#dn').textContent=DIAL;tone(DT[t.dataset.d],.1,.08)}},dbs(){DIAL=DIAL.slice(0,-1);$('#dn').innerHTML=DIAL||'&nbsp;'},dgo:dialGo,
  closeSheet,holdPrev,holdDel,postT:postText,like:likePost,postdel:delPost,adminAdd,adminDel,adminTg,msgmenu,unsend,setup:setupAdmin,
  async logout(){if(CALL)hang();MS.removeItem('uy_me');location.reload()},
+ contactYes(){closeSheet();ac();startIVR()},
+ contactNo(){closeSheet();VIEW='chats';openChat(supId())},
+ qaplay(t){const u=qaUrl(t.dataset.id);if(u)new Audio(u).play().catch(()=>toast(S.err))},
+ qaclr(t){edSync();qaSet(t.dataset.id,'');edDraw();return edSave()},
  park(){const C=CALL;if(!C||C.dir!=='in'||C.state!=='ringing')return;PARK[C.id]={id:C.id,peer:C.peer,ts:Date.now()};CALL=null;stopRing();$('#inc').classList.remove('on');toast('พักสายไว้แล้ว — ผู้โทรยังฟังเพลงรอและอยู่ในคิว ดูได้ที่เมนูแอดมิน');if(!OPEN)VIEW='admin';render()},
  unpark(t){if(CALL)return toast(S.inCall);const p=PARK[t.dataset.id];if(!p)return;delete PARK[p.id];ac();CALL={id:p.id,dir:'in',state:'ringing',pend:[],peer:p.peer,grp:true};return answer()},
  parkdel(t){const p=PARK[t.dataset.id];if(!p)return;delete PARK[p.id];DONE.add(p.id);sig(p.peer.id,'reject',p.id);render()},
@@ -1201,6 +1280,8 @@ document.addEventListener('change',async e=>{
  const t=e.target;
  if(ED&&t.closest&&t.closest('.ecard2')&&(t.classList.contains('ov2')||t.classList.contains('af')))edLater();
  if(t.id==='hf'){const f=t.files[0];t.value='';holdPick(f)}
+ if(t.dataset&&t.dataset.qaFile){const f=t.files[0],id=t.dataset.qaFile;t.value='';qaPick(id,f)}
+ if(t.dataset&&t.dataset.qaBulk!==undefined){const fs=[...t.files];t.value='';qaBulk(fs)}
  if(t.dataset&&t.dataset.ivrFile){const k=t.dataset.ivrFile,f=t.files[0];t.value='';edFilePick(k,f)}
  if(t.id==='ff'){const f=t.files[0];t.value='';postImage(f)}
  if(t.id==='pf'){const f=t.files[0];t.value='';pickImage(f)}
