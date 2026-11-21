@@ -284,9 +284,9 @@ details.ecard2[open]>summary::after{content:'▴'}
 @media(min-width:768px){.qgrid{grid-template-columns:repeat(3,1fr)}}
 
 /* ===== พอดีจอ: ไม่เลื่อนไปมา ===== */
-html{overflow-x:hidden;overscroll-behavior:none}
-body{overscroll-behavior:none;max-width:100vw}
 .ov{overflow:hidden;overflow:clip;height:100vh;height:100dvh;padding:calc(clamp(14px,4vh,44px) + var(--sat)) 16px calc(clamp(12px,3vh,30px) + var(--sab))}
+.ov{touch-action:none;overscroll-behavior:contain;-webkit-user-select:none;user-select:none}
+.sub2{touch-action:pan-y}
 .oi{min-height:0}
 .cav{width:clamp(64px,12vh,110px);height:clamp(64px,12vh,110px);font-size:clamp(26px,5vh,44px);margin-bottom:clamp(4px,1vh,12px)}
 .ov h2{font-size:clamp(20px,3.4vh,26px);line-height:1.3}
@@ -296,7 +296,6 @@ body{overscroll-behavior:none;max-width:100vw}
 .kp button{height:clamp(40px,7vh,56px);font-size:clamp(18px,3vh,24px)}
 .cctl{padding-top:clamp(8px,2vh,20px);gap:clamp(18px,4vh,26px)}
 .cb{width:clamp(54px,9vh,70px);height:clamp(54px,9vh,70px)}
-#sheet{overflow-x:hidden}
 #sheet .dn{font-size:clamp(24px,4.4vh,32px);min-height:clamp(34px,6vh,50px)}
 #sheet .kp button{height:clamp(38px,6.4vh,56px)}
 @media(max-height:560px){
@@ -315,6 +314,7 @@ body{overscroll-behavior:none;max-width:100vw}
  #sheet .kp button{height:clamp(30px,9vh,38px)}
  #sheet .cctl{padding-top:4px;margin-top:6px!important}
 }
+@media(max-height:560px){.snd{display:none}}
 </style>
 </head>
 <body>
@@ -991,7 +991,7 @@ function callUI(){
  clearInterval(C.tm);C.tm=setInterval(()=>{const s=$('#cst');if(s&&CALL===C&&(C.state==='connected'||C.state==='ivr'))s.textContent=stTxt(C)},1000);
  e.innerHTML='<div class="oi"><div class="cav'+(pulse?' pulse':'')+'" style="background:'+(ivr?'#ffffff33':col(C.peer.id))+'">'+(ivr?'☎':esc(ini(C.peer.name)))+'</div><h2>'+esc(C.peer.name)+'</h2><p class="st" id="cst">'+stTxt(C)+'</p>'+
   (ivr||C.ivrMode?'<div class="sub2" id="sub">'+esc(C.sub||'')+'</div><div class="extd" id="ext">'+esc(C.ivr&&C.ivr.buf||'')+'</div>':'')+
-  (ivr?kpHtml('dg'):'')+
+  (IOS&&(ivr||C.ivrMode)?'<button class="btn sm snd" data-act="snd" style="margin-top:8px">🔊 ไม่ได้ยินเสียงพูด? แตะที่นี่</button>':'')+(ivr?kpHtml('dg'):'')+
   '<div class="cctl">'+(!ivr&&C.state!=='calling'&&C.state!=='agentring'?'<button class="cb '+(C.muted?'on':'')+'" data-act="mute">'+(C.muted?'🔇':'🎙')+'</button>':'')+'<button class="cb red" data-act="hang"><span>'+PHI+'</span></button></div></div>';
  e.classList.add('on');
 }
@@ -1002,26 +1002,29 @@ function mute(){const C=CALL;if(!C||!C.stream)return;C.muted=!C.muted;C.stream.g
 const SILENT='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
 let TTSA=null;
 /* ปลดล็อกเสียงด้วยการแตะของผู้ใช้ (แอนดรอยด์บล็อกเสียงที่เล่นเองถ้าไม่ปลดล็อกก่อน) */
+let VA=null;   // ตัวเล่นเสียงสำหรับไฟล์เสียง/ประกาศ: ต้องปลดล็อกด้วยการแตะ ไม่งั้น iPhone/iPad ไม่ยอมเล่นเสียงที่เริ่มเอง
+const IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 function unlockAudio(){
  try{TTSA=TTSA||new Audio();TTSA.src=SILENT;TTSA.play().catch(()=>{})}catch(e){}
- try{if(window.speechSynthesis&&window.SpeechSynthesisUtterance){const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}}catch(e){}
+ try{VA=VA||new Audio();VA.src=SILENT;VA.play().catch(()=>{})}catch(e){}
+ try{if(window.speechSynthesis&&window.SpeechSynthesisUtterance){speechSynthesis.cancel();try{speechSynthesis.resume()}catch(e){}const u=new SpeechSynthesisUtterance('.');u.volume=0;u.lang='th-TH';window.__u0=u;speechSynthesis.speak(u)}}catch(e){}
 }
 const ttsVoice=()=>{try{return speechSynthesis.getVoices().find(v=>/^th/i.test(v.lang))}catch(e){return null}};
 function stopPrompt(){const C=CALL;if(C&&C.ivr&&C.ivr.cancel)C.ivr.cancel();try{speechSynthesis.cancel()}catch(e){}try{TTSA&&TTSA.pause()}catch(e){}}
 function speakNative(text,I){return new Promise(res=>{
  if(!window.speechSynthesis||!window.SpeechSynthesisUtterance)return res(false);
  try{
-  speechSynthesis.cancel();
+  speechSynthesis.cancel();try{speechSynthesis.resume()}catch(e){}
   const u=new SpeechSynthesisUtterance(text),v=ttsVoice();
   if(v){u.voice=v;u.lang=v.lang}else u.lang='th-TH';
-  u.rate=.95;
+  u.rate=.95;u.volume=1;window.__utt=u;   // เก็บอ้างอิงไว้ ไม่งั้น Safari เก็บกวาดทิ้งก่อนพูดจบ
   let started=false,done=false,w2=null;
   const fin=ok=>{if(done)return;done=true;clearTimeout(w);clearTimeout(w2);I.cancel=null;res(ok)};
-  const w=setTimeout(()=>{if(!started){try{speechSynthesis.cancel()}catch(e){}fin(false)}},2500);
+  const w=setTimeout(()=>{if(!started){try{speechSynthesis.cancel()}catch(e){}fin(false)}},4500);
   u.onstart=()=>{started=true;w2=setTimeout(()=>fin(true),Math.max(5000,text.length*220))};
   u.onend=()=>fin(true);u.onerror=()=>fin(started);
   I.cancel=()=>{try{speechSynthesis.cancel()}catch(e){}fin(true)};
-  speechSynthesis.speak(u);
+  setTimeout(()=>{if(!done)try{speechSynthesis.speak(u)}catch(e){fin(false)}},90);   // Safari: สั่งพูดทันทีหลัง cancel() เสียงจะหาย
  }catch(e){res(false)}
 })}
 /* สำรอง: เครื่องที่ไม่มีเสียงไทยในตัว (แอนดรอยด์บางรุ่น) ใช้เสียงอ่านออนไลน์ */
@@ -1039,7 +1042,7 @@ async function say(key,override){
  const n=override!=null?{text:override,audio:''}:(IVRC.nodes[key]||{text:'',audio:''});I.cancel&&I.cancel();
  C.sub=n.text;const s=$('#sub');if(s)s.textContent=n.text;
  if(n.audio){
-  return new Promise(res=>{const a=new Audio(n.audio);let d=false;const fin=()=>{if(d)return;d=true;I.cancel=null;res()};I.cancel=()=>{a.pause();fin()};a.onended=fin;a.onerror=fin;a.play().catch(fin)});
+  const okA=await playUrl(n.audio,I);if(okA||!n.text)return;     // เล่นไฟล์ไม่ได้ → อ่านข้อความแทน
  }
  if(!n.text)return;
  let ok=await speakNative(n.text,I);
@@ -1111,7 +1114,14 @@ function inviteAgents(C){
  C.invited=C.invited||[];
  Object.values(ONL).filter(x=>x.agent&&x.id!==ME.id&&!C.invited.includes(x.id)).forEach(x=>{C.invited.push(x.id);sig(x.id,'invite',C.id,{name:ME.name,ext:ME.ext,grp:1})});
 }
-function playUrl(url,I){return new Promise(res=>{const a=new Audio(url);let d=false;const fin=()=>{if(d)return;d=true;I.cancel=null;res()};I.cancel=()=>{a.pause();fin()};a.onended=fin;a.onerror=fin;a.play().catch(fin)})}
+function playUrl(url,I){return new Promise(res=>{
+ const a=VA||(VA=new Audio());let d=false,started=false,w=null;
+ const fin=()=>{if(d)return;d=true;clearTimeout(w);a.onended=a.onerror=a.onplaying=null;I.cancel=null;res(started)};
+ I.cancel=()=>{try{a.pause()}catch(e){}fin()};
+ a.onplaying=()=>{started=true};a.onended=fin;a.onerror=fin;a.loop=false;a.src=url;
+ w=setTimeout(()=>{if(!started)fin()},8000);          // เริ่มเล่นไม่ได้ภายใน 8 วิ ถือว่าล้มเหลว
+ const pr=a.play();if(pr&&pr.catch)pr.catch(fin);
+})}
 async function speakText(text,I,C){
  let ok=await speakNative(text,I);
  if(!ok&&CALL===C&&C.ivr===I)ok=await speakGoogle(text,I);
@@ -1120,14 +1130,14 @@ async function speakText(text,I,C){
 /* ประกอบประโยคแจ้งคิวจากไฟล์เสียงที่อัปโหลด (เลข 0-9 ทีละหลัก) ช่องไหนไม่มีไฟล์ใช้เสียงอ่านแทน */
 async function queueAnnounce(C,I,ok,n){
  const Q=IVRC.qa||{},nums=Q.d||{};
- const num=v=>{const ds=String(v).split('');return ds.every(d=>nums[d])?ds.map(d=>({url:nums[d]})):[{text:String(v)}]};
- const seg=(key,text)=>[Q[key]?{url:Q[key]}:{text}];
+ const num=v=>{const ds=String(v).split('');return ds.every(d=>nums[d])?ds.map(d=>({url:nums[d],alt:d})):[{text:String(v)}]};
+ const seg=(key,text)=>[Q[key]?{url:Q[key],alt:text}:{text}];
  const pos=n+1;
  const list=[].concat(seg('pre','ท่านอยู่คิวที่'),num(pos),n>0?[].concat(seg('mid','เหลืออีก'),num(n),seg('post','คิวก่อนถึงท่าน')):seg('next','เป็นคิวถัดไป'));
  const txt='ท่านอยู่คิวที่ '+pos+(n>0?' เหลืออีก '+n+' คิวก่อนถึงท่าน':' เป็นคิวถัดไป');
  C.sub=txt;const sb=$('#sub');if(sb)sb.textContent=txt;
  const merged=[];list.forEach(it=>{const l=merged[merged.length-1];if(it.text&&l&&l.text)l.text+=' '+it.text;else merged.push(Object.assign({},it))});
- for(const it of merged){if(!ok())return;if(it.url)await playUrl(it.url,I);else await speakText(it.text,I,C)}
+ for(const it of merged){if(!ok())return;if(it.url){const g=await playUrl(it.url,I);if(!g&&it.alt&&ok())await speakText(it.alt,I,C)}else await speakText(it.text,I,C)}
 }
 /* เจ้าหน้าที่ทุกคนที่ออนไลน์กดปฏิเสธแล้ว: ผู้โทรเลิกรอ แจ้งข้อความ แล้วกลับเมนูหลัก (ไม่ตัดสาย ไม่บังคับฝากข้อความ) */
 function ivrCheckDeclined(C){
@@ -1302,6 +1312,7 @@ const A={
  dialer,dk(t){if(DIAL.length<8){DIAL+=t.dataset.d;$('#dn').textContent=DIAL;tone(DT[t.dataset.d],.1,.08)}},dbs(){DIAL=DIAL.slice(0,-1);$('#dn').innerHTML=DIAL||'&nbsp;'},dgo:dialGo,
  closeSheet,holdPrev,holdDel,postT:postText,like:likePost,postdel:delPost,adminAdd,adminDel,adminTg,msgmenu,unsend,setup:setupAdmin,
  async logout(){if(CALL)hang();MS.removeItem('uy_me');location.reload()},
+ snd(){unlockAudio();const C=CALL;if(C&&C.ivr&&C.state==='ivr'&&C.ivr.mode==='menu')ivrRun(C.ivr.node);else toast('เปิดเสียงแล้ว')},
  contactYes(){closeSheet();ac();startIVR()},
  contactNo(){closeSheet();VIEW='chats';openChat(supId())},
  qaplay(t){const u=qaUrl(t.dataset.id);if(u)new Audio(u).play().catch(()=>toast(S.err))},
