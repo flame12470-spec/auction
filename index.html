@@ -282,6 +282,39 @@ details.ecard2[open]>summary::after{content:'▴'}
 .qslot.has{border-color:var(--green);background:#f6fbe6}
 .qslot b{font-size:14px}
 @media(min-width:768px){.qgrid{grid-template-columns:repeat(3,1fr)}}
+
+/* ===== พอดีจอ: ไม่เลื่อนไปมา ===== */
+html{overflow-x:hidden;overscroll-behavior:none}
+body{overscroll-behavior:none;max-width:100vw}
+.ov{overflow:hidden;overflow:clip;height:100vh;height:100dvh;padding:calc(clamp(14px,4vh,44px) + var(--sat)) 16px calc(clamp(12px,3vh,30px) + var(--sab))}
+.oi{min-height:0}
+.cav{width:clamp(64px,12vh,110px);height:clamp(64px,12vh,110px);font-size:clamp(26px,5vh,44px);margin-bottom:clamp(4px,1vh,12px)}
+.ov h2{font-size:clamp(20px,3.4vh,26px);line-height:1.3}
+.sub2{margin-top:clamp(6px,1.5vh,14px);padding:8px 12px;min-height:0;max-height:clamp(52px,12vh,130px);overflow:auto;font-size:clamp(13px,1.9vh,14px)}
+.extd{font-size:clamp(20px,3.6vh,30px);min-height:clamp(26px,4.5vh,44px);margin-top:2px}
+.kp{grid-template-columns:repeat(3,clamp(56px,8.5vh,72px));gap:clamp(6px,1.4vh,12px);margin-top:clamp(6px,1.4vh,14px)}
+.kp button{height:clamp(40px,7vh,56px);font-size:clamp(18px,3vh,24px)}
+.cctl{padding-top:clamp(8px,2vh,20px);gap:clamp(18px,4vh,26px)}
+.cb{width:clamp(54px,9vh,70px);height:clamp(54px,9vh,70px)}
+#sheet{overflow-x:hidden}
+#sheet .dn{font-size:clamp(24px,4.4vh,32px);min-height:clamp(34px,6vh,50px)}
+#sheet .kp button{height:clamp(38px,6.4vh,56px)}
+@media(max-height:560px){
+ .ov{padding-top:calc(10px + var(--sat));padding-bottom:calc(10px + var(--sab))}
+ .cav{width:46px;height:46px;font-size:20px;margin-bottom:2px}
+ .ov h2{font-size:18px}.ov p.st{margin-top:0;font-size:13px}
+ .sub2{max-height:40px;margin-top:4px;padding:6px 10px}
+ .extd{font-size:18px;min-height:22px}
+ .kp{grid-template-columns:repeat(6,clamp(42px,11vh,52px));gap:6px;margin-top:6px}
+ .kp button{height:clamp(32px,10vh,42px);font-size:18px}
+ .cctl{padding-top:6px}.cb{width:50px;height:50px}
+ #sheet{max-height:96vh;max-height:96dvh;padding-top:8px;padding-bottom:calc(10px + var(--sab))}
+ #sheet .grab{margin-bottom:6px}#sheet h3{font-size:17px;margin-bottom:2px}
+ #sheet .cta.inline{margin-top:8px;padding:10px;font-size:16px}
+ #sheet .dn{font-size:22px;min-height:28px}
+ #sheet .kp button{height:clamp(30px,9vh,38px)}
+ #sheet .cctl{padding-top:4px;margin-top:6px!important}
+}
 </style>
 </head>
 <body>
@@ -902,7 +935,9 @@ async function onSig(p){
    break;
   case 'reject':case 'busy':
    C.invited=(C.invited||[]).filter(i=>i!==p.from);
-   if(C.state==='calling'&&!C.invited.length)cleanup(p.type==='busy'?S.busy:S.rejected);   // สายจากระบบ IVR: ไม่ตัดสาย รอคิวต่อ
+   if(p.type==='reject')(C.declined=C.declined||new Set()).add(p.from);
+   if(C.state==='calling'&&!C.invited.length)cleanup(p.type==='busy'?S.busy:S.rejected);
+   else if(C.state==='agentring'&&p.type==='reject')ivrCheckDeclined(C);   // ไม่ว่าง(busy)ยังรอต่อ / ปฏิเสธครบทุกคนแล้วเลิกรอ
    break;
   case 'cancel':if(C.dir==='in'&&C.state==='ringing'){C.missed=1;cleanup(p.why==='taken'?'สายนี้มีเจ้าหน้าที่อื่นรับแล้ว':(C.grp?'ผู้โทรจากระบบอัตโนมัติวางสายแล้ว ('+C.peer.name+')':'ผู้โทรยกเลิกสายแล้ว'))}break;
   case 'offer':{
@@ -1094,8 +1129,22 @@ async function queueAnnounce(C,I,ok,n){
  const merged=[];list.forEach(it=>{const l=merged[merged.length-1];if(it.text&&l&&l.text)l.text+=' '+it.text;else merged.push(Object.assign({},it))});
  for(const it of merged){if(!ok())return;if(it.url)await playUrl(it.url,I);else await speakText(it.text,I,C)}
 }
+/* เจ้าหน้าที่ทุกคนที่ออนไลน์กดปฏิเสธแล้ว: ผู้โทรเลิกรอ แจ้งข้อความ แล้วกลับเมนูหลัก (ไม่ตัดสาย ไม่บังคับฝากข้อความ) */
+function ivrCheckDeclined(C){
+ if(CALL!==C||C.state!=='agentring'||!C.ivr)return;
+ const on=Object.values(ONL).filter(x=>x.agent&&x.id!==ME.id);
+ if(!C.declined||!C.declined.size||!on.every(a=>C.declined.has(a.id)))return;
+ ivrDeclined(C);
+}
+async function ivrDeclined(C){
+ const I=C.ivr;stopRing();clearWq(C);clearTimeout(C.to);C.state='ivr';C.invited=[];callUI();
+ const k=++I.tok;
+ await say(null,'ขณะนี้เจ้าหน้าที่ไม่สะดวกรับสาย กรุณาเลือกเมนูอีกครั้ง หรือฝากข้อความเสียง');
+ if(CALL===C&&I.tok===k)ivrRun('root');
+}
 async function ivrAgent(){
  const C=CALL;if(!C||!C.ivr)return;const I=C.ivr,k=++I.tok;
+ if(C.declined&&C.declined.size){C.id=rid();C.declined=new Set()}   // โอนใหม่อีกครั้ง: ใช้รหัสสายใหม่ เพื่อให้เจ้าหน้าที่ที่เคยปฏิเสธได้รับเสียงเรียกอีก
  const none=!Object.values(ONL).some(x=>x.agent&&x.id!==ME.id);
  await say(none?'noagent':'agent');if(CALL!==C||I.tok!==k)return;
  C.state='agentring';C.invited=[];C.ivrMode=1;C.wq=Date.now();trackMe();C.qpos=queueAhead(C)+1;callUI();
