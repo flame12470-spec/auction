@@ -28,7 +28,6 @@ img{display:block;max-width:100%}
 .sub{color:var(--muted);font-size:13px}
 .in{color:#2e7d32}.out{color:#3f6200}.miss{color:#c62828}
 bdi{unicode-bidi:isolate}
-
 #app{max-width:560px;margin:0 auto;min-height:100vh;min-height:100dvh;background:var(--bg);position:relative;box-shadow:0 0 40px rgba(0,0,0,.08)}
 #page{min-height:100vh;min-height:100dvh;padding-bottom:calc(104px + var(--sab))}
 #page.noNav{padding-bottom:24px}
@@ -63,6 +62,7 @@ bdi{unicode-bidi:isolate}
 .badge{background:var(--green);color:#fff;border-radius:99px;min-width:22px;padding:0 7px;font-size:12px;text-align:center}
 .av{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:18px;flex:none;position:relative}
 .av.s{width:40px;height:40px;font-size:16px}
+.av.xs{width:28px;height:28px;font-size:12px}
 .dot{position:absolute;bottom:0;right:0;width:12px;height:12px;border-radius:50%;background:#43d17a;border:2px solid #fff}
 .rb{width:40px;height:40px;border-radius:50%;background:#f1f6e3;font-size:18px;display:grid;place-items:center;flex:none}
 .rb.call{background:var(--lime-soft)}
@@ -78,7 +78,7 @@ bdi{unicode-bidi:isolate}
 .cta.ghost{background:#fff;border:2px solid var(--line)}
 .cta.danger{background:#fff;color:#c62828;border:2px solid #f3c6c6}
 .cta:disabled{opacity:.6}
-.btn{padding:10px 18px;border-radius:99px;font-size:14px;background:#fff;border:2px solid var(--line)}
+.btn{padding:10px 18px;border-radius:99px;font-size:14px;background:#fff;border:2px solid var(--line);display:inline-flex;align-items:center;gap:6px}
 .btn.p{background:var(--lime);border-color:var(--lime);font-weight:600}
 .btn.sm{padding:6px 14px;font-size:13px}
 .fld label{font-size:14px;color:var(--muted);display:block;margin:12px 0 6px}
@@ -95,52 +95,73 @@ bdi{unicode-bidi:isolate}
 .auth-card .lead{text-align:center;color:var(--muted);font-size:14px;margin-bottom:6px;line-height:1.6}
 
 /* bottom nav */
-#nav{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:560px;height:calc(84px + var(--sab));background:#fff;border-top:1px solid #eee;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;padding-bottom:calc(10px + var(--sab));z-index:20}
-.tab{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:13px;color:#555;position:relative}
-.tab svg{width:28px;height:28px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#nav{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:560px;height:calc(72px + var(--sab));background:#fff;border-top:1px solid #eee;display:flex;align-items:center;justify-content:space-around;padding:0 4px var(--sab);z-index:20}
+.tab{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:#555;position:relative;padding:8px 0}
+.tab svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .tab.on{color:var(--green);font-weight:700}
-.tab .tb{position:absolute;top:-6px;right:calc(50% - 26px);background:#ff5a36;color:#fff;border-radius:99px;font-size:11px;min-width:18px;padding:0 5px;line-height:18px;text-align:center}
-.scan .bubble{position:absolute;top:-34px;left:50%;transform:translateX(-50%);width:70px;height:70px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 -4px 14px rgba(0,0,0,.05)}
-.scan .bubble i{width:56px;height:56px;border-radius:50%;background:var(--lime);display:grid;place-items:center;color:#222}
-.scan span.l{margin-top:38px}
+.tab .tb{position:absolute;top:2px;right:calc(50% - 22px);background:#ff5a36;color:#fff;border-radius:99px;font-size:11px;min-width:18px;padding:0 5px;line-height:18px;text-align:center}
 
 /* chat page */
 .chatpage{position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:560px;display:flex;flex-direction:column;background:#eef4dc;z-index:15}
 .chatpage .topbar{background:#fff;padding-bottom:10px;box-shadow:0 1px 0 var(--line)}
 .hn{flex:1;min-width:0}.hn b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hn small{color:var(--muted);font-size:12px}
-#msgs{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:6px;-webkit-overflow-scrolling:touch}
-.b{max-width:80%;padding:8px 12px 4px;border-radius:16px;word-break:break-word;font-size:15px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+#msgs{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px;-webkit-overflow-scrolling:touch}
+.b{max-width:82%;padding:8px 12px 6px;border-radius:16px;word-break:break-word;font-size:15px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
 .b.me{align-self:flex-end;background:var(--lime-soft);border-bottom-right-radius:4px}
 .b.ot{align-self:flex-start;background:#fff;border-bottom-left-radius:4px}
 .b i{display:block;font-style:normal;font-size:10px;color:var(--muted);text-align:right;margin-top:2px}
-.b .who{font-size:12px;color:var(--green);font-weight:700}
-.b img{max-width:100%;max-height:300px;border-radius:10px;display:block;cursor:zoom-in;margin-bottom:2px}
-.b audio{width:230px;max-width:100%;height:40px;margin:2px 0}
-#comp{display:flex;align-items:center;gap:8px;padding:8px 10px calc(8px + var(--sab));background:#fff;border-top:1px solid var(--line);flex:none}
-#comp input[type=text]{flex:1;padding:12px 18px;border-radius:99px;border:2px solid var(--line);background:#fff;outline:none;min-width:0}
+.b .who{font-size:12px;color:var(--green-dark);font-weight:700;margin-bottom:2px}
+.b img{max-width:100%;max-height:300px;border-radius:10px;display:block;cursor:zoom-in;margin-bottom:4px}
+.b audio{width:240px;max-width:100%;height:40px;margin:3px 0;display:block}
+.b-aud-meta{font-size:12px;color:var(--green-dark);font-weight:600;display:flex;align-items:center;gap:4px;margin-bottom:2px}
+
+#comp{display:flex;align-items:center;gap:6px;padding:8px 10px calc(8px + var(--sab));background:#fff;border-top:1px solid var(--line);flex:none}
+#comp input[type=text]{flex:1;padding:11px 16px;border-radius:99px;border:2px solid var(--line);background:#fff;outline:none;min-width:0}
 #comp input[type=text]:focus{border-color:var(--green)}
-.cb2{width:44px;height:44px;border-radius:50%;background:var(--lime);color:#222;font-size:19px;display:grid;place-items:center;flex:none}
-.cb2.g{background:#f1f6e3;color:var(--green-dark)}.cb2.r{background:#e53935;color:#fff}
+.cb2{width:42px;height:42px;border-radius:50%;background:var(--lime);color:#222;font-size:18px;display:grid;place-items:center;flex:none}
+.cb2.g{background:#f1f6e3;color:var(--green-dark);cursor:pointer}.cb2.r{background:#e53935;color:#fff}
 .recbar{flex:1;display:flex;align-items:center;gap:10px;color:#e53935;font-weight:600}
 .recbar .d{width:12px;height:12px;border-radius:50%;background:#e53935;animation:bl 1s infinite}
 @keyframes bl{50%{opacity:.2}}
 
-/* call overlays (อยู่นอก #page จึงไม่โดนวาดใหม่) */
-.ov{position:fixed;inset:0;z-index:50;background:linear-gradient(180deg,#1c3300,#3f6200);color:#fff;display:none;flex-direction:column;align-items:center;padding:calc(50px + var(--sat)) 20px calc(30px + var(--sab));overflow:auto;text-align:center}
+/* call overlays */
+.ov{position:fixed;inset:0;z-index:50;background:radial-gradient(90% 60% at 15% 0%,rgba(182,245,26,.55),transparent 60%),radial-gradient(80% 60% at 100% 25%,rgba(67,208,234,.5),transparent 60%),radial-gradient(100% 70% at 50% 110%,rgba(123,92,255,.55),transparent 60%),linear-gradient(180deg,#10301c,#0b2038);color:#fff;display:none;flex-direction:column;align-items:center;padding:calc(clamp(14px,4vh,44px) + var(--sat)) 16px calc(clamp(12px,3vh,30px) + var(--sab));overflow:hidden;text-align:center;touch-action:none;overscroll-behavior:contain;-webkit-user-select:none;user-select:none}
 .ov.on{display:flex}
-.oi{width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;flex:1}
-.cav{width:110px;height:110px;border-radius:50%;display:grid;place-items:center;font-size:44px;font-weight:700;margin-bottom:12px;box-shadow:0 0 0 10px rgba(255,255,255,.1)}
-.ov h2{font-size:26px}.ov p.st{opacity:.85;margin-top:4px}
-.sub2{margin:14px 0 0;background:rgba(0,0,0,.25);border-radius:14px;padding:10px 14px;font-size:14px;min-height:44px;max-width:95%}
-.extd{font-size:30px;letter-spacing:4px;min-height:44px;direction:ltr;margin-top:6px}
-.cctl{display:flex;gap:26px;margin-top:auto;padding-top:20px;justify-content:center;align-items:center}
-.cb{width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;font-size:26px;display:grid;place-items:center}
-.cb.on{background:#fff;color:var(--green-dark)}.cb.red{background:#e53935}.cb.grn{background:#2fb344}
+.oi{width:100%;max-width:440px;display:flex;flex-direction:column;align-items:center;flex:1;min-height:0;position:relative;z-index:1}
+.cav{width:clamp(64px,12vh,110px);height:clamp(64px,12vh,110px);border-radius:50%;display:grid;place-items:center;font-size:clamp(26px,5vh,44px);font-weight:700;margin-bottom:clamp(4px,1vh,12px);box-shadow:0 0 0 10px rgba(255,255,255,.1);position:relative}
+.cav.pulse::before,.cav.pulse::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid rgba(255,255,255,.45);animation:ping 2s ease-out infinite}
+.cav.pulse::after{animation-delay:1s}
+@keyframes ping{from{transform:scale(1);opacity:.8}to{transform:scale(1.7);opacity:0}}
+.ov h2{font-size:clamp(20px,3.4vh,26px);line-height:1.3;text-shadow:0 2px 12px rgba(0,0,0,.35)}
+.ov p.st{opacity:.85;margin-top:4px}
+.sub2{margin-top:clamp(6px,1.5vh,14px);background:rgba(255,255,255,.12);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:8px 12px;min-height:0;max-height:clamp(52px,12vh,130px);max-width:95%;overflow:auto;font-size:clamp(13px,1.9vh,14px);touch-action:pan-y}
+.extd{font-size:clamp(20px,3.6vh,30px);letter-spacing:4px;min-height:clamp(26px,4.5vh,44px);direction:ltr;margin-top:2px}
+.cctl{display:flex;gap:clamp(18px,4vh,26px);margin-top:auto;padding-top:clamp(8px,2vh,20px);justify-content:center;align-items:center}
+.cb{width:clamp(54px,9vh,70px);height:clamp(54px,9vh,70px);border-radius:50%;background:rgba(255,255,255,.18);color:#fff;font-size:26px;display:grid;place-items:center;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.25);box-shadow:0 8px 24px rgba(0,0,0,.25);transition:transform .15s}
+.cb:active{transform:scale(.92)}
+.cb.on{background:#fff;color:var(--green-dark)}.cb.red{background:linear-gradient(135deg,#ff6b6b,#e53935);border:0;box-shadow:0 10px 28px rgba(229,57,53,.5)}
+.cb.grn{background:linear-gradient(135deg,#5df28a,#1fae4b);border:0;box-shadow:0 10px 28px rgba(47,179,68,.55)}
 .cb.red span{display:inline-block;transform:rotate(135deg)}
-.kp{display:grid;grid-template-columns:repeat(3,72px);gap:12px;justify-content:center;margin-top:14px}
-.kp button{height:56px;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;font-size:24px}
+.cb.grn.ring{animation:bnc 1s ease-in-out infinite}
+@keyframes bnc{50%{transform:scale(1.12)}}
+.cb svg{width:30px;height:30px}
+.kp{display:grid;grid-template-columns:repeat(3,clamp(56px,8.5vh,72px));gap:clamp(6px,1.4vh,12px);justify-content:center;margin-top:clamp(6px,1.4vh,14px)}
+.kp button{height:clamp(40px,7vh,56px);border-radius:50%;background:rgba(255,255,255,.15);color:#fff;font-size:clamp(18px,3vh,24px);border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .kp button:active{background:rgba(255,255,255,.35)}
-.kp.lt button{background:#f1f6e3;color:var(--text)}.kp.lt button:active{background:var(--lime)}
+.kp.lt button{background:#f1f6e3;color:var(--text);border-color:#e3ecc8;backdrop-filter:none}
+.kp.lt button:active{background:var(--lime)}
+
+/* Multi-admin ringing display */
+.ag-ring-box{margin-top:8px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.22);border-radius:18px;padding:8px 12px;width:100%;max-width:390px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.ag-ring-title{font-size:13px;font-weight:600;color:var(--lime-soft);margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:6px}
+.ag-ring-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-height:80px;overflow-y:auto}
+.ag-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);padding:4px 10px;border-radius:99px;font-size:12px;border:1px solid rgba(255,255,255,.25)}
+.ag-chip.on{background:rgba(182,245,26,.25);border-color:var(--lime)}
+.admin-call-badge{background:var(--lime);color:#1c3300;font-weight:700;font-size:13px;padding:4px 14px;border-radius:99px;margin-top:6px;display:inline-block}
+.sub-admins{margin-top:10px;background:rgba(0,0,0,.3);border-radius:16px;padding:8px 12px;width:100%;max-width:380px}
+.admin-tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.ad-tag{font-size:12px;background:rgba(255,255,255,.16);padding:3px 8px;border-radius:8px;border:1px solid rgba(255,255,255,.2)}
+.ad-tag.me{background:var(--lime);color:#173300;font-weight:700;border-color:var(--lime)}
 
 /* sheet / toast */
 #shBg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:60;opacity:0;pointer-events:none;transition:.25s}
@@ -149,29 +170,18 @@ bdi{unicode-bidi:isolate}
 #sheet.on{transform:translate(-50%,0)}
 #sheet .grab{width:48px;height:6px;border-radius:6px;background:#ddd;margin:0 auto 14px}
 #sheet h3{font-size:20px;margin-bottom:8px}
-.dn{direction:ltr;text-align:center;font-size:32px;min-height:50px;letter-spacing:3px}
-.ecard{border:2px solid var(--line);border-radius:16px;padding:10px;margin-top:10px}
-.ecard b{font-size:14px;color:var(--green-dark)}
-.ecard textarea{width:100%;margin-top:6px;border:2px solid var(--line);border-radius:14px;padding:10px;min-height:76px;outline:none;line-height:1.6}
-.erow{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
-.erow button,.mini{background:#f1f6e3;color:var(--green-dark);border-radius:99px;padding:6px 14px;font-size:13px}
-.mini.r{background:#ffe1e1;color:#b3261e}
-.orow{display:flex;gap:6px;margin-top:6px;align-items:center}
-.orow input{width:44px;text-align:center;border:2px solid var(--line);border-radius:12px;padding:8px 0}
-.orow select{flex:1;min-width:0;border:2px solid var(--line);border-radius:12px;padding:8px;background:#fff}
+.dn{direction:ltr;text-align:center;font-size:clamp(24px,4.4vh,32px);min-height:clamp(34px,6vh,50px);letter-spacing:3px}
+#sheet .kp button{height:clamp(38px,6.4vh,56px)}
 #toast{position:fixed;left:50%;bottom:calc(104px + var(--sab));transform:translate(-50%,20px);background:#222;color:#fff;padding:11px 20px;border-radius:99px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:99;max-width:90vw;text-align:center}
 #toast.on{opacity:1;transform:translate(-50%,0)}
 .lb{position:fixed;inset:0;background:#000e;z-index:70;display:grid;place-items:center}.lb img{max-width:100%;max-height:100%}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
-/* ===== v2 : topbar / nav / chat / call ===== */
+/* UI helpers */
 .topbar .tt{flex:1;min-width:0}.topbar .tt h1{font-size:24px;flex:none}
 .clk,.ck{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
 .icon-btn.callbtn{width:46px;height:46px;border-radius:16px;color:#14340a;background:linear-gradient(135deg,#d9ff6a 0,#7fe8a6 55%,#43d0ea 100%);box-shadow:0 6px 16px rgba(76,201,140,.45);transition:transform .15s}
 .icon-btn.callbtn:active{transform:scale(.92)}
 .icon-btn.callbtn svg{width:22px;height:22px}
-#nav{display:flex;align-items:center;justify-content:space-around;grid-template-columns:none;height:calc(72px + var(--sab));padding:0 4px var(--sab)}
-.tab{flex:1;min-width:0;padding:8px 0}
 .hl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .hl small.typ{color:var(--green);font-weight:700}
 .tp{display:flex;align-items:center;gap:8px;padding:4px 16px;font-size:12px;color:var(--green-dark);background:#eef4dc;flex:none}
@@ -181,34 +191,51 @@ bdi{unicode-bidi:isolate}
 .b .bm{background:none;color:var(--muted);font-size:15px;line-height:1;padding:0 0 0 8px;vertical-align:middle}
 .b.un{background:#ececec;color:#888}.uns{font-size:14px;font-style:italic}
 .tag{background:var(--lime-soft);color:var(--green-dark);border-radius:99px;font-size:11px;padding:1px 8px;margin-left:6px;font-weight:600}
+.tag.adm{background:#d4f580;color:#274d00;border:1px solid #b6f51a}
 .item .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.ov{background:radial-gradient(90% 60% at 15% 0%,rgba(182,245,26,.55),transparent 60%),radial-gradient(80% 60% at 100% 25%,rgba(67,208,234,.5),transparent 60%),radial-gradient(100% 70% at 50% 110%,rgba(123,92,255,.55),transparent 60%),linear-gradient(180deg,#10301c,#0b2038)}
-.ov::before,.ov::after{content:"";position:absolute;border-radius:50%;filter:blur(50px);pointer-events:none;animation:orb 10s ease-in-out infinite alternate}
-.ov::before{width:260px;height:260px;left:-80px;top:18%;background:rgba(182,245,26,.28)}
-.ov::after{width:300px;height:300px;right:-100px;bottom:8%;background:rgba(67,208,234,.25);animation-delay:-4s}
-@keyframes orb{to{transform:translate(30px,-40px) scale(1.15)}}
-.oi{position:relative;z-index:1}
-.ov h2{text-shadow:0 2px 12px rgba(0,0,0,.35)}
-.cav{position:relative}
-.cav.pulse::before,.cav.pulse::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid rgba(255,255,255,.45);animation:ping 2s ease-out infinite}
-.cav.pulse::after{animation-delay:1s}
-@keyframes ping{from{transform:scale(1);opacity:.8}to{transform:scale(1.7);opacity:0}}
-.sub2{background:rgba(255,255,255,.12);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2)}
-.cb{color:#fff;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.25);box-shadow:0 8px 24px rgba(0,0,0,.25);transition:transform .15s}
-.cb:active{transform:scale(.92)}
-.cb svg{width:30px;height:30px}
-.cb span{display:grid;place-items:center}
-.cb.red{background:linear-gradient(135deg,#ff6b6b,#e53935);border:0;box-shadow:0 10px 28px rgba(229,57,53,.5)}
-.cb.grn{background:linear-gradient(135deg,#5df28a,#1fae4b);border:0;box-shadow:0 10px 28px rgba(47,179,68,.55)}
-.cb.grn.ring{animation:bnc 1s ease-in-out infinite}
-@keyframes bnc{50%{transform:scale(1.12)}}
-.kp button{border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-.kp.lt button{border-color:#e3ecc8;backdrop-filter:none}
+.cbtn{position:relative}.cbtn svg{width:24px;height:24px}
+.cbadge{position:absolute;top:-6px;right:-6px;background:#ff5a36;color:#fff;border-radius:99px;font-size:11px;min-width:18px;padding:0 5px;line-height:18px;text-align:center}
+.fin{flex:1;min-width:0;padding:12px 18px;border-radius:99px;border:2px solid var(--line);background:#fff;outline:none}.fin:focus{border-color:var(--green)}
+.post{background:#fff;margin:10px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.post .ph{display:flex;gap:10px;align-items:center;padding:10px 14px}
+.post .pimg{width:100%;max-height:560px;object-fit:cover;display:block;cursor:zoom-in}
+.post .ptxt{padding:8px 16px 4px;font-size:17px;line-height:1.6;word-break:break-word}
+.post .paud{padding:10px 16px 6px;background:#f9fbf4;border-radius:14px;margin:6px 14px;border:1px solid var(--line)}
+.post .pact{display:flex;gap:12px;align-items:center;padding:8px 14px 2px}
+.post .hb{font-size:26px;line-height:1;background:none;transition:transform .15s}.post .hb:active{transform:scale(1.3)}
+.post .pcap{padding:2px 14px 14px;word-break:break-word}
 
-/* ===== responsive: มือถือ / ไอแพด / คอมพิวเตอร์ ===== */
-#app,#nav,.chatpage{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
-#nav{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
-@media(hover:hover){.item:hover,.tab:hover{background:rgba(182,245,26,.12)}.cta:hover,.btn:hover,.cb:hover,.icon-btn:hover{filter:brightness(1.05)}.item,.tab,.cta,.cb,.icon-btn{cursor:pointer}}
+/* IVR Editor details */
+details.ecard2{background:#fff;border-radius:20px;box-shadow:var(--shadow);margin:10px 16px;padding:0 16px}
+details.ecard2>summary{list-style:none;padding:14px 0;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px}
+details.ecard2>summary::-webkit-details-marker{display:none}
+details.ecard2>summary::after{content:'▾';margin-left:auto;color:var(--muted)}
+details.ecard2[open]>summary::after{content:'▴'}
+.edb{padding:0 0 16px;border-top:1px dashed var(--line)}
+.edb textarea{width:100%;border:2px solid var(--line);border-radius:14px;padding:10px;min-height:84px;outline:none;line-height:1.6}
+.edb textarea:focus{border-color:var(--green)}
+.orow{display:flex;gap:6px;margin-top:6px;align-items:center}
+.orow input.od{width:66px;text-align:center;border:2px solid var(--line);border-radius:12px;padding:8px 0}
+.orow select{flex:1;min-width:0;border:2px solid var(--line);border-radius:12px;padding:8px;background:#fff}
+.orow span{color:var(--muted);white-space:nowrap}
+.erow{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;align-items:center}
+.mini{background:#f1f6e3;color:var(--green-dark);border-radius:99px;padding:6px 14px;font-size:13px}
+.mini.r{background:#ffe1e1;color:#b3261e}
+.qgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.qslot{border:2px solid var(--line);border-radius:14px;padding:8px 10px}
+.qslot.has{border-color:var(--green);background:#f6fbe6}
+.qslot b{font-size:14px}
+
+/* Support Team Card */
+.support-card{background:linear-gradient(135deg,#f4fed6,#ffffff 60%);border:1.5px solid #c9f53e;border-radius:18px;padding:12px 14px;margin:8px 12px 12px;box-shadow:0 3px 12px rgba(111,163,0,.08)}
+.support-card-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.support-card-title{font-size:14px;font-weight:700;color:var(--green-dark)}
+.support-card-grid{display:flex;flex-wrap:wrap;gap:6px}
+.admin-badge-item{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #d8e5b4;padding:4px 10px;border-radius:99px;font-size:12px}
+.admin-badge-item.online{background:#effcd6;border-color:#a5e612}
+.admin-badge-dot{width:8px;height:8px;border-radius:50%;background:#43d17a;box-shadow:0 0 6px #43d17a}
+.admin-badge-dot.off{background:#bbb;box-shadow:none}
+
 @media(min-width:768px){
   body{background:linear-gradient(135deg,#e6f3c8,#d3ecf2 60%,#e4dcf7);font-size:17px}
   #app,#nav,.chatpage{max-width:860px}
@@ -226,95 +253,35 @@ bdi{unicode-bidi:isolate}
   .auth-card{max-width:480px;padding:36px 32px}
   .oi{max-width:460px}
   .kp{grid-template-columns:repeat(3,80px);gap:14px}.kp button{height:62px}
-  /* ฟอร์ม/แป้นโทรเป็นหน้าต่างกลางจอ แทนแผ่นเลื่อนจากล่าง */
   #sheet{bottom:auto;top:50%;max-width:520px;border-radius:28px;transform:translate(-50%,-44%);opacity:0;pointer-events:none;transition:transform .25s,opacity .25s;max-height:86vh;padding-bottom:24px}
   #sheet.on{transform:translate(-50%,-50%);opacity:1;pointer-events:auto}
   #toast{bottom:40px}
+  .post{margin:12px 24px;border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:var(--shadow)}
+  details.ecard2{margin-left:24px;margin-right:24px}
+  .qgrid{grid-template-columns:repeat(3,1fr)}
 }
 @media(min-width:1100px){
   #app,#nav,.chatpage{max-width:980px}
   .b{max-width:60%}
 }
-/* มือถือแนวนอน / จอเตี้ย */
 @media(max-height:560px){
-  .ov{padding-top:calc(16px + var(--sat));padding-bottom:calc(12px + var(--sab))}
-  .cav{width:72px;height:72px;font-size:30px;margin-bottom:6px}
-  .ov h2{font-size:20px}.extd{font-size:22px;min-height:30px}
-  .kp{grid-template-columns:repeat(6,52px);gap:8px;margin-top:8px}.kp button{height:44px;font-size:20px}
-  .cb{width:58px;height:58px}.cctl{padding-top:10px;gap:20px}
-  #sheet{max-height:94vh}
-  .dn{font-size:26px;min-height:36px}
+  .ov{padding-top:calc(10px + var(--sat));padding-bottom:calc(10px + var(--sab))}
+  .cav{width:46px;height:46px;font-size:20px;margin-bottom:2px}
+  .ov h2{font-size:18px}.ov p.st{margin-top:0;font-size:13px}
+  .sub2{max-height:40px;margin-top:4px;padding:6px 10px}
+  .extd{font-size:18px;min-height:22px}
+  .kp{grid-template-columns:repeat(6,clamp(42px,11vh,52px));gap:6px;margin-top:6px}
+  .kp button{height:clamp(32px,10vh,42px);font-size:18px}
+  .cctl{padding-top:6px}.cb{width:50px;height:50px}
+  #sheet{max-height:96vh;max-height:96dvh;padding-top:8px;padding-bottom:calc(10px + var(--sab))}
+  #sheet .grab{margin-bottom:6px}#sheet h3{font-size:17px;margin-bottom:2px}
+  #sheet .cta.inline{margin-top:8px;padding:10px;font-size:16px}
+  #sheet .dn{font-size:22px;min-height:28px}
+  #sheet .kp button{height:clamp(30px,9vh,38px)}
+  #sheet .cctl{padding-top:4px;margin-top:6px!important}
+  .snd{display:none}
 }
-@media(max-width:360px){.topbar h1{font-size:21px}.kp{grid-template-columns:repeat(3,64px)}}
-
-.fin{flex:1;min-width:0;padding:12px 18px;border-radius:99px;border:2px solid var(--line);background:#fff;outline:none}.fin:focus{border-color:var(--green)}
-.post .pbody{margin-top:10px;word-break:break-word}
-.post .pimg{margin-top:10px;width:100%;max-height:420px;object-fit:cover;border-radius:16px;cursor:zoom-in}
-.tab{font-size:12px}
-label.btn{cursor:pointer;display:inline-block}
-
-.post{background:#fff;margin:10px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.post .ph{display:flex;gap:10px;align-items:center;padding:10px 14px}
-.post .pimg{width:100%;max-height:560px;object-fit:cover;display:block;cursor:zoom-in}
-.post .ptxt{padding:8px 16px 4px;font-size:18px;line-height:1.6;word-break:break-word}
-.post .pact{display:flex;gap:12px;align-items:center;padding:8px 14px 2px}
-.post .hb{font-size:26px;line-height:1;background:none;transition:transform .15s}.post .hb:active{transform:scale(1.3)}
-.post .pcap{padding:2px 14px 14px;word-break:break-word}
-.cbtn{position:relative}.cbtn svg{width:24px;height:24px}
-.cbadge{position:absolute;top:-6px;right:-6px;background:#ff5a36;color:#fff;border-radius:99px;font-size:11px;min-width:18px;padding:0 5px;line-height:18px;text-align:center}
-@media(min-width:768px){.post{margin:12px 24px;border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:var(--shadow)}}
-
-/* ===== หน้าตั้งค่า IVR ===== */
-details.ecard2{background:#fff;border-radius:20px;box-shadow:var(--shadow);margin:10px 16px;padding:0 16px}
-details.ecard2>summary{list-style:none;padding:14px 0;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px}
-details.ecard2>summary::-webkit-details-marker{display:none}
-details.ecard2>summary::after{content:'▾';margin-left:auto;color:var(--muted)}
-details.ecard2[open]>summary::after{content:'▴'}
-.edb{padding:0 0 16px;border-top:1px dashed var(--line)}
-.edb textarea{width:100%;border:2px solid var(--line);border-radius:14px;padding:10px;min-height:84px;outline:none;line-height:1.6}
-.edb textarea:focus{border-color:var(--green)}
-.orow input.od{width:66px}.orow span{color:var(--muted);white-space:nowrap}
-.section-title .sub{margin-top:2px}
-@media(min-width:768px){details.ecard2{margin-left:24px;margin-right:24px}}
-
-.qgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.qslot{border:2px solid var(--line);border-radius:14px;padding:8px 10px}
-.qslot.has{border-color:var(--green);background:#f6fbe6}
-.qslot b{font-size:14px}
-@media(min-width:768px){.qgrid{grid-template-columns:repeat(3,1fr)}}
-
-/* ===== พอดีจอ: ไม่เลื่อนไปมา ===== */
-.ov{overflow:hidden;overflow:clip;height:100vh;height:100dvh;padding:calc(clamp(14px,4vh,44px) + var(--sat)) 16px calc(clamp(12px,3vh,30px) + var(--sab))}
-.ov{touch-action:none;overscroll-behavior:contain;-webkit-user-select:none;user-select:none}
-.sub2{touch-action:pan-y}
-.oi{min-height:0}
-.cav{width:clamp(64px,12vh,110px);height:clamp(64px,12vh,110px);font-size:clamp(26px,5vh,44px);margin-bottom:clamp(4px,1vh,12px)}
-.ov h2{font-size:clamp(20px,3.4vh,26px);line-height:1.3}
-.sub2{margin-top:clamp(6px,1.5vh,14px);padding:8px 12px;min-height:0;max-height:clamp(52px,12vh,130px);overflow:auto;font-size:clamp(13px,1.9vh,14px)}
-.extd{font-size:clamp(20px,3.6vh,30px);min-height:clamp(26px,4.5vh,44px);margin-top:2px}
-.kp{grid-template-columns:repeat(3,clamp(56px,8.5vh,72px));gap:clamp(6px,1.4vh,12px);margin-top:clamp(6px,1.4vh,14px)}
-.kp button{height:clamp(40px,7vh,56px);font-size:clamp(18px,3vh,24px)}
-.cctl{padding-top:clamp(8px,2vh,20px);gap:clamp(18px,4vh,26px)}
-.cb{width:clamp(54px,9vh,70px);height:clamp(54px,9vh,70px)}
-#sheet .dn{font-size:clamp(24px,4.4vh,32px);min-height:clamp(34px,6vh,50px)}
-#sheet .kp button{height:clamp(38px,6.4vh,56px)}
-@media(max-height:560px){
- .ov{padding-top:calc(10px + var(--sat));padding-bottom:calc(10px + var(--sab))}
- .cav{width:46px;height:46px;font-size:20px;margin-bottom:2px}
- .ov h2{font-size:18px}.ov p.st{margin-top:0;font-size:13px}
- .sub2{max-height:40px;margin-top:4px;padding:6px 10px}
- .extd{font-size:18px;min-height:22px}
- .kp{grid-template-columns:repeat(6,clamp(42px,11vh,52px));gap:6px;margin-top:6px}
- .kp button{height:clamp(32px,10vh,42px);font-size:18px}
- .cctl{padding-top:6px}.cb{width:50px;height:50px}
- #sheet{max-height:96vh;max-height:96dvh;padding-top:8px;padding-bottom:calc(10px + var(--sab))}
- #sheet .grab{margin-bottom:6px}#sheet h3{font-size:17px;margin-bottom:2px}
- #sheet .cta.inline{margin-top:8px;padding:10px;font-size:16px}
- #sheet .dn{font-size:22px;min-height:28px}
- #sheet .kp button{height:clamp(30px,9vh,38px)}
- #sheet .cctl{padding-top:4px;margin-top:6px!important}
-}
-@media(max-height:560px){.snd{display:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -327,6 +294,7 @@ details.ecard2[open]>summary::after{content:'▴'}
 <script>
 (()=>{
 'use strict';
+
 /* ============ ตั้งค่าฐานข้อมูล (Supabase โปรเจกต์เดียวกับเว็บห้อง) ============ */
 const CFG=Object.assign({SB_URL:'https://iejmwihipfvtkbvjtude.supabase.co',SB_KEY:'sb_publishable_PybXrP5brR32CHIw3nm8Lg_-SruBwlg'},{});
 const CLOUD=!!(CFG.SB_URL&&CFG.SB_KEY&&window.supabase);
@@ -336,14 +304,29 @@ const AUDEXTS=['mp3','m4a','mp4','aac','wav','wave','ogg','oga','opus','webm','w
 const AUDACC='audio/*,.'+AUDEXTS.join(',.');
 const AUDMAX=25*1024*1024;
 const AUDMIME={mp3:'audio/mpeg',m4a:'audio/mp4',mp4:'audio/mp4',aac:'audio/aac',wav:'audio/wav',wave:'audio/wav',ogg:'audio/ogg',oga:'audio/ogg',opus:'audio/ogg',webm:'audio/webm',weba:'audio/webm',flac:'audio/flac',amr:'audio/amr','3gp':'audio/3gpp','3gpp':'audio/3gpp',aif:'audio/aiff',aiff:'audio/aiff',caf:'audio/x-caf',wma:'audio/x-ms-wma',mka:'audio/x-matroska'};
+
 /* ตรวจไฟล์เสียง: คืนนามสกุลที่ใช้ หรือ null (พร้อมแจ้งเหตุผล) */
 function audExt(f){
  if(!f)return null;
  if(f.size>AUDMAX){toast('ไฟล์เสียงต้องมีขนาดไม่เกิน 25 MB');return null}
  const ext=(f.name.split('.').pop()||'').toLowerCase(),isA=String(f.type||'').toLowerCase().startsWith('audio/');
- if(!AUDEXTS.includes(ext)&&!isA){toast('ไฟล์นี้ไม่ใช่ไฟล์เสียงที่รองรับ (รองรับ MP3, M4A, WAV, OGG, OPUS, AAC, FLAC, WEBM, AMR, 3GP, AIFF ฯลฯ)');return null}
+ if(!AUDEXTS.includes(ext)&&!isA){toast('ไฟล์นี้ไม่ใช่ไฟล์เสียงที่รองรับ (รองรับ MP3, M4A, WAV, OGG, OPUS, AAC, FLAC, WEBM, AMR ฯลฯ)');return null}
  return AUDEXTS.includes(ext)?ext:'mp3';
 }
+
+function getAudioDuration(file){
+ return new Promise(res=>{
+  try{
+   const a=new Audio();
+   const u=URL.createObjectURL(file);
+   a.preload='metadata';
+   a.onloadedmetadata=()=>{URL.revokeObjectURL(u);res(Math.round(a.duration)||0)};
+   a.onerror=()=>{URL.revokeObjectURL(u);res(0)};
+   a.src=u;
+  }catch(e){res(0)}
+ });
+}
+
 const HOLD_CYCLE=30000; /* เพลงรอรอบละ 30 วิ แล้วแจ้งคิว วนไปเรื่อยๆ จนกว่าจะมีคนรับสาย (ไม่ตัดสายอัตโนมัติ) */
 const DONE=new Set();
 const ICE=CFG.ICE||[
@@ -368,8 +351,8 @@ const S={app:'คุยกัน',chats:'แชต',calls:'ประวัติ
  logout:'ออกจากระบบ',search:'ค้นหา…',saved:'บันทึกแล้ว',missed:'ไม่ได้รับสาย',rejectedLog:'ปฏิเสธสาย',
  netTitle:'ฐานข้อมูล',netOn:'ออนไลน์ (Supabase) — ใช้ข้ามเครื่องได้',
  err:'ผิดพลาด',needTbl:'ฐานข้อมูลยังไม่มีตาราง — เปิด Supabase › SQL Editor แล้วรันไฟล์ schema.sql จากนั้นกดเข้าสู่ระบบใหม่',
- 
  optAgent:'โอนหาเจ้าหน้าที่',optExt:'ต่อเบอร์สั้น',optVm:'ฝากข้อความเสียง',optHang:'วางสาย',optRep:'ฟังซ้ำ'};
+
 const NL={root:'เมนูหลัก',info:'ข้อมูลทั่วไป',hours:'เวลาทำการ',agent:'เริ่มโอนสายเจ้าหน้าที่',queue:'ประโยคนำก่อนแจ้งคิว',noagent:'ยังไม่มีเจ้าหน้าที่ออนไลน์',extp:'ขอเบอร์สั้น',vmp:'ฝากข้อความเสียง',thx:'ขอบคุณ/ลาก่อน',bad:'กดผิด/ไม่พบเบอร์'};
 const defIVR=()=>({nodes:{
  root:{text:'ยินดีต้อนรับค่ะ กด 1 เพื่อฟังข้อมูลทั่วไป กด 2 เพื่อฟังเวลาทำการ กด 3 เพื่อสนทนากับเจ้าหน้าที่ กด 4 เพื่อต่อเบอร์สั้น กด 5 เพื่อฝากข้อความเสียง หรือกด 0 เพื่อฟังเมนูซ้ำ',audio:'',
@@ -415,7 +398,7 @@ let ringT=null;
 function ring(kind){stopRing();const inn=kind==='in';const go=()=>{if(inn){tone([440,480],.4);setTimeout(()=>tone([440,480],.4),600)}else tone([425],1)};go();ringT=setInterval(go,inn?3000:4000);if(inn&&navigator.vibrate)navigator.vibrate([400,200,400,1500,400,200,400])}
 let HOLD=null;
 function holdSynth(){const N=[523,659,784,659,587,698,880,698,523,659,784,1047,880,784,659,587];let i=0;const step=()=>{tone([N[i%N.length]],.38,.05);i++};step();return setInterval(step,420)}
-/* เพลงรอสายระหว่างโอนสายหาเจ้าหน้าที่: ใช้ไฟล์ที่แอดมินอัปโหลด ถ้าไม่มีใช้ทำนองมาตรฐาน */
+
 function holdStart(){
  stopRing();const u=IVRC.hold&&IVRC.hold.url;HOLD={};
  if(u){try{const a=TTSA||(TTSA=new Audio()),H=HOLD;a.onended=null;a.loop=true;a.src=u;H.a=a;
@@ -427,7 +410,7 @@ function holdStop(){if(!HOLD)return;const H=HOLD;HOLD=null;clearInterval(H.t);if
 function stopRing(){clearInterval(ringT);ringT=null;holdStop();if(navigator.vibrate)navigator.vibrate(0)}
 function notifyB(t,b){try{if(document.hidden&&window.Notification&&Notification.permission==='granted')new Notification(t,{body:b})}catch(e){}}
 
-/* ============ Transport: ในเครื่อง (BroadcastChannel) / Supabase ============ */
+/* ============ Transport: Supabase ============ */
 function CloudT(){
  const sb=supabase.createClient(CFG.SB_URL,CFG.SB_KEY,{realtime:{params:{eventsPerSecond:40}}}),h={};let ch,pcb=()=>{},me;
  const ck=r=>{if(r.error){const m=r.error.message||'';throw Error(r.error.code==='23505'?'dup':(r.error.code==='PGRST205'||r.error.code==='42P01'||/relation|does not exist|schema cache|Could not find the table/i.test(m)?'tbl':m))}return r.data};
@@ -468,14 +451,19 @@ const getUser=id=>USERS[id]||ONL[id];
 const allUsers=()=>{const o=Object.assign({},USERS);for(const k in ONL)o[k]=Object.assign({},ONL[k],o[k]||{});return o};
 const pub=u=>({id:u.id,name:u.name,ext:u.ext,agent:!!u.agent});
 
-/* ============ เริ่มต้น / สมัคร-เข้าสู่ระบบ ============ */
+/* ช่วยหาแอดมินทั้งหมดและแอดมินที่ออนไลน์ */
+const getAdmins=()=>Object.values(allUsers()).filter(u=>u.agent&&u.name).sort((a,b)=>(!!ONL[b.id])-(!!ONL[a.id])||String(a.name).localeCompare(b.name));
+const getOnlineAdmins=(excludeId)=>getAdmins().filter(u=>ONL[u.id]&&(excludeId?u.id!==excludeId:true));
+
 function mkT(){try{if(CLOUD)return CloudT()}catch(e){}return{users:async()=>{throw Error('เชื่อมต่อฐานข้อมูลไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วรีเฟรชหน้า')},init:async()=>{throw Error('offline')},on(){},track(){},emit(){},onPresence(){}}}
+
 async function boot(){
  T=mkT();
  const me=(()=>{try{return JSON.parse(MS.getItem('uy_me')||'null')}catch(e){return null}})();
  if(me){const ok=await enter(me,true);if(ok)return}
  loginView();
 }
+
 async function loginView(msg){
  $('#nav').classList.add('hide');page().className='';
  page().innerHTML='<div class="auth"><div class="auth-card"><div class="logo">📞</div><h1>'+S.loginTitle+'</h1><p class="lead">'+S.loginLead+'</p>'+
@@ -487,6 +475,7 @@ async function loginView(msg){
  try{const us=await T.users();const el=$('#setup');
   if(el&&!us.some(u=>u.agent))el.innerHTML='<div class="fld" style="margin-top:18px;border-top:1px dashed var(--line);padding-top:6px"><label for="sn">ยังไม่มีแอดมินในระบบ — ตั้งแอดมินคนแรก</label><input type="text" id="sn" maxlength="40" placeholder="ชื่อแอดมิน"></div><button class="cta inline ghost" data-act="setup">สร้างแอดมินคนแรก (ระบบสร้างหมายเลขให้อัตโนมัติ)</button>'}catch(e){}
 }
+
 function genExt(bad){let e;do{e=String(1000+Math.floor(Math.random()*9000))}while(bad.some(u=>String(u.ext)===e)||e===OPERATOR_EXT);return e}
 async function createUser(name,agent,us){
  let bad=us.slice();
@@ -496,9 +485,11 @@ async function createUser(name,agent,us){
  }
  throw Error('สร้างหมายเลขไม่สำเร็จ ลองใหม่อีกครั้ง');
 }
+
 function showNo(u){
  sheet('<h3>เพิ่มผู้ใช้เรียบร้อย</h3><p class="hint" style="margin:4px 0">'+esc(u.name)+(u.agent?' (แอดมิน)':'')+'</p><div class="dn">'+esc(u.ext)+'</div><p class="hint">นี่คือหมายเลขสำหรับเข้าสู่ระบบ ส่งให้ผู้ใช้เพื่อใช้ล็อกอิน</p><button class="cta inline" data-act="closeSheet">ตกลง</button>');
 }
+
 async function login(){
  const n=(($('#ln')||{}).value||'').replace(/\D/g,'');
  if(!n)return toast(S.enterNo);
@@ -510,6 +501,7 @@ async function login(){
  if(!ex)return loginView(S.noNo);
  await enter({id:ex.id,name:ex.name,ext:ex.ext,agent:!!ex.agent});
 }
+
 async function setupAdmin(){
  const n=((($('#sn')||{}).value)||'').trim().replace(/\s+/g,' ');
  if(!n)return toast(S.enterName);
@@ -519,6 +511,7 @@ async function setupAdmin(){
   if(await enter(me,false))showNo(me);
  }catch(e){loginView(e.message==='tbl'?S.needTbl:S.err+': '+esc(e.message))}
 }
+
 async function enter(me,silent){
  try{
   const us=await T.users();const ex=us.find(u=>u.id===me.id);
@@ -532,18 +525,25 @@ async function enter(me,silent){
  }
  MS.setItem('uy_me',JSON.stringify(pub(ME)));
  T.on('msg',onMsg);T.on('sig',onSig);T.on('typing',onTyping);T.on('unsend',onUnsend);T.on('kick',onKick);
- T.onPresence(o=>{ONL=o;if(CALL&&CALL.state==='agentring'&&CALL.wq){CALL.qpos=queueAhead(CALL)+1;const sq=$('#cst');if(sq)sq.textContent=stTxt(CALL)}const k=Object.values(o).map(x=>x.id+'|'+x.name+'|'+!!x.agent).sort().join();if(k!==lastPres){lastPres=k;render()}});
+ T.onPresence(o=>{ONL=o;if(CALL&&CALL.state==='agentring'&&CALL.wq){CALL.qpos=queueAhead(CALL)+1;const sq=$('#cst');if(sq)sq.textContent=stTxt(CALL);callUI()}const k=Object.values(o).map(x=>x.id+'|'+x.name+'|'+!!x.agent).sort().join();if(k!==lastPres){lastPres=k;render()}});
  await refresh();setInterval(refreshUsers,15000);
  $('#nav').classList.remove('hide');VIEW=ME.agent?'feed':'chats';render();
  if(!ME.agent)setTimeout(contactPrompt,350);
  return true;
 }
+
 function contactPrompt(){
  if(!ME||ME.agent||CALL||OPEN)return;
- sheet('<h3>ต้องการติดต่อเจ้าหน้าที่หรือไม่?</h3><p class="hint" style="margin:4px 0 10px">เลือก “ใช่” เพื่อโทรเข้าระบบตอบรับอัตโนมัติ หรือเลือก “ไม่” เพื่อไปหน้าแชต</p><button class="cta inline" data-act="contactYes">📞 ใช่ ติดต่อเจ้าหน้าที่</button><button class="cta inline ghost" data-act="contactNo">💬 ไม่ ไปหน้าแชต</button>');
+ const ads=getAdmins(),onAds=getOnlineAdmins();
+ sheet('<h3>ต้องการติดต่อเจ้าหน้าที่หรือไม่?</h3>'+
+  '<p class="hint" style="margin:4px 0 6px">เลือก “ใช่” เพื่อโทรเข้าระบบตอบรับอัตโนมัติ หรือเลือก “ไม่” เพื่อไปหน้าแชต</p>'+
+  (ads.length?'<div class="sub" style="margin-bottom:12px;text-align:center">มีแอดมินพร้อมดูแล <b>'+onAds.length+'/'+ads.length+' คน</b></div>':'')+
+  '<button class="cta inline" data-act="contactYes">📞 ใช่ ติดต่อเจ้าหน้าที่</button><button class="cta inline ghost" data-act="contactNo">💬 ไม่ ไปหน้าแชต</button>');
 }
+
 function forceOut(){try{if(CALL)hang()}catch(e){};MS.removeItem('uy_me');try{alert('บัญชีของคุณถูกลบออกจากระบบแล้ว')}catch(e){};location.reload()}
 function onKick(p){if(p&&ME&&p.id===ME.id)forceOut()}
+
 async function refreshUsers(){
  if(!ME)return;
  try{const us=await T.users();
@@ -555,6 +555,7 @@ async function refreshUsers(){
   if(k!==lastUsers){lastUsers=k;render()}
  }catch(e){}
 }
+
 async function refresh(){
  try{const us=await T.users();us.forEach(u=>USERS[u.id]=u);lastUsers=JSON.stringify(us.map(u=>[u.id,u.name,u.ext,!!u.agent]).sort());
   const r=await T.recent(ME.id,ME.agent);MSGS={};r.forEach(m=>{if((m.chat!=='inbox'&&m.chat!=='feed')||ME.agent)addMsg(m)})}
@@ -569,6 +570,7 @@ async function sendMsg(chat,kind,f){
  try{await T.saveMsg(m)}catch(e){toast(e.message==='tbl'?S.needTbl:e.message);return}
  T.emit('msg',m);
 }
+
 function onMsg(m){
  const rel=(m.chat==='feed'||m.chat==='inbox')?ME.agent:isSup(m.chat)?(ME.agent||supOwner(m.chat)===ME.id):m.chat.split('|').includes(ME.id);if(!rel||m.sender===ME.id)return;
  if(!addMsg(m))return;
@@ -576,24 +578,43 @@ function onMsg(m){
  delete TYP[m.chat];
  if(!USERS[m.sender])refreshUsers();
  if(OPEN===m.chat&&!document.hidden){READ[m.chat]=m.ts;SV('uy_read',READ)}
- const u=getUser(m.sender)||{name:'?'};notifyB(u.name,m.kind==='text'?m.body:(m.kind==='image'?'📷':'🎤'));
+ const u=getUser(m.sender)||{name:'?'};notifyB(u.name,m.kind==='text'?m.body:(m.kind==='image'?'📷':(m.kind==='voice'?'🎵 เสียง':'💬')));
  tone([880],.08,.06);render();
 }
+
 const unread=c=>(MSGS[c]||[]).filter(m=>m.sender!==ME.id&&m.ts>(READ[c]||0)).length;
-const prev=m=>m?(m.body===UNS?'🚫 '+S.unsent:m.kind==='image'?'📷 '+S.photo:m.kind==='voice'?'🎤 '+S.voice:m.body):'';
+const prev=m=>m?(m.body===UNS?'🚫 '+S.unsent:m.kind==='image'?'📷 '+S.photo:m.kind==='voice'?'🎵 '+(m.dur?mmss(m.dur):S.voice):m.body):'';
 
 /* ============ ภาพ / เสียง ============ */
 function shrink(file,max){max=max||1024;return new Promise((res,rej)=>{const i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext('2d').drawImage(i,0,0,c.width,c.height);c.toBlob(b=>b?res(b):rej(Error('img')),'image/jpeg',.78);URL.revokeObjectURL(i.src)};i.onerror=()=>rej(Error('img'));i.src=URL.createObjectURL(file)})}
+
 function recorder(stream){
  const mt=['audio/webm;codecs=opus','audio/webm','audio/mp4'].find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t))||'';
  const mr=new MediaRecorder(stream,mt?{mimeType:mt}:{}),ch=[],t0=Date.now();
  mr.ondataavailable=e=>e.data&&e.data.size&&ch.push(e.data);mr.start();
  return{ext:/mp4/.test(mt)?'m4a':'webm',stop:()=>new Promise(r=>{if(mr.state==='inactive')return r({blob:new Blob(ch),dur:0});mr.onstop=()=>r({blob:new Blob(ch,{type:mr.mimeType||'audio/webm'}),dur:Math.round((Date.now()-t0)/1000)});mr.stop()})}
 }
+
 async function pickImage(f){
  if(!f||!OPEN)return;
  try{const b=await shrink(f);const url=await T.upload(b,'jpg');sendMsg(OPEN,'image',{url})}catch(e){toast(S.err)}
 }
+
+async function pickAudio(f){
+ if(!f||!OPEN)return;
+ const ext=audExt(f);if(!ext)return;
+ toast('กำลังอัปโหลดไฟล์เสียง…');
+ try{
+  const dur=await getAudioDuration(f);
+  const url=await T.upload(f,ext);
+  sendMsg(OPEN,'voice',{url,dur:dur||0,body:f.name});
+  toast('ส่งไฟล์เสียงแล้ว');
+ }catch(e){
+  console.error(e);
+  toast('อัปโหลดไฟล์เสียงไม่สำเร็จ: '+(e&&e.message||S.err));
+ }
+}
+
 async function recStart(){
  try{const st=await getMic();REC={st,rec:recorder(st),t0:Date.now()};
   REC.tm=setInterval(()=>{const e=$('#rt');if(e)e.textContent=mmss(Math.round((Date.now()-REC.t0)/1000))},500);comp()}
@@ -605,9 +626,7 @@ async function recEnd(send){
  if(send&&r.dur>=1){try{const url=await T.upload(r.blob,R.rec.ext);sendMsg(OPEN,'voice',{url,dur:r.dur})}catch(e){toast(S.err)}}
 }
 
-/* ============ วาดหน้าจอ ============
-   สำคัญ: วาดเฉพาะ #page / #nav เท่านั้น ส่วน sheet, หน้าจอโทร, หน้ารับสาย อยู่นอก #page
-   จึงไม่ถูกลบเมื่อระบบอัปเดตข้อมูล และจะไม่วาดใหม่ระหว่างคุยสาย */
+/* ============ วาดหน้าจอ ============ */
 const NAVIC={
  chats:'<path d="M4 5h16v11H9l-5 4z"/>',
  people:'<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-4 3-6 6-6s6 2 6 6M15 15c3 0 6 1 6 5"/>',
@@ -617,22 +636,25 @@ const NAVIC={
 };
 const NAVFEED='<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 10h16M9 10v10"/>';
 const NAVAD='<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>';
+
 function drawNav(){
  const tot=Object.keys(MSGS).filter(c=>c!=='feed').reduce((s,c)=>s+unread(c),0);
  const t=(k,l)=>'<button class="tab'+((VIEW===k||(k==='admin'&&VIEW==='ivr'))?' on':'')+'" data-act="tab" data-v="'+k+'"><svg viewBox="0 0 24 24">'+(k==='admin'?NAVAD:k==='feed'?NAVFEED:NAVIC[k])+'</svg>'+l+(k==='chats'&&tot?'<span class="tb">'+tot+'</span>':'')+(k==='admin'&&Object.keys(PARK).length?'<span class="tb">'+Object.keys(PARK).length+'</span>':'')+'</button>';
- $('#nav').innerHTML=ME.agent?t('feed',S.feed)+t('chats',S.chats)+t('people',S.people)+t('calls',S.calls)+t('admin',S.admin)+t('set',S.set):t('chats',S.chats)+t('set',S.set);
+ $('#nav').innerHTML=ME.agent?t('feed',S.feed)+t('chats',S.chats)+t('people',S.people)+t('calls',S.calls)+t('admin',S.admin)+t('set',S.set):t('chats',S.chats)+t('people',S.people)+t('set',S.set);
 }
+
 const topbar=t=>'<div class="topbar"><div class="tt"><h1><span class="brand-dot"></span>'+t+'</h1><div class="clk" data-clock></div></div></div>';
 const clk=()=>{const d=new Date();return d.toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'})+' · '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds())};
 function tickClock(){const t=clk();document.querySelectorAll('[data-clock]').forEach(e=>e.textContent=t)}
+
 function render(){
  if(!ME)return;
- if(CALL)return;                       // ไม่วาดใหม่ระหว่างโทร
- if(VIEW==='ivr')return;               // หน้าตั้งค่า IVR วาดเอง
+ if(CALL)return;
+ if(VIEW==='ivr')return;
  if(OPEN){chatHead();chatMsgs();return}
  const a=document.activeElement;
  if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)&&page().contains(a))return;
- if(!ME.agent&&VIEW!=='chats'&&VIEW!=='set')VIEW='chats';   // ผู้ใช้ทั่วไปมีแค่ แชต / ตั้งค่า
+ if(!ME.agent&&VIEW!=='chats'&&VIEW!=='people'&&VIEW!=='set')VIEW='chats';
  const y=window.scrollY;
  const V={chats:vChats,feed:vFeed,people:vPeople,calls:vCalls,set:vSet,admin:vAdmin}[VIEW]();
  page().className='';
@@ -643,21 +665,24 @@ function render(){
  page().innerHTML=tb+V;
  $('#nav').classList.remove('hide');drawNav();tickClock();window.scrollTo(0,y);
 }
+
 const SUP='sup|';
 const isSup=c=>String(c).startsWith(SUP);
 const supOwner=c=>String(c).slice(4);
 const supId=()=>SUP+ME.id;
 const pidOf=c=>c==='inbox'?null:isSup(c)?(supOwner(c)===ME.id?null:supOwner(c)):String(c).split('|').find(x=>x!==ME.id);
 const chatUser=c=>{if(c==='inbox')return{id:'inbox',name:S.inbox};if(isSup(c)&&supOwner(c)===ME.id)return{id:'sup',name:'แชตกับเจ้าหน้าที่'};const p=pidOf(c);return getUser(p)||{id:p,name:'?'}};
+
 function vChats(){
  let ids=Object.keys(MSGS).filter(c=>c!=='feed'&&MSGS[c].length&&(c!=='inbox'||ME.agent)).sort((a,b)=>MSGS[b][MSGS[b].length-1].ts-MSGS[a][MSGS[a].length-1].ts);
- if(!ME.agent){ids=ids.filter(c=>c!==supId());ids.unshift(supId())}      // แชตเจ้าหน้าที่อยู่บนสุดเสมอ
+ if(!ME.agent){ids=ids.filter(c=>c!==supId());ids.unshift(supId())}
  if(!ids.length)return '<div class="card empty">'+S.noChats+'</div>';
  return '<div class="list">'+ids.map(c=>{
   const l=(MSGS[c]||[])[(MSGS[c]||[]).length-1],pid=pidOf(c),u=chatUser(c),n=unread(c),mine=isSup(c)&&supOwner(c)===ME.id;
   const sub=l?((l.sender===ME.id&&l.body!==UNS?'✓ ':'')+prev(l)):'พิมพ์ข้อความถึงเจ้าหน้าที่ได้ที่นี่';
   return '<div class="item" role="button" tabindex="0" data-act="open" data-c="'+esc(c)+'">'+(mine?'<div class="av" style="background:var(--green)">💬</div>':av(u,'',pid&&ONL[pid]))+'<div class="nm"><b>'+esc(u.name)+(isSup(c)&&ME.agent?'<span class="tag">ขอความช่วยเหลือ</span>':'')+'</b><small>'+esc(sub)+'</small></div><div class="end"><span>'+(l?hhmm(l.ts):'')+'</span>'+(n?'<span class="badge">'+n+'</span>':'')+'</div></div>'}).join('')+'</div>';
 }
+
 function feedData(){
  const likes={},posts=[];
  (MSGS.feed||[]).forEach(m=>{
@@ -669,20 +694,25 @@ function feedData(){
  return{likes,posts:posts.reverse()};
 }
 const fdate=t=>{const d=new Date(t),n=new Date();return d.toDateString()===n.toDateString()?hhmm(t):d.toLocaleDateString('th-TH',{day:'numeric',month:'short'})+' '+hhmm(t)};
+
 function vFeed(){
  const F=feedData();
- const comp='<div class="card"><div style="display:flex;gap:10px;align-items:center">'+av(ME,'s')+'<input type="text" id="fi" class="fin" maxlength="500" placeholder="แชร์อะไรสักหน่อย…" autocomplete="off"></div>'+
-  '<div style="display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:10px"><label class="btn" for="ff">📷 รูปภาพ</label><input type="file" id="ff" accept="image/*" hidden><button class="btn p" data-act="postT">โพสต์</button></div></div>';
+ const comp='<div class="card"><div style="display:flex;gap:10px;align-items:center">'+av(ME,'s')+'<input type="text" id="fi" class="fin" maxlength="500" placeholder="แชร์ข้อความ รูป หรือเสียง…" autocomplete="off"></div>'+
+  '<div style="display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:10px;flex-wrap:wrap">'+
+  '<label class="btn" for="ff">📷 รูปภาพ</label><input type="file" id="ff" accept="image/*" hidden>'+
+  '<label class="btn" for="fa">🎵 อัปโหลดเสียง</label><input type="file" id="fa" accept="'+AUDACC+'" hidden>'+
+  '<button class="btn p" data-act="postT">โพสต์</button></div></div>';
  if(!F.posts.length)return comp+'<div class="card empty">ยังไม่มีโพสต์ — เป็นคนแรกที่โพสต์เลย</div>';
  return comp+F.posts.map(m=>{
-  const u=getUser(m.sender)||{id:m.sender,name:'?'},lk=F.likes[m.id]||{},n=Object.values(lk).reduce((a,b)=>a+b,0),me=!!lk[ME.id],img=m.kind==='image'&&m.url;
-  return '<article class="post"><div class="ph">'+av(u,'s',ONL[u.id])+'<div style="flex:1;min-width:0"><b>'+esc(u.name)+(u.agent?'<span class="tag">แอดมิน</span>':'')+'</b><div class="sub">'+fdate(m.ts)+'</div></div>'+
+  const u=getUser(m.sender)||{id:m.sender,name:'?'},lk=F.likes[m.id]||{},n=Object.values(lk).reduce((a,b)=>a+b,0),me=!!lk[ME.id],img=m.kind==='image'&&m.url,aud=m.kind==='voice'&&m.url;
+  return '<article class="post"><div class="ph">'+av(u,'s',ONL[u.id])+'<div style="flex:1;min-width:0"><b>'+esc(u.name)+(u.agent?'<span class="tag adm">แอดมิน</span>':'')+'</b><div class="sub">'+fdate(m.ts)+'</div></div>'+
    ((m.sender===ME.id||ME.agent)?'<button class="mini r" data-act="postdel" data-id="'+esc(m.id)+'">'+S.del+'</button>':'')+'</div>'+
-   (img?'<img class="pimg" src="'+esc(m.url)+'" data-act="zoom" data-i="'+esc(m.id)+'" alt="'+S.photo+'">':(m.body?'<div class="ptxt">'+esc(m.body).replace(/\n/g,'<br>')+'</div>':''))+
+   (img?'<img class="pimg" src="'+esc(m.url)+'" data-act="zoom" data-i="'+esc(m.id)+'" alt="'+S.photo+'">':(aud?'<div class="paud"><div class="b-aud-meta">🎵 ไฟล์เสียง '+(m.dur?mmss(m.dur):'')+'</div><audio controls preload="metadata" src="'+esc(m.url)+'" style="width:100%"></audio></div>':(m.body?'<div class="ptxt">'+esc(m.body).replace(/\n/g,'<br>')+'</div>':'')))+
    '<div class="pact"><button class="hb" data-act="like" data-id="'+esc(m.id)+'" aria-label="ถูกใจ">'+(me?'❤️':'🤍')+'</button><span class="sub">'+(n?'ถูกใจ '+n+' คน':'ยังไม่มีคนถูกใจ')+'</span></div>'+
-   (img&&m.body?'<div class="pcap"><b>'+esc(u.name)+'</b> '+esc(m.body).replace(/\n/g,'<br>')+'</div>':'<div style="height:12px"></div>')+'</article>';
+   ((img||aud)&&m.body?'<div class="pcap"><b>'+esc(u.name)+'</b> '+esc(m.body).replace(/\n/g,'<br>')+'</div>':'<div style="height:12px"></div>')+'</article>';
  }).join('');
 }
+
 async function postText(){
  const i=$('#fi'),t=((i&&i.value)||'').trim();if(!t)return toast('พิมพ์ข้อความก่อนโพสต์');
  i.value='';i.blur();await sendMsg('feed','text',{body:t});
@@ -691,6 +721,19 @@ async function postImage(f){
  if(!f)return;const i=$('#fi'),cap=((i&&i.value)||'').trim();
  try{const b=await shrink(f);const url=await T.upload(b,'jpg');if(i){i.value='';i.blur()}await sendMsg('feed','image',{url,body:cap})}catch(e){toast(S.err)}
 }
+async function postAudio(f){
+ if(!f)return;const ext=audExt(f);if(!ext)return;
+ const i=$('#fi'),cap=((i&&i.value)||'').trim();
+ toast('กำลังอัปโหลดไฟล์เสียง…');
+ try{
+  const dur=await getAudioDuration(f);
+  const url=await T.upload(f,ext);
+  if(i){i.value='';i.blur()}
+  await sendMsg('feed','voice',{url,dur:dur||0,body:cap||f.name});
+  toast('โพสต์ไฟล์เสียงแล้ว');
+ }catch(e){toast('อัปโหลดไฟล์เสียงไม่สำเร็จ: '+(e&&e.message||S.err))}
+}
+
 function likePost(t){
  const id=t.dataset.id,cur=((feedData().likes[id]||{})[ME.id])===1;
  sendMsg('feed','text',{body:(cur?'__unlike__|':'__like__|')+id});
@@ -702,12 +745,31 @@ async function delPost(t){
  try{await T.unsendMsg(id)}catch(e){return toast(e.message==='tbl'?S.needTbl:e.message)}
  applyUns(m);T.emit('unsend',{id,chat:'feed',from:ME.id});render();
 }
+
 function vPeople(){
- const us=Object.values(allUsers()).filter(u=>u.id!==ME.id&&u.name).sort((a,b)=>(!!ONL[b.id])-(!!ONL[a.id])||String(a.name).localeCompare(b.name));
- return '<input class="search" id="ps" placeholder="'+S.search+'" autocomplete="off">'+(us.length?'<div class="list" id="pl">'+us.map(u=>
-  '<div class="item" data-nm="'+esc((u.name||'').toLowerCase()+' '+u.ext)+'">'+av(u,'',ONL[u.id])+'<div class="nm"><b>'+esc(u.name)+(u.agent?'<span class="tag">แอดมิน</span>':'')+'</b><small>หมายเลข <bdi>'+esc(u.ext)+'</bdi> · '+(ONL[u.id]?S.online:S.offline)+'</small></div>'+
-  '<button class="rb" data-act="chat" data-id="'+esc(u.id)+'">💬</button>'+'</div>').join('')+'</div>':'<div class="card empty">'+S.noPeople+'</div>');
+ const allAdm=getAdmins();
+ const regulars=Object.values(allUsers()).filter(u=>!u.agent&&u.id!==ME.id&&u.name).sort((a,b)=>(!!ONL[b.id])-(!!ONL[a.id])||String(a.name).localeCompare(b.name));
+ 
+ let admHtml='';
+ if(allAdm.length){
+  const onAdmCount=allAdm.filter(a=>ONL[a.id]).length;
+  admHtml='<div class="section-title"><h3>🛡️ ทีมแอดมินช่วยกันรับสาย ('+onAdmCount+'/'+allAdm.length+' ออนไลน์)</h3><div class="sub">สมาชิกทุกคนสามารถกดโทรหรือแชตเพื่อติดต่อแอดมินได้โดยตรง</div></div>'+
+  '<div class="list">'+allAdm.map(u=>
+   '<div class="item" data-nm="'+esc((u.name||'').toLowerCase()+' '+u.ext)+'">'+av(u,'',ONL[u.id])+
+   '<div class="nm"><b>'+esc(u.name)+'<span class="tag adm">แอดมิน</span>'+(u.id===ME.id?' <small style="display:inline;color:var(--green)">(คุณ)</small>':'')+'</b>'+
+   '<small>หมายเลข <bdi>'+esc(u.ext)+'</bdi> · '+(ONL[u.id]?'<span style="color:#2e7d32;font-weight:600">🟢 ออนไลน์ พร้อมรับสาย</span>':'⚪ ออฟไลน์')+'</small></div>'+
+   (u.id!==ME.id?'<div class="acts"><button class="rb" data-act="chat" data-id="'+esc(u.id)+'" title="แชต">💬</button><button class="rb call" data-act="callu" data-id="'+esc(u.id)+'" title="โทรด่วน">📞</button></div>':'')+
+   '</div>').join('')+'</div>';
+ }
+
+ const regHtml=regulars.length?'<div class="section-title"><h3>👥 สมาชิกทั่วไป ('+regulars.length+')</h3></div><div class="list" id="pl">'+regulars.map(u=>
+  '<div class="item" data-nm="'+esc((u.name||'').toLowerCase()+' '+u.ext)+'">'+av(u,'',ONL[u.id])+
+  '<div class="nm"><b>'+esc(u.name)+'</b><small>หมายเลข <bdi>'+esc(u.ext)+'</bdi> · '+(ONL[u.id]?S.online:S.offline)+'</small></div>'+
+  '<button class="rb" data-act="chat" data-id="'+esc(u.id)+'">💬</button></div>').join('')+'</div>':(allAdm.length?'':'<div class="card empty">'+S.noPeople+'</div>');
+
+ return '<input class="search" id="ps" placeholder="'+S.search+'" autocomplete="off">'+admHtml+regHtml;
 }
+
 const CL=()=>LS('uy_calls_'+ME.id,[]);
 function vCalls(){
  const l=CL();
@@ -716,26 +778,36 @@ function vCalls(){
   const miss=c.res==='missed',cl=miss?'miss':(c.dir==='in'?'in':'out'),ar=c.dir==='in'?'↙':'↗';
   return '<div class="item">'+av({id:c.pid,name:c.name})+'<div class="nm"><b>'+esc(c.name)+'</b><small class="'+cl+'">'+ar+' '+(miss?S.missed:c.res==='rej'?S.rejectedLog:c.dur?mmss(c.dur):S.noAns)+' · '+hhmm(c.ts)+'</small></div>'+(c.pid==='ivr'?'<button class="rb call" data-act="ivr">📞</button>':'<button class="rb call" data-act="callx" data-id="'+esc(c.pid)+'">📞</button>')+'</div>'}).join('')+'</div>':'<div class="card empty">'+S.noCalls+'</div>');
 }
+
 function vSet(){
- return '<div class="card" style="display:flex;gap:14px;align-items:center">'+av(ME)+'<div style="flex:1;min-width:0"><b>'+esc(ME.name)+(ME.agent?'<span class="tag">แอดมิน</span>':'')+'</b><div class="sub">'+S.yourNo+': <b style="color:var(--green-dark);font-size:18px"><bdi>'+esc(ME.ext)+'</bdi></b></div></div></div>'+
+ return '<div class="card" style="display:flex;gap:14px;align-items:center">'+av(ME)+'<div style="flex:1;min-width:0"><b>'+esc(ME.name)+(ME.agent?'<span class="tag adm">แอดมิน</span>':'')+'</b><div class="sub">'+S.yourNo+': <b style="color:var(--green-dark);font-size:18px"><bdi>'+esc(ME.ext)+'</bdi></b></div></div></div>'+
  '<div class="card"><div class="sub"><b>'+S.netTitle+'</b><br>'+S.netOn+'</div></div>'+
  '<button class="cta danger" data-act="logout">'+S.logout+'</button>';
 }
+
 function parkedHtml(){
  const l=Object.values(PARK).sort((a,b)=>a.ts-b.ts);
- return '<div class="card"><b>⏸ สายที่พักไว้ (รอสายก่อน)</b><div class="sub" style="margin:4px 0 6px">ผู้โทรจะยังฟังเพลงรอสายและรับแจ้งคิวต่อไป จนกว่าคุณจะรับสาย</div>'+
- (l.length?l.map(p=>'<div class="item">'+av(p.peer,'s')+'<div class="nm"><b>'+esc(p.peer.name)+'</b><small>หมายเลข <bdi>'+esc(p.peer.ext||'')+'</bdi> · พักไว้ตั้งแต่ '+hhmm(p.ts)+'</small></div><div class="acts"><button class="btn p sm" data-act="unpark" data-id="'+esc(p.id)+'">รับสาย</button><button class="mini r" data-act="parkdel" data-id="'+esc(p.id)+'">ปฏิเสธ</button></div></div>').join(''):'<div class="sub" style="padding:6px 0">ไม่มีสายที่พักไว้</div>')+'</div>';
+ return '<div class="card"><b>⏸ สายที่พักไว้ (ช่วยกันรับสายที่นี่ได้)</b><div class="sub" style="margin:4px 0 6px">ผู้โทรจะยังฟังเพลงรอสายและรับแจ้งคิวต่อไป จนกว่าแอดมินคนใดคนหนึ่งจะกดรับสาย</div>'+
+ (l.length?l.map(p=>'<div class="item">'+av(p.peer,'s')+'<div class="nm"><b>'+esc(p.peer.name)+'</b><small>หมายเลข <bdi>'+esc(p.peer.ext||'')+'</bdi> · พักไว้ตั้งแต่ '+hhmm(p.ts)+'</small></div><div class="acts"><button class="btn p sm" data-act="unpark" data-id="'+esc(p.id)+'">รับสายนี้</button><button class="mini r" data-act="parkdel" data-id="'+esc(p.id)+'">ตัดสาย</button></div></div>').join(''):'<div class="sub" style="padding:6px 0">ไม่มีสายที่พักไว้</div>')+'</div>';
 }
+
 function vAdmin(){
  const us=Object.values(allUsers()).filter(u=>u.name).sort((a,b)=>(!!b.agent)-(!!a.agent)||String(a.name).localeCompare(b.name));
- return '<div class="card"><b>➕ เพิ่มผู้ใช้ใหม่</b><div class="fld"><label for="an">ชื่อผู้ใช้</label><input type="text" id="an" maxlength="40" autocomplete="off" placeholder="เช่น สมชาย ใจดี"></div>'+
-  '<label class="chk" style="margin-top:8px"><input type="checkbox" id="aag"><span>ให้เป็นแอดมินด้วย</span></label>'+
+ const admins=us.filter(u=>u.agent),onAdms=admins.filter(u=>ONL[u.id]);
+ return '<div class="card" style="background:linear-gradient(135deg,#f2fbd7,#ffffff);border:1.5px solid #c8f53c">'+
+  '<b>🛡️ ทีมแอดมินช่วยรับสาย ('+onAdms.length+'/'+admins.length+' ออนไลน์)</b>'+
+  '<div class="sub" style="margin:4px 0 8px">เมื่อมีสายโอนจากระบบ IVR (เบอร์ 100) แอดมินทุกคนที่ออนไลน์จะได้รับสายเรียกเข้าพร้อมกันเพื่อช่วยกันรับสาย</div>'+
+  '<div style="display:flex;gap:6px;flex-wrap:wrap">'+admins.map(a=>'<span class="ag-chip '+(ONL[a.id]?'on':'')+'">'+av(a,'xs')+'<b>'+esc(a.name)+'</b> ('+esc(a.ext)+') '+(ONL[a.id]?'🟢':'⚪')+'</span>').join('')+'</div>'+
+  '</div>'+
+  '<div class="card"><b>➕ เพิ่มผู้ใช้ใหม่</b><div class="fld"><label for="an">ชื่อผู้ใช้</label><input type="text" id="an" maxlength="40" autocomplete="off" placeholder="เช่น สมชาย ใจดี"></div>'+
+  '<label class="chk" style="margin-top:8px"><input type="checkbox" id="aag"><span>ให้เป็นแอดมินด้วย (รับสายโอนและจัดการระบบ)</span></label>'+
   '<button class="cta inline" data-act="adminAdd">เพิ่มผู้ใช้ (ระบบสร้างหมายเลขให้อัตโนมัติ)</button></div>'+
   parkedHtml()+'<button class="cta ghost" data-act="ivrEd">🎛 '+S.ivrSet+'</button>'+
-  '<div class="section-title"><h3>ผู้ใช้ทั้งหมด ('+us.length+')</h3></div><div class="list">'+us.map(u=>
-   '<div class="item">'+av(u,'',ONL[u.id])+'<div class="nm"><b>'+esc(u.name)+(u.agent?'<span class="tag">แอดมิน</span>':'')+'</b><small>หมายเลข <bdi>'+esc(u.ext)+'</bdi> · '+(ONL[u.id]?S.online:S.offline)+'</small></div>'+
-   (u.id!==ME.id?'<div class="acts"><button class="mini" data-act="adminTg" data-id="'+esc(u.id)+'">'+(u.agent?'ถอดแอดมิน':'ตั้งเป็นแอดมิน')+'</button><button class="mini r" data-act="adminDel" data-id="'+esc(u.id)+'">🗑 '+S.del+'</button></div>':'<span class="sub">คุณ</span>')+'</div>').join('')+'</div>';
+  '<div class="section-title"><h3>ผู้ใช้ทั้งหมดในระบบ ('+us.length+')</h3></div><div class="list">'+us.map(u=>
+   '<div class="item">'+av(u,'',ONL[u.id])+'<div class="nm"><b>'+esc(u.name)+(u.agent?'<span class="tag adm">แอดมิน</span>':'')+'</b><small>หมายเลข <bdi>'+esc(u.ext)+'</bdi> · '+(ONL[u.id]?S.online:S.offline)+'</small></div>'+
+   (u.id!==ME.id?'<div class="acts"><button class="mini" data-act="adminTg" data-id="'+esc(u.id)+'">'+(u.agent?'ถอดแอดมิน':'ตั้งเป็นแอดมิน')+'</button><button class="mini r" data-act="adminDel" data-id="'+esc(u.id)+'">🗑 '+S.del+'</button></div>':'<span class="sub">คุณ (แอดมิน)</span>')+'</div>').join('')+'</div>';
 }
+
 function holdInfo(){
  const e=$('#holdinfo');if(!e)return;
  const h=(ED||IVRC).hold;e.textContent=h&&h.url?(h.name||'เพลงที่อัปโหลด'):'เพลงมาตรฐานของระบบ';
@@ -760,6 +832,7 @@ function holdPrev(){
  else{const t=holdSynth();PREV={t};setTimeout(()=>{if(PREV&&PREV.t===t){clearInterval(t);PREV=null}},7000)}
 }
 async function holdDel(){if(!ME.agent)return;try{await holdSave(null);toast('ใช้เพลงมาตรฐานแล้ว')}catch(e){toast(e.message||S.err)}}
+
 async function adminAdd(){
  if(!ME.agent)return;
  const i=$('#an'),n=((i&&i.value)||'').trim().replace(/\s+/g,' ');
@@ -784,6 +857,7 @@ async function adminTg(t){
  const n={id:u.id,name:u.name,ext:u.ext,agent:!u.agent};
  await T.upsertUser(n);USERS[id]=n;render();toast(n.agent?'ตั้งเป็นแอดมินแล้ว':'ถอดสิทธิ์แอดมินแล้ว');
 }
+
 /* ============ หน้าแชต ============ */
 function openChat(c){OPEN=c;READ[c]=Date.now();SV('uy_read',READ);buildChat()}
 function buildChat(){
@@ -793,36 +867,61 @@ function buildChat(){
  page().innerHTML='<div class="chatpage"><div class="topbar"><button class="icon-btn" data-act="back">←</button>'+av(u,'s')+'<div class="hn"><b>'+esc(u.name)+'</b><div class="hl"><small id="hs"></small><small class="ck" data-clock></small></div></div>'+(pid?'<button class="icon-btn callbtn" data-act="callu" data-id="'+esc(pid)+'" aria-label="โทร">'+PHI+'</button>':(isSup(c)&&!ME.agent?'<button class="icon-btn callbtn" data-act="ivr" aria-label="โทรติดต่อเจ้าหน้าที่">'+PHI+'</button>':''))+'</div><div id="msgs" data-c="'+esc(c)+'"></div><div id="tp" class="tp hide"><span class="dts"><i></i><i></i><i></i></span><span>'+S.typing+'</span></div><div id="comp"></div></div>';
  comp();chatHead();chatMsgs(true);tickClock();
 }
+
 const isTyp=c=>Date.now()-(TYP[c]||0)<3000;
 function chatHead(){
  const e=$('#hs');if(!e)return;const c=OPEN;
  const tp=$('#tp');
  if(c==='inbox'){e.textContent=(MSGS.inbox||[]).length+' ข้อความ';return}
  const pid=pidOf(c),ty=isTyp(c);
- e.textContent=ty?S.typing:(!pid?(Object.values(ONL).some(x=>x.agent)?'มีเจ้าหน้าที่ออนไลน์':'เจ้าหน้าที่ออฟไลน์ — ฝากข้อความไว้ได้'):(ONL[pid]?S.online:S.offline));e.classList.toggle('typ',ty);
+ if(isSup(c)){
+  const adms=getAdmins(),onAdms=getOnlineAdmins();
+  e.textContent=ty?S.typing:(onAdms.length?'แอดมินออนไลน์ '+onAdms.length+'/'+adms.length+' คน':'แอดมินออฟไลน์ ('+adms.length+' คน)');
+ }else{
+  e.textContent=ty?S.typing:(!pid?(Object.values(ONL).some(x=>x.agent)?'มีเจ้าหน้าที่ออนไลน์':'เจ้าหน้าที่ออฟไลน์'):(ONL[pid]?S.online:S.offline));
+ }
+ e.classList.toggle('typ',ty);
  if(tp){const was=tp.classList.contains('hide');tp.classList.toggle('hide',!ty);if(ty&&was){const b=$('#msgs');if(b)b.scrollTop=b.scrollHeight}}
 }
+
 function onTyping(p){
  if(!p||p.from===ME.id)return;if(isSup(p.chat)?!(ME.agent||supOwner(p.chat)===ME.id):!String(p.chat).split('|').includes(ME.id))return;
  TYP[p.chat]=Date.now();
  if(OPEN===p.chat)chatHead();
  setTimeout(()=>{if(OPEN===p.chat)chatHead()},3100);
 }
+
 const isUns=m=>m.body===UNS;
 function bub(m){
  const mine=m.sender===ME.id,u=getUser(m.sender)||{name:'?'};let c,menu='';
  if(isUns(m))c='<span class="uns">🚫 '+S.unsent+'</span>';
  else{
   if(m.kind==='image')c='<img src="'+esc(m.url)+'" data-act="zoom" data-i="'+esc(m.id)+'" alt="'+S.photo+'">';
-  else if(m.kind==='voice')c='<audio controls preload="metadata" src="'+esc(m.url)+'"></audio>'+(m.body?'<div>'+esc(m.body)+'</div>':'');
+  else if(m.kind==='voice')c='<div class="b-aud-meta">🎵 เสียง '+(m.dur?mmss(m.dur):'')+'</div><audio controls preload="metadata" src="'+esc(m.url)+'"></audio>'+(m.body&&m.body!==fName(m.url)?'<div>'+esc(m.body)+'</div>':'');
   else c=esc(m.body).replace(/\n/g,'<br>');
   if(mine&&OPEN!=='inbox')menu='<button class="bm" data-act="msgmenu" data-id="'+esc(m.id)+'" aria-label="ตัวเลือกข้อความ">⋯</button>';
  }
- return '<div class="b '+(mine?'me':'ot')+(isUns(m)?' un':'')+'" data-id="'+esc(m.id)+'">'+((!mine&&(OPEN==='inbox'||isSup(OPEN)))?'<div class="who">'+esc(u.name)+'</div>':'')+c+'<i>'+hhmm(m.ts)+menu+'</i></div>';
+ return '<div class="b '+(mine?'me':'ot')+(isUns(m)?' un':'')+'" data-id="'+esc(m.id)+'">'+((!mine&&(OPEN==='inbox'||isSup(OPEN)))?'<div class="who">'+esc(u.name)+(u.agent?' <span class="tag adm">แอดมิน</span>':'')+'</div>':'')+c+'<i>'+hhmm(m.ts)+menu+'</i></div>';
 }
+function fName(url){try{return url.split('/').pop()}catch(e){return ''}}
+
+function supportTeamBanner(){
+ const adms=getAdmins();if(!adms.length)return '';
+ const onAdms=adms.filter(a=>ONL[a.id]);
+ return '<div class="support-card">'+
+  '<div class="support-card-head"><span style="font-size:18px">🛡️</span><div class="support-card-title">ทีมแอดมินช่วยกันดูแลและรับสาย ('+onAdms.length+'/'+adms.length+' ออนไลน์)</div></div>'+
+  '<div class="sub" style="margin-bottom:8px">แอดมินทุกคนสามารถมองเห็นข้อความช่วยเหลือและช่วยกันรับสายได้ทันที</div>'+
+  '<div class="support-card-grid">'+adms.map(a=>
+   '<div class="admin-badge-item '+(ONL[a.id]?'online':'')+'"><span class="admin-badge-dot '+(ONL[a.id]?'':'off')+'"></span><b>'+esc(a.name)+'</b> ('+esc(a.ext)+')'+(ONL[a.id]?'<span style="color:#2e7d32;font-size:11px">พร้อม</span>':'')+'</div>'
+  ).join('')+'</div></div>';
+}
+
 function chatMsgs(first){
  const box=$('#msgs');if(!box)return;
- if(box.dataset.c!==OPEN){box.dataset.c=OPEN;box.innerHTML=''}
+ if(box.dataset.c!==OPEN){
+  box.dataset.c=OPEN;
+  box.innerHTML=(isSup(OPEN)?supportTeamBanner():'');
+ }
  const near=first||box.scrollHeight-box.scrollTop-box.clientHeight<140;let added=false;
  (MSGS[OPEN]||[]).forEach(m=>{
   const el=box.querySelector('[data-id="'+m.id+'"]');
@@ -831,6 +930,7 @@ function chatMsgs(first){
  });
  if(added&&near)box.scrollTop=box.scrollHeight;
 }
+
 function msgmenu(t){
  sheet('<h3>ข้อความ</h3><p class="hint" style="margin:6px 0 12px">ยกเลิกข้อความนี้สำหรับทุกคนในแชต?</p><button class="cta inline danger" data-act="unsend" data-id="'+esc(t.dataset.id)+'">ยกเลิกข้อความ</button><button class="cta inline ghost" data-act="closeSheet">ปิด</button>');
 }
@@ -845,15 +945,18 @@ function onUnsend(p){
  if(!p)return;const m=(MSGS[p.chat]||[]).find(x=>x.id===p.id);if(!m)return;
  applyUns(m);render();
 }
+
 function comp(){
  const c=$('#comp');if(!c)return;
  if(OPEN==='inbox'){c.style.display='none';return}
  if(REC){c.innerHTML='<button class="cb2 r" data-act="recCancel">✕</button><div class="recbar"><span class="d"></span><span id="rt">00:00</span><span>'+S.recording+'</span></div><button class="cb2" data-act="recSend">➤</button>';return}
- c.innerHTML='<label class="cb2 g" for="pf">📷</label><input type="file" id="pf" accept="image/*" hidden><input type="text" id="mi" placeholder="'+S.type+'" autocomplete="off"><button class="cb2" id="bs" data-act="sendT" style="display:none">➤</button><button class="cb2" id="bm" data-act="recStart">🎤</button>';
+ c.innerHTML='<label class="cb2 g" for="pf" title="ส่งรูปภาพ">📷</label><input type="file" id="pf" accept="image/*" hidden>'+
+  '<label class="cb2 g" for="af" title="อัปโหลดไฟล์เสียงใหม่">🎵</label><input type="file" id="af" accept="'+AUDACC+'" hidden>'+
+  '<input type="text" id="mi" placeholder="'+S.type+'" autocomplete="off"><button class="cb2" id="bs" data-act="sendT" style="display:none">➤</button><button class="cb2" id="bm" data-act="recStart" title="อัดเสียงส่ง">🎤</button>';
 }
 async function sendText(){const i=$('#mi');if(!i)return;const t=i.value.trim();if(!t)return;i.value='';lastTyp=0;$('#bs').style.display='none';$('#bm').style.display='';sendMsg(OPEN,'text',{body:t});i.focus()}
 
-/* ============ Sheet (อยู่นอก #page จึงไม่หาย) ============ */
+/* ============ Sheet ============ */
 function sheet(h){$('#sheet').innerHTML='<div class="grab"></div>'+h;$('#sheet').classList.add('on');$('#shBg').classList.add('on')}
 function closeSheet(){$('#sheet').classList.remove('on');$('#shBg').classList.remove('on');if(ER&&ER.st)ER.st.getTracks().forEach(t=>t.stop());ER=null}
 const kpHtml=(act,cls)=>'<div class="kp '+(cls||'')+'">'+'123456789*0#'.split('').map(d=>'<button data-act="'+act+'" data-d="'+d+'">'+d+'</button>').join('')+'</div>';
@@ -868,12 +971,14 @@ function dialGo(){
 
 /* ============ โทร (WebRTC) ============ */
 const sig=(to,type,callId,x)=>T.emit('sig',Object.assign({to,from:ME.id,type,callId},x||{}));
+
 async function startCall(u){
  if(CALL)return toast(S.inCall);
  ac();CALL={id:rid(),dir:'out',pend:[],state:'calling',peer:u};
- callUI();                               // แสดงหน้าจอโทรทันที ก่อนขอไมค์
+ callUI();
  await beginOut(u);
 }
+
 async function beginOut(u){
  const C=CALL;
  try{C.stream=C.stream||await getMic()}catch(e){return cleanup(micMsg(e))}
@@ -884,11 +989,11 @@ async function beginOut(u){
  clearInterval(C.rs);C.rs=setInterval(()=>{if(CALL===C&&C.state==='calling')inv();else clearInterval(C.rs)},2500);
  C.to=setTimeout(()=>{if(CALL===C&&C.state==='calling'){C.invited.forEach(i=>sig(i,'cancel',C.id));cleanup(S.noAns)}},40000);
 }
+
 async function mkPC(){
  const C=CALL,pc=new RTCPeerConnection({iceServers:ICE,iceCandidatePoolSize:4,bundlePolicy:'max-bundle'});
  C.pc=pc;C.icq=[];
  C.stream.getTracks().forEach(t=>pc.addTrack(t,C.stream));
- /* รวมผู้สมัครเส้นทาง (ICE) ส่งเป็นชุด เพื่อไม่ให้ติดลิมิตจำนวนข้อความของ realtime (สาเหตุที่แอนดรอยด์ต่อไม่ติดบ่อย) */
  const flushIce=()=>{C.icT=null;if(CALL!==C||!C.icq.length)return;sig(C.peer.id,'ice',C.id,{cs:C.icq.splice(0)})};
  pc.onicecandidate=e=>{if(e.candidate){C.icq.push(e.candidate.toJSON?e.candidate.toJSON():e.candidate);if(!C.icT)C.icT=setTimeout(flushIce,150)}else{clearTimeout(C.icT);flushIce()}};
  pc.ontrack=e=>{const a=$('#ra');a.srcObject=e.streams[0]||new MediaStream([e.track]);a.muted=false;a.volume=1;a.play().catch(()=>{})};
@@ -900,17 +1005,20 @@ async function mkPC(){
  };
  pc.oniceconnectionstatechange=()=>{if(CALL===C&&(pc.iceConnectionState==='connected'||pc.iceConnectionState==='completed'))connected()};
 }
+
 async function restartIce(C){
  if(CALL!==C||!C.pc)return;
  C.rst=(C.rst||0)+1;if(C.rst>2)return cleanup(S.failed);
  if(C.dir==='out'){try{const o=await C.pc.createOffer({iceRestart:true});await C.pc.setLocalDescription(o);sig(C.peer.id,'offer',C.id,{sdp:o})}catch(e){cleanup(S.failed)}}
  clearTimeout(C.dc);C.dc=setTimeout(()=>{if(CALL===C&&C.pc&&C.pc.connectionState!=='connected')cleanup(S.failed)},15000);
 }
+
 function connected(){const C=CALL;if(!C||C.state==='connected')return;clearTimeout(C.to);clearTimeout(C.dc);clearInterval(C.ra);C.state='connected';C.t0=Date.now();stopRing();callUI()}
 async function flush(C){while(C.pend.length)try{await C.pc.addIceCandidate(C.pend.shift())}catch(e){}}
+
 async function onSig(p){
  if(p.to!==ME.id)return;
- if(PARK[p.callId]){if(p.type==='cancel'||p.type==='hangup'){const pk=PARK[p.callId];delete PARK[p.callId];toast(p.why==='taken'?'สายที่พักไว้มีเจ้าหน้าที่อื่นรับแล้ว':'ผู้โทรจากระบบอัตโนมัติวางสายแล้ว'+(pk?' ('+pk.peer.name+')':''));render()}return}
+ if(PARK[p.callId]){if(p.type==='cancel'||p.type==='hangup'){const pk=PARK[p.callId];delete PARK[p.callId];toast(p.why==='taken'?'สายที่พักไว้มีแอดมินท่านอื่นรับแล้ว':'ผู้โทรจากระบบอัตโนมัติวางสายแล้ว'+(pk?' ('+pk.peer.name+')':''));render()}return}
  let C=CALL;
  if(p.type==='invite'){
   if(DONE.has(p.callId))return;
@@ -937,9 +1045,9 @@ async function onSig(p){
    C.invited=(C.invited||[]).filter(i=>i!==p.from);
    if(p.type==='reject')(C.declined=C.declined||new Set()).add(p.from);
    if(C.state==='calling'&&!C.invited.length)cleanup(p.type==='busy'?S.busy:S.rejected);
-   else if(C.state==='agentring'&&p.type==='reject')ivrCheckDeclined(C);   // ไม่ว่าง(busy)ยังรอต่อ / ปฏิเสธครบทุกคนแล้วเลิกรอ
+   else if(C.state==='agentring'&&p.type==='reject')ivrCheckDeclined(C);
    break;
-  case 'cancel':if(C.dir==='in'&&C.state==='ringing'){C.missed=1;cleanup(p.why==='taken'?'สายนี้มีเจ้าหน้าที่อื่นรับแล้ว':(C.grp?'ผู้โทรจากระบบอัตโนมัติวางสายแล้ว ('+C.peer.name+')':'ผู้โทรยกเลิกสายแล้ว'))}break;
+  case 'cancel':if(C.dir==='in'&&C.state==='ringing'){C.missed=1;cleanup(p.why==='taken'?'✅ มีแอดมินท่านอื่นรับสายนี้แล้ว':(C.grp?'ผู้โทรจากระบบอัตโนมัติวางสายแล้ว ('+C.peer.name+')':'ผู้โทรยกเลิกสายแล้ว'))}break;
   case 'offer':{
    if(!C.pc)break;
    C.gotOffer=1;clearInterval(C.ra);
@@ -951,6 +1059,7 @@ async function onSig(p){
   case 'hangup':cleanup(C.grp?'ผู้โทรจากระบบอัตโนมัติวางสายแล้ว':'อีกฝ่ายวางสายแล้ว');break;
  }}catch(e){console.error(e)}
 }
+
 async function answer(){
  const C=CALL;if(!C||C.state!=='ringing')return;stopRing();ac();
  let st;try{st=await getMic()}catch(e){sig(C.peer.id,'reject',C.id);return cleanup(micMsg(e))}
@@ -979,31 +1088,56 @@ function cleanup(msg){
  ['#call','#inc'].forEach(s=>{const e=$(s);e&&e.classList.remove('on')});
  if(msg)toast(msg);render();
 }
+
 const stTxt=C=>C.state==='calling'?S.calling:C.state==='agentring'?S.toAgent+(C.qpos?' · คิวที่ '+C.qpos:''):C.state==='connecting'?S.connecting:(C.state==='ivr'||C.state==='connected')&&C.t0?mmss(Math.round((Date.now()-C.t0)/1000)):S.ivrOn;
+
 function incUI(){
  const C=CALL,e=$('#inc');if(!C||!e)return;
- e.innerHTML='<div class="oi"><div class="cav pulse" style="background:'+col(C.peer.id)+'">'+esc(ini(C.peer.name))+'</div><h2>'+esc(C.peer.name)+'</h2><p class="st">'+S.incoming+(C.grp?' · '+S.operator:'')+'</p>'+(C.grp?'<button class="btn p" data-act="park" style="margin-top:18px">⏸ รอสายก่อน (ยังไม่รับสาย)</button>':'')+'<div class="cctl"><button class="cb red" data-act="decline"><span>'+PHI+'</span></button><button class="cb grn ring" data-act="answer"><span>'+PHI+'</span></button></div></div>';
+ const onAdms=getOnlineAdmins();
+ let adminGroupNote='';
+ if(C.grp){
+  adminGroupNote='<div class="admin-call-badge">📞 สายโอนจากระบบ IVR (ส่งถึงแอดมินทุกคน)</div>'+
+   '<div class="sub-admins"><div style="font-size:12px;opacity:.9">แอดมินที่กำลังรับสายพร้อมกัน ('+onAdms.length+' คน):</div>'+
+   '<div class="admin-tags">'+onAdms.map(a=>'<span class="ad-tag '+(a.id===ME.id?'me':'')+'">'+esc(a.name)+' ('+esc(a.ext)+')'+(a.id===ME.id?' (คุณ)':'')+'</span>').join('')+'</div>'+
+   '<div style="font-size:11px;color:#d8ff7a;margin-top:6px">⚡ แอดมินท่านใดกดรับก่อนจะได้คุยทันที หรือกดพักสายไว้</div></div>';
+ }
+ e.innerHTML='<div class="oi"><div class="cav pulse" style="background:'+col(C.peer.id)+'">'+esc(ini(C.peer.name))+'</div><h2>'+esc(C.peer.name)+'</h2><p class="st">'+S.incoming+(C.grp?' · '+S.operator:'')+'</p>'+adminGroupNote+(C.grp?'<button class="btn p" data-act="park" style="margin-top:14px">⏸ รอสายก่อน (พักสาย)</button>':'')+'<div class="cctl"><button class="cb red" data-act="decline"><span>'+PHI+'</span></button><button class="cb grn ring" data-act="answer"><span>'+PHI+'</span></button></div></div>';
  e.classList.add('on');
 }
+
 function callUI(){
  const C=CALL,e=$('#call');if(!C||!e)return;
  const ivr=C.state==='ivr',pulse=C.state==='calling'||C.state==='agentring'||C.state==='connecting';$('#inc').classList.remove('on');
  clearInterval(C.tm);C.tm=setInterval(()=>{const s=$('#cst');if(s&&CALL===C&&(C.state==='connected'||C.state==='ivr'))s.textContent=stTxt(C)},1000);
+ 
+ let adminRingNotice='';
+ if(C.state==='agentring'){
+  const onAdms=getOnlineAdmins(ME.id);
+  adminRingNotice='<div class="ag-ring-box">'+
+   '<div class="ag-ring-title">🔔 กำลังเรียกแอดมินเพื่อช่วยกันรับสาย ('+onAdms.length+' คน)</div>'+
+   (onAdms.length?
+    '<div class="ag-ring-chips">'+onAdms.map(a=>'<span class="ag-chip on">'+av(a,'xs')+'<b>'+esc(a.name)+'</b> ('+esc(a.ext)+')</span>').join('')+'</div>':
+    '<div class="sub" style="font-size:12px;color:#ffe1e1">⚠️ ยังไม่มีแอดมินออนไลน์ ระบบกำลังรอแอดมินเข้าสู่ระบบ</div>')+
+   '</div>';
+ }
+
  e.innerHTML='<div class="oi"><div class="cav'+(pulse?' pulse':'')+'" style="background:'+(ivr?'#ffffff33':col(C.peer.id))+'">'+(ivr?'☎':esc(ini(C.peer.name)))+'</div><h2>'+esc(C.peer.name)+'</h2><p class="st" id="cst">'+stTxt(C)+'</p>'+
+  adminRingNotice+
   (ivr||C.ivrMode?'<div class="sub2" id="sub">'+esc(C.sub||'')+'</div><div class="extd" id="ext">'+esc(C.ivr&&C.ivr.buf||'')+'</div>':'')+
   (IOS&&(ivr||C.ivrMode)?'<button class="btn sm snd" data-act="snd" style="margin-top:8px">🔊 ไม่ได้ยินเสียงพูด? แตะที่นี่</button>':'')+(ivr?kpHtml('dg'):'')+
   '<div class="cctl">'+(!ivr&&C.state!=='calling'&&C.state!=='agentring'?'<button class="cb '+(C.muted?'on':'')+'" data-act="mute">'+(C.muted?'🔇':'🎙')+'</button>':'')+'<button class="cb red" data-act="hang"><span>'+PHI+'</span></button></div></div>';
  e.classList.add('on');
 }
+
 function updExt(){const e=$('#ext');if(e&&CALL&&CALL.ivr)e.textContent=CALL.ivr.buf}
 function mute(){const C=CALL;if(!C||!C.stream)return;C.muted=!C.muted;C.stream.getAudioTracks().forEach(t=>t.enabled=!C.muted);callUI()}
 
 /* ============ IVR (ระบบตอบรับอัตโนมัติ) ============ */
 const SILENT='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
 let TTSA=null;
-/* ปลดล็อกเสียงด้วยการแตะของผู้ใช้ (แอนดรอยด์บล็อกเสียงที่เล่นเองถ้าไม่ปลดล็อกก่อน) */
-let VA=null;   // ตัวเล่นเสียงสำหรับไฟล์เสียง/ประกาศ: ต้องปลดล็อกด้วยการแตะ ไม่งั้น iPhone/iPad ไม่ยอมเล่นเสียงที่เริ่มเอง
+let VA=null;
 const IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+
 function unlockAudio(){
  try{TTSA=TTSA||new Audio();TTSA.src=SILENT;TTSA.play().catch(()=>{})}catch(e){}
  try{VA=VA||new Audio();VA.src=SILENT;VA.play().catch(()=>{})}catch(e){}
@@ -1011,23 +1145,24 @@ function unlockAudio(){
 }
 const ttsVoice=()=>{try{return speechSynthesis.getVoices().find(v=>/^th/i.test(v.lang))}catch(e){return null}};
 function stopPrompt(){const C=CALL;if(C&&C.ivr&&C.ivr.cancel)C.ivr.cancel();try{speechSynthesis.cancel()}catch(e){}try{TTSA&&TTSA.pause()}catch(e){}}
+
 function speakNative(text,I){return new Promise(res=>{
  if(!window.speechSynthesis||!window.SpeechSynthesisUtterance)return res(false);
  try{
   speechSynthesis.cancel();try{speechSynthesis.resume()}catch(e){}
   const u=new SpeechSynthesisUtterance(text),v=ttsVoice();
   if(v){u.voice=v;u.lang=v.lang}else u.lang='th-TH';
-  u.rate=.95;u.volume=1;window.__utt=u;   // เก็บอ้างอิงไว้ ไม่งั้น Safari เก็บกวาดทิ้งก่อนพูดจบ
+  u.rate=.95;u.volume=1;window.__utt=u;
   let started=false,done=false,w2=null;
   const fin=ok=>{if(done)return;done=true;clearTimeout(w);clearTimeout(w2);I.cancel=null;res(ok)};
   const w=setTimeout(()=>{if(!started){try{speechSynthesis.cancel()}catch(e){}fin(false)}},4500);
   u.onstart=()=>{started=true;w2=setTimeout(()=>fin(true),Math.max(5000,text.length*220))};
   u.onend=()=>fin(true);u.onerror=()=>fin(started);
   I.cancel=()=>{try{speechSynthesis.cancel()}catch(e){}fin(true)};
-  setTimeout(()=>{if(!done)try{speechSynthesis.speak(u)}catch(e){fin(false)}},90);   // Safari: สั่งพูดทันทีหลัง cancel() เสียงจะหาย
+  setTimeout(()=>{if(!done)try{speechSynthesis.speak(u)}catch(e){fin(false)}},90);
  }catch(e){res(false)}
 })}
-/* สำรอง: เครื่องที่ไม่มีเสียงไทยในตัว (แอนดรอยด์บางรุ่น) ใช้เสียงอ่านออนไลน์ */
+
 function speakGoogle(text,I){return new Promise(res=>{
  const parts=[];let s=String(text).replace(/\s+/g,' ').trim();
  while(s.length){let cut=s.length>170?s.lastIndexOf(' ',170):s.length;if(cut<40)cut=Math.min(170,s.length);parts.push(s.slice(0,cut).trim());s=s.slice(cut).trim()}
@@ -1037,33 +1172,37 @@ function speakGoogle(text,I){return new Promise(res=>{
  const next=()=>{if(done)return;if(i>=parts.length)return fin(true);a.onended=next;a.onerror=()=>fin(i>1);a.src='https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=th&q='+encodeURIComponent(parts[i++]);a.play().catch(()=>fin(i>1))};
  next();
 })}
+
 async function say(key,override){
  const C=CALL,I=C&&C.ivr;if(!I)return;
  const n=override!=null?{text:override,audio:''}:(IVRC.nodes[key]||{text:'',audio:''});I.cancel&&I.cancel();
  C.sub=n.text;const s=$('#sub');if(s)s.textContent=n.text;
  if(n.audio){
-  const okA=await playUrl(n.audio,I);if(okA||!n.text)return;     // เล่นไฟล์ไม่ได้ → อ่านข้อความแทน
+  const okA=await playUrl(n.audio,I);if(okA||!n.text)return;
  }
  if(!n.text)return;
  let ok=await speakNative(n.text,I);
  if(!ok&&CALL===C&&C.ivr===I)ok=await speakGoogle(n.text,I);
  if(!ok&&CALL===C&&C.ivr===I)await new Promise(r=>{const t=setTimeout(()=>{I.cancel=null;r()},Math.min(9000,1500+n.text.length*55));I.cancel=()=>{clearTimeout(t);I.cancel=null;r()}});
 }
+
 async function startIVR(){
  if(CALL)return toast(S.inCall);
  ac();unlockAudio();try{IVRC=normIVR(await T.kvGet('ivr'))}catch(e){IVRC=defIVR()}
  CALL={id:rid(),dir:'out',state:'ivr',pend:[],t0:Date.now(),peer:{id:'ivr',name:S.operator,ext:OPERATOR_EXT},ivr:{tok:0,idle:0,buf:'',mode:'menu',node:'root'}};
  tone([480,620],.3,.1);callUI();ivrRun('root');
 }
+
 async function ivrRun(key){
  const C=CALL;if(!C||C.state!=='ivr'||!C.ivr)return;const I=C.ivr,tok=++I.tok;I.node=key;I.mode='menu';I.buf='';updExt();clearTimeout(I.tmo);
  await say(key);if(CALL!==C||I.tok!==tok)return;
  const n=IVRC.nodes[key]||{};
- const again=()=>{I.tmo=setTimeout(()=>{if(CALL===C&&I.tok===tok)ivrRun(key)},10000)};   // เงียบ: อ่านเมนูซ้ำ ไม่ตัดสาย
+ const again=()=>{I.tmo=setTimeout(()=>{if(CALL===C&&I.tok===tok)ivrRun(key)},10000)};
  if(n.after)return ivrAct(n.after);
  if(!n.opts||!n.opts.length){if(key==='root')return again();return ivrAct({t:'node',v:'root'})}
  again();
 }
+
 async function ivrAct(a){
  const C=CALL;if(!C||!C.ivr)return;const I=C.ivr;
  if(a.t==='node')return ivrRun(a.v);
@@ -1073,6 +1212,7 @@ async function ivrAct(a){
  if(a.t==='hang'){++I.tok;await say('thx');if(CALL===C)cleanup(S.ended);return}
  if(a.t==='ext'){const k=++I.tok;I.mode='ext';I.buf='';updExt();await say('extp');if(CALL!==C||I.tok!==k)return;I.tmo=setTimeout(()=>{if(CALL===C&&I.mode==='ext'&&!I.buf)ivrRun('root')},12000)}
 }
+
 function dig(d){
  tone(DT[d],.12,.1);
  const C=CALL;if(!C||C.state!=='ivr'||!C.ivr)return;
@@ -1084,12 +1224,12 @@ function dig(d){
   if(d==='#')return ivrDial();if(d==='*'){I.buf='';updExt();return}
   I.buf+=d;updExt();I.tmo=setTimeout(ivrDial,4000);return;
  }
- const k=++I.tok;I.cancel&&I.cancel();            // กดแทรกระหว่างฟังเมนู
+ const k=++I.tok;I.cancel&&I.cancel();
  if(d==='*'){I.buf='';updExt();I.tmo=setTimeout(()=>{if(CALL===C&&I.tok===k)ivrRun(I.node)},6000);return}
  if(d!=='#'){if(I.buf.length>=3)I.buf='';I.buf+=d}
  updExt();menuResolve(C,I,d==='#');
 }
-/* รหัสปุ่มกด 1-3 หลัก: ถ้ายังมีรหัสที่ยาวกว่าขึ้นต้นเหมือนกัน จะรอตัวเลขถัดไป 2 วิ หรือกด # เพื่อยืนยันทันที */
+
 function menuResolve(C,I,force){
  const opts=(IVRC.nodes[I.node]||{}).opts||[],b=I.buf;
  const bad=()=>{I.buf='';updExt();const k=++I.tok;say('bad').then(()=>{if(CALL===C&&I.tok===k)ivrRun(I.node)})};
@@ -1100,34 +1240,43 @@ function menuResolve(C,I,force){
  const k=I.tok;
  I.tmo=setTimeout(()=>{if(CALL!==C||I.tok!==k)return;const ex=opts.find(o=>o.d===I.buf);if(ex){I.buf='';updExt();ivrAct(ex)}else bad()},2000);
 }
+
 async function ivrDial(){
  const C=CALL;if(!C||!C.ivr)return;const I=C.ivr;clearTimeout(I.tmo);const ext=I.buf;I.buf='';updExt();if(!ext)return;
  const u=Object.values(allUsers()).find(x=>x.ext===ext&&x.id!==ME.id);
  if(!u||!ONL[u.id]){I.tok++;await say('bad');if(CALL===C)ivrRun('root');return}
  I.tok++;I.cancel&&I.cancel();await beginOut(u);
 }
-/* ----- โอนสายหาเจ้าหน้าที่: เพลงรอ 30 วิ → แจ้งคิว → วนไปเรื่อยๆ จนกว่าจะมีคนรับ หรือผู้โทรวางสายเอง ----- */
+
+/* ----- โอนสายหาเจ้าหน้าที่: เพลงรอ 30 วิ → แจ้งคิว → ชวนแอดมินทุกคน ----- */
 const queueAhead=C=>Object.values(ONL).filter(x=>x.wq&&x.wq<C.wq&&x.id!==ME.id).length;
 const trackMe=()=>{try{T.track(Object.assign(pub(ME),CALL&&CALL.wq?{wq:CALL.wq}:{}))}catch(e){}};
 function clearWq(C){if(C&&C.wq){C.wq=0;trackMe()}}
+
 function inviteAgents(C){
  C.invited=C.invited||[];
- Object.values(ONL).filter(x=>x.agent&&x.id!==ME.id&&!C.invited.includes(x.id)).forEach(x=>{C.invited.push(x.id);sig(x.id,'invite',C.id,{name:ME.name,ext:ME.ext,grp:1})});
+ const onlineAdmins=getOnlineAdmins(ME.id);
+ onlineAdmins.forEach(x=>{
+  if(!C.invited.includes(x.id))C.invited.push(x.id);
+  sig(x.id,'invite',C.id,{name:ME.name,ext:ME.ext,grp:1});
+ });
 }
+
 function playUrl(url,I){return new Promise(res=>{
  const a=VA||(VA=new Audio());let d=false,started=false,w=null;
  const fin=()=>{if(d)return;d=true;clearTimeout(w);a.onended=a.onerror=a.onplaying=null;I.cancel=null;res(started)};
  I.cancel=()=>{try{a.pause()}catch(e){}fin()};
  a.onplaying=()=>{started=true};a.onended=fin;a.onerror=fin;a.loop=false;a.src=url;
- w=setTimeout(()=>{if(!started)fin()},8000);          // เริ่มเล่นไม่ได้ภายใน 8 วิ ถือว่าล้มเหลว
+ w=setTimeout(()=>{if(!started)fin()},8000);
  const pr=a.play();if(pr&&pr.catch)pr.catch(fin);
 })}
+
 async function speakText(text,I,C){
  let ok=await speakNative(text,I);
  if(!ok&&CALL===C&&C.ivr===I)ok=await speakGoogle(text,I);
  if(!ok&&CALL===C&&C.ivr===I)await new Promise(r=>{const t=setTimeout(()=>{I.cancel=null;r()},Math.min(9000,1500+text.length*55));I.cancel=()=>{clearTimeout(t);I.cancel=null;r()}});
 }
-/* ประกอบประโยคแจ้งคิวจากไฟล์เสียงที่อัปโหลด (เลข 0-9 ทีละหลัก) ช่องไหนไม่มีไฟล์ใช้เสียงอ่านแทน */
+
 async function queueAnnounce(C,I,ok,n){
  const Q=IVRC.qa||{},nums=Q.d||{};
  const num=v=>{const ds=String(v).split('');return ds.every(d=>nums[d])?ds.map(d=>({url:nums[d],alt:d})):[{text:String(v)}]};
@@ -1139,10 +1288,10 @@ async function queueAnnounce(C,I,ok,n){
  const merged=[];list.forEach(it=>{const l=merged[merged.length-1];if(it.text&&l&&l.text)l.text+=' '+it.text;else merged.push(Object.assign({},it))});
  for(const it of merged){if(!ok())return;if(it.url){const g=await playUrl(it.url,I);if(!g&&it.alt&&ok())await speakText(it.alt,I,C)}else await speakText(it.text,I,C)}
 }
-/* เจ้าหน้าที่ทุกคนที่ออนไลน์กดปฏิเสธแล้ว: ผู้โทรเลิกรอ แจ้งข้อความ แล้วกลับเมนูหลัก (ไม่ตัดสาย ไม่บังคับฝากข้อความ) */
+
 function ivrCheckDeclined(C){
  if(CALL!==C||C.state!=='agentring'||!C.ivr)return;
- const on=Object.values(ONL).filter(x=>x.agent&&x.id!==ME.id);
+ const on=getOnlineAdmins(ME.id);
  if(!C.declined||!C.declined.size||!on.every(a=>C.declined.has(a.id)))return;
  ivrDeclined(C);
 }
@@ -1152,24 +1301,28 @@ async function ivrDeclined(C){
  await say(null,'ขณะนี้เจ้าหน้าที่ไม่สะดวกรับสาย กรุณาเลือกเมนูอีกครั้ง หรือฝากข้อความเสียง');
  if(CALL===C&&I.tok===k)ivrRun('root');
 }
+
 async function ivrAgent(){
  const C=CALL;if(!C||!C.ivr)return;const I=C.ivr,k=++I.tok;
- if(C.declined&&C.declined.size){C.id=rid();C.declined=new Set()}   // โอนใหม่อีกครั้ง: ใช้รหัสสายใหม่ เพื่อให้เจ้าหน้าที่ที่เคยปฏิเสธได้รับเสียงเรียกอีก
- const none=!Object.values(ONL).some(x=>x.agent&&x.id!==ME.id);
+ if(C.declined&&C.declined.size){C.id=rid();C.declined=new Set()}
+ const onlineAdmins=getOnlineAdmins(ME.id);
+ const none=!onlineAdmins.length;
  await say(none?'noagent':'agent');if(CALL!==C||I.tok!==k)return;
  C.state='agentring';C.invited=[];C.ivrMode=1;C.wq=Date.now();trackMe();C.qpos=queueAhead(C)+1;callUI();
  inviteAgents(C);
  const ok=()=>CALL===C&&I.tok===k&&C.state==='agentring';
  while(ok()){
-  holdStart();                                              // เพลงรอ 30 วิ
+  holdStart();
   await new Promise(r=>setTimeout(r,HOLD_CYCLE));
   if(!ok())break;
-  stopRing();inviteAgents(C);                               // ชวนเจ้าหน้าที่ที่เพิ่งออนไลน์ / ที่เคยไม่ว่าง
+  stopRing();inviteAgents(C);
   const n=queueAhead(C);C.qpos=n+1;const sc=$('#cst');if(sc)sc.textContent=stTxt(C);
+  callUI();
   await say('queue');if(!ok())break;
   await queueAnnounce(C,I,ok,n);
  }
 }
+
 async function ivrVM(){
  const C=CALL;if(!C||!C.ivr)return;const I=C.ivr;const k=++I.tok;I.mode='vm';
  await say('vmp');if(CALL!==C||I.tok!==k)return;
@@ -1184,7 +1337,7 @@ async function ivrVMEnd(){
  if(CALL===C){await say('thx');if(CALL===C)cleanup(S.ended)}
 }
 
-/* ============ ตัวแก้ไข IVR (หน้าเต็ม แยกเป็นหมวด บันทึกอัตโนมัติ) ============ */
+/* ============ ตัวแก้ไข IVR ============ */
 const SYSH={agent:'เล่นตอนเริ่มโอนสายไปหาเจ้าหน้าที่',queue:'ประโยคนำก่อนแจ้งคิว ระบบจะต่อท้ายลำดับคิวให้เอง เช่น “ท่านอยู่คิวที่ 2 เหลืออีก 1 คิวก่อนถึงท่าน”',noagent:'เล่นก่อนเข้าคิวเมื่อยังไม่มีเจ้าหน้าที่ออนไลน์',extp:'เล่นตอนให้ผู้โทรกดเบอร์สั้น',vmp:'เล่นก่อนเริ่มอัดข้อความเสียง',thx:'เล่นก่อนวางสาย',bad:'เล่นเมื่อกดผิดหรือไม่พบเบอร์'};
 const actVal=o=>o.t==='node'?'node:'+o.v:o.t;
 const actParse=v=>v.startsWith('node:')?{t:'node',v:v.slice(5)}:{t:v};
@@ -1195,7 +1348,7 @@ function actSel(cur,cls){
  return '<select class="'+cls+'"><optgroup label="ไปที่เมนู / ข้อความ">'+ks.map(k=>'<option value="node:'+k+'"'+(cur==='node:'+k?' selected':'')+'>'+esc(nodeLabel(k))+'</option>').join('')+'</optgroup><optgroup label="ทำงาน">'+[['agent',S.optAgent],['ext',S.optExt],['vm',S.optVm],['repeat',S.optRep],['hang',S.optHang]].map(p=>'<option value="'+p[0]+'"'+(cur===p[0]?' selected':'')+'>'+esc(p[1])+'</option>').join('')+'</optgroup></select>';
 }
 function audioRow(k,n){
- return '<div class="erow"><label class="btn p sm" for="ivrf_'+k+'">⬆ อัปโหลดไฟล์เสียง</label><input type="file" id="ivrf_'+k+'" data-ivr-file="'+k+'" accept="'+AUDACC+'" hidden><button class="btn sm" data-act="edrec" data-k="'+k+'">'+(ER&&ER.k===k?'⏹ หยุดและบันทึก':'🎙 อัดเสียง')+'</button>'+(n.audio?'<button class="btn sm" data-act="edplay" data-k="'+k+'">▶ ฟัง</button><button class="mini r" data-act="edclr" data-k="'+k+'">✕ ลบเสียง</button>':'')+'</div><div class="sub" style="margin-top:6px'+(n.audio?';color:var(--green-dark)':'')+'">'+(n.audio?'✓ ใช้ไฟล์เสียงที่อัปโหลดไว้ (อัปโหลดแล้วบันทึกให้อัตโนมัติ)':'ยังไม่มีไฟล์เสียง — ระบบจะอ่านข้อความด้านบนด้วยเสียงสังเคราะห์')+'</div>';
+ return '<div class="erow"><label class="btn p sm" for="ivrf_'+k+'">⬆ อัปโหลดไฟล์เสียงใหม่</label><input type="file" id="ivrf_'+k+'" data-ivr-file="'+k+'" accept="'+AUDACC+'" hidden><button class="btn sm" data-act="edrec" data-k="'+k+'">'+(ER&&ER.k===k?'⏹ หยุดและบันทึก':'🎙 อัดเสียง')+'</button>'+(n.audio?'<button class="btn sm" data-act="edplay" data-k="'+k+'">▶ ฟัง</button><button class="mini r" data-act="edclr" data-k="'+k+'">✕ ลบเสียง</button>':'')+'</div><div class="sub" style="margin-top:6px'+(n.audio?';color:var(--green-dark)':'')+'">'+(n.audio?'✓ ใช้ไฟล์เสียงที่อัปโหลดไว้ (อัปโหลดแล้วบันทึกให้อัตโนมัติ)':'ยังไม่มีไฟล์เสียง — ระบบจะอ่านข้อความด้านบนด้วยเสียงสังเคราะห์')+'</div>';
 }
 function edCard(k,open){
  const n=ED.nodes[k],sys=SYS.includes(k),menu=!!n.opts,info=!!n.after&&!menu;
@@ -1209,6 +1362,7 @@ function edCard(k,open){
  if(isCustom(k))b+='<div style="margin-top:14px"><button class="mini r" data-act="eddel" data-k="'+k+'">🗑 ลบรายการนี้</button></div>';
  return '<details class="ecard2" data-k="'+k+'"'+(open?' open':'')+'><summary>'+sum+'</summary><div class="edb">'+b+'</div></details>';
 }
+
 function edDraw(openKey){
  if(!ED)return;
  const had=!!document.querySelector('.ecard2'),open=new Set([...document.querySelectorAll('.ecard2[open]')].map(e=>e.dataset.k));
@@ -1219,13 +1373,14 @@ function edDraw(openKey){
  page().className='';
  page().innerHTML='<div class="topbar"><button class="icon-btn" data-act="ivrBack" aria-label="กลับ">←</button><div class="tt"><h1>ระบบตอบรับอัตโนมัติ</h1><div class="clk" id="edst">'+esc(keep||'บันทึกอัตโนมัติทุกครั้งที่แก้ไข')+'</div></div></div>'+
   sec('🎵 เพลงรอสาย','เล่นวนระหว่างรอเจ้าหน้าที่ สลับกับประกาศคิวทุก 30 วินาที ระบบไม่ตัดสายเอง')+
-  '<div class="card"><div class="sub" style="margin-bottom:10px">ใช้อยู่: <b id="holdinfo"></b></div><div class="erow"><label class="btn p sm" for="hf" style="cursor:pointer">⬆ อัปโหลดเพลง</label><input type="file" id="hf" accept="'+AUDACC+'" hidden><button class="btn sm" data-act="holdPrev">▶ ฟัง</button><button class="btn sm" data-act="holdDel">✕ ใช้เพลงมาตรฐาน</button></div></div>'+
+  '<div class="card"><div class="sub" style="margin-bottom:10px">ใช้อยู่: <b id="holdinfo"></b></div><div class="erow"><label class="btn p sm" for="hf" style="cursor:pointer">⬆ อัปโหลดเพลงใหม่</label><input type="file" id="hf" accept="'+AUDACC+'" hidden><button class="btn sm" data-act="holdPrev">▶ ฟัง</button><button class="btn sm" data-act="holdDel">✕ ใช้เพลงมาตรฐาน</button></div></div>'+
   sec('1 · เมนูหลัก','สิ่งที่ผู้โทรได้ยินเป็นอันดับแรก')+edCard('root',open.has('root'))+
   sec('2 · เมนูย่อย','เมนูที่มีปุ่มกดของตัวเอง')+menus.map(k=>edCard(k,open.has(k))).join('')+'<button class="cta ghost" data-act="edaddmenu">+ เพิ่มเมนูย่อย</button>'+
   sec('3 · ข้อความข้อมูล','พูดข้อความแล้วไปต่อ เช่น เวลาทำการ ราคา ที่อยู่')+infos.map(k=>edCard(k,open.has(k))).join('')+'<button class="cta ghost" data-act="edaddinfo">'+S.addNode+'</button>'+
   sec('4 · ข้อความระบบ','เสียงที่ระบบใช้ตอนโอนสาย รอคิว ฝากข้อความ และวางสาย')+SYS.map(k=>edCard(k,open.has(k))).join('')+sec('5 · เสียงแจ้งคิว','อัปโหลดเสียงตัวเลข 0–9 และคำพูดประกอบ ระบบจะประกอบเป็นประโยคแจ้งคิวให้เอง')+qaCard();
  holdInfo();window.scrollTo(0,y);
 }
+
 function edSync(){
  if(!ED)return;
  document.querySelectorAll('.ecard2').forEach(el=>{
@@ -1236,6 +1391,7 @@ function edSync(){
   const af=el.querySelector('.af');if(af)n.after=actParse(af.value);
  });
 }
+
 const QSL=[['pre','ท่านอยู่คิวที่'],['mid','เหลืออีก'],['post','คิวก่อนถึงท่าน'],['next','เป็นคิวถัดไป']];
 function qaUrl(id){const Q=(ED&&ED.qa)||{};return /^d\d$/.test(id)?(Q.d||{})[id[1]]:Q[id]}
 function qaCard(){
@@ -1246,6 +1402,7 @@ function qaCard(){
   '<div class="qgrid">'+[0,1,2,3,4,5,6,7,8,9].map(d=>slot('d'+d,'เลข '+d)).join('')+'</div>'+
   '<div class="sub" style="margin:16px 0 8px"><b>คำพูดประกอบ</b></div><div class="qgrid">'+QSL.map(q=>slot(q[0],'“'+q[1]+'”')).join('')+'</div></div>';
 }
+
 function qaSet(id,url){ED.qa=ED.qa||{};if(/^d\d$/.test(id)){ED.qa.d=ED.qa.d||{};if(url)ED.qa.d[id[1]]=url;else delete ED.qa.d[id[1]]}else{if(url)ED.qa[id]=url;else delete ED.qa[id]}}
 async function qaPick(id,f){
  if(!f||!ED)return;if(!ME.agent)return toast('ไม่มีสิทธิ์อัปโหลด');
@@ -1254,6 +1411,7 @@ async function qaPick(id,f){
  try{const url=await T.upload(f,ext);if(!ED)return;qaSet(id,url);edDraw();await edSave();toast('อัปโหลดและบันทึกแล้ว')}
  catch(e){edSt('✗ อัปโหลดไม่สำเร็จ');toast('อัปโหลดไม่สำเร็จ: '+(e&&e.message||S.err))}
 }
+
 async function qaBulk(fs){
  if(!fs.length||!ED)return;if(!ME.agent)return toast('ไม่มีสิทธิ์อัปโหลด');
  edSync();let ok=0;const skip=[];
@@ -1267,6 +1425,7 @@ async function qaBulk(fs){
  edDraw();await edSave();
  toast('อัปโหลดเสียงเลขแล้ว '+ok+' ไฟล์'+(skip.length?' · ข้าม '+skip.length+' ไฟล์ (ชื่อต้องมีเลข 0–9 หนึ่งตัว): '+skip.slice(0,3).join(', '):''));
 }
+
 let edTm=null;
 const edSt=t=>{const e=$('#edst');if(e)e.textContent=t};
 function edLater(){clearTimeout(edTm);edSt('กำลังบันทึก…');edTm=setTimeout(edSave,700)}
@@ -1279,6 +1438,7 @@ async function edSave(){
  try{await T.kvSet('ivr',E);IVRC=JSON.parse(JSON.stringify(E));const w=edDup(E);edSt(w?'⚠ '+w+' (บันทึกแล้ว แต่ควรแก้)':'✓ บันทึกอัตโนมัติแล้ว '+hhmm(Date.now()))}
  catch(e){edSt('✗ บันทึกไม่สำเร็จ');toast(e.message==='tbl'?S.needTbl:(e.message||S.err))}
 }
+
 async function edFilePick(k,f){
  if(!f)return;
  if(!ME||!ME.agent)return toast('ไม่มีสิทธิ์อัปโหลดไฟล์เสียง กรุณาเข้าสู่ระบบด้วยบัญชีแอดมิน');
@@ -1289,6 +1449,7 @@ async function edFilePick(k,f){
  try{const url=await T.upload(f,ext);if(!ED||!ED.nodes[k])return;ED.nodes[k].audio=url;edDraw(k);await edSave();toast('อัปโหลดและบันทึกแล้ว')}
  catch(e){console.error(e);edSt('✗ อัปโหลดไม่สำเร็จ');toast('อัปโหลดไม่สำเร็จ: '+(e&&e.message?e.message:'ตรวจสอบ Storage และสิทธิ์ Supabase'))}
 }
+
 async function edRec(k){
  edSync();
  if(ER&&ER.k===k){const R=ER;ER=null;const r=await R.rec.stop();R.st.getTracks().forEach(t=>t.stop());try{const url=await T.upload(r.blob,R.rec.ext);if(ED&&ED.nodes[k])ED.nodes[k].audio=url}catch(e){toast(e.message||S.err)}edDraw(k);return edSave()}
@@ -1299,7 +1460,7 @@ async function edRec(k){
 /* ============ เหตุการณ์ ============ */
 const A={
  login,
-  tab(t){if(ED){if(edTm)edSave();ED=null}VIEW=t.dataset.v;window.scrollTo(0,0);render()},
+ tab(t){if(ED){if(edTm)edSave();ED=null}VIEW=t.dataset.v;window.scrollTo(0,0);render()},
  open(t){openChat(t.dataset.c)},
  chat(t){openChat(cid(ME.id,t.dataset.id))},
  back(){recEnd(false);OPEN=null;render()},
@@ -1317,7 +1478,7 @@ const A={
  contactNo(){closeSheet();VIEW='chats';openChat(supId())},
  qaplay(t){const u=qaUrl(t.dataset.id);if(u)new Audio(u).play().catch(()=>toast(S.err))},
  qaclr(t){edSync();qaSet(t.dataset.id,'');edDraw();return edSave()},
- park(){const C=CALL;if(!C||C.dir!=='in'||C.state!=='ringing')return;PARK[C.id]={id:C.id,peer:C.peer,ts:Date.now()};CALL=null;stopRing();$('#inc').classList.remove('on');toast('พักสายไว้แล้ว — ผู้โทรยังฟังเพลงรอและอยู่ในคิว ดูได้ที่เมนูแอดมิน');if(!OPEN)VIEW='admin';render()},
+ park(){const C=CALL;if(!C||C.dir!=='in'||C.state!=='ringing')return;PARK[C.id]={id:C.id,peer:C.peer,ts:Date.now()};CALL=null;stopRing();$('#inc').classList.remove('on');toast('พักสายไว้แล้ว — ผู้โทรยังฟังเพลงรอและอยู่ในคิว แอดมินทุกคนสามารถช่วยรับสายนี้ได้');if(!OPEN)VIEW='admin';render()},
  unpark(t){if(CALL)return toast(S.inCall);const p=PARK[t.dataset.id];if(!p)return;delete PARK[p.id];ac();CALL={id:p.id,dir:'in',state:'ringing',pend:[],peer:p.peer,grp:true};return answer()},
  parkdel(t){const p=PARK[t.dataset.id];if(!p)return;delete PARK[p.id];DONE.add(p.id);sig(p.peer.id,'reject',p.id);render()},
  ivrEd(){VIEW='ivr';ED=null;window.scrollTo(0,0);page().innerHTML='<div class="card empty">กำลังโหลด…</div>';drawNav();
@@ -1332,10 +1493,12 @@ const A={
  edoptadd(t){edSync();ED.nodes[t.dataset.k].opts.push({d:'',t:'agent'});edDraw(t.dataset.k)},
  edoptdel(t){const r=t.closest('.orow');if(r)r.remove();edSync();edDraw(t.dataset.k);return edSave()}
 };
+
 document.addEventListener('click',e=>{
  const t=e.target.closest('[data-act]');if(!t||t.type==='checkbox')return;
  const f=A[t.dataset.act];if(f){e.preventDefault();Promise.resolve(f(t)).catch(x=>toast(x.message||S.err))}
 });
+
 document.addEventListener('change',async e=>{
  const t=e.target;
  if(ED&&t.closest&&t.closest('.ecard2')&&(t.classList.contains('ov2')||t.classList.contains('af')))edLater();
@@ -1344,15 +1507,19 @@ document.addEventListener('change',async e=>{
  if(t.dataset&&t.dataset.qaBulk!==undefined){const fs=[...t.files];t.value='';qaBulk(fs)}
  if(t.dataset&&t.dataset.ivrFile){const k=t.dataset.ivrFile,f=t.files[0];t.value='';edFilePick(k,f)}
  if(t.id==='ff'){const f=t.files[0];t.value='';postImage(f)}
+ if(t.id==='fa'){const f=t.files[0];t.value='';postAudio(f)}
  if(t.id==='pf'){const f=t.files[0];t.value='';pickImage(f)}
+ if(t.id==='af'){const f=t.files[0];t.value='';pickAudio(f)}
  if(t.dataset&&t.dataset.act==='agentTg'){ME.agent=t.checked;MS.setItem('uy_me',JSON.stringify(pub(ME)));try{await T.upsertUser(pub(ME));T.track(pub(ME))}catch(x){toast(x.message)}if(ME.agent)refresh();render()}
 });
+
 document.addEventListener('input',e=>{
  const t=e.target;
  if(ED&&t.closest&&t.closest('.ecard2')&&(t.classList.contains('et')||t.classList.contains('od')||t.classList.contains('en'))){if(t.classList.contains('od'))t.value=t.value.replace(/\D/g,'');edLater()}
  if(t.id==='mi'){const has=!!t.value.trim();if(has&&OPEN&&OPEN!=='inbox'&&Date.now()-lastTyp>1500){lastTyp=Date.now();T.emit('typing',{chat:OPEN,from:ME.id})}$('#bs').style.display=has?'':'none';$('#bm').style.display=has?'none':''}
- if(t.id==='ps'){const q=t.value.toLowerCase();document.querySelectorAll('#pl .item').forEach(r=>r.style.display=r.dataset.nm.includes(q)?'':'none')}
+ if(t.id==='ps'){const q=t.value.toLowerCase();document.querySelectorAll('#pl .item, .list .item').forEach(r=>{if(r.dataset&&r.dataset.nm){r.style.display=r.dataset.nm.includes(q)?'':'none'}})}
 });
+
 document.addEventListener('keydown',e=>{
  if(e.key==='Enter'&&e.target.id==='fi'){e.preventDefault();postText()}
  if(e.key==='Enter'&&e.target.dataset&&e.target.dataset.act==='open'){e.target.click()}
@@ -1360,6 +1527,7 @@ document.addEventListener('keydown',e=>{
  if(e.key==='Enter'&&e.target.id==='ln'){e.preventDefault();login()}
  if(e.key==='Escape')closeSheet();
 });
+
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&OPEN){READ[OPEN]=Date.now();SV('uy_read',READ);render()}});
 addEventListener('beforeunload',()=>{if(CALL)try{hang()}catch(e){}});
 try{speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=()=>{}}catch(e){}
